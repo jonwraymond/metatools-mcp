@@ -19,14 +19,11 @@ jobs:
           go-version: "1.24.x"
           cache: true
 
-      - name: Debug module context
-        run: |
-          pwd
-          go env GOMOD
-          go env GOPATH
-          go env GOMODCACHE
-          cat go.mod
-          go list ./pkg/metatools || true
+      - name: Download modules
+        run: go mod download
+
+      - name: Vet
+        run: go vet ./...
 
       - name: Test
         run: go test ./...
