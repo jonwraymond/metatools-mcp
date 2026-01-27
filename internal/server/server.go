@@ -29,9 +29,9 @@ var errorCodes = []string{
 	"internal",
 }
 
-// ServerCapabilities represents the capabilities this server supports.
+// Capabilities represents the capabilities this server supports.
 // This mirrors the MCP tools capability for simple checks in tests and callers.
-type ServerCapabilities struct {
+type Capabilities struct {
 	Tools bool
 }
 
@@ -106,8 +106,8 @@ func (s *Server) ListTools() []*mcp.Tool {
 }
 
 // Capabilities returns the server capabilities.
-func (s *Server) Capabilities() ServerCapabilities {
-	return ServerCapabilities{Tools: len(s.tools) > 0}
+func (s *Server) Capabilities() Capabilities {
+	return Capabilities{Tools: len(s.tools) > 0}
 }
 
 // Handlers returns the server's handlers for tool execution.

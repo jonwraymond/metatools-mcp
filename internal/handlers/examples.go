@@ -23,9 +23,9 @@ func (h *ExamplesHandler) Handle(ctx context.Context, input metatools.ListToolEx
 		return nil, err
 	}
 
-	max := input.GetMax()
+	maxExamples := input.GetMax()
 
-	examples, err := h.store.ListExamples(ctx, input.ToolID, max)
+	examples, err := h.store.ListExamples(ctx, input.ToolID, maxExamples)
 	if err != nil {
 		return nil, err
 	}

@@ -46,7 +46,7 @@ func (h *ChainHandler) Handle(ctx context.Context, input metatools.RunChainInput
 
 	// Build step results output
 	results := make([]metatools.ChainStepResult, len(stepResults))
-	var failingStepIndex int = -1
+	failingStepIndex := -1
 
 	for i, sr := range stepResults {
 		results[i] = metatools.ChainStepResult{

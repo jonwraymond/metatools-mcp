@@ -12,19 +12,19 @@ import (
 // Mock implementations for testing
 type mockIndex struct{}
 
-func (m *mockIndex) Search(ctx context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
+func (m *mockIndex) Search(_ context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
 	return nil, nil
 }
-func (m *mockIndex) ListNamespaces(ctx context.Context) ([]string, error) {
+func (m *mockIndex) ListNamespaces(_ context.Context) ([]string, error) {
 	return nil, nil
 }
 
 type mockStore struct{}
 
-func (m *mockStore) DescribeTool(ctx context.Context, id string, level string) (handlers.ToolDoc, error) {
+func (m *mockStore) DescribeTool(_ context.Context, id string, level string) (handlers.ToolDoc, error) {
 	return handlers.ToolDoc{}, nil
 }
-func (m *mockStore) ListExamples(ctx context.Context, id string, max int) ([]metatools.ToolExample, error) {
+func (m *mockStore) ListExamples(_ context.Context, id string, max int) ([]metatools.ToolExample, error) {
 	return nil, nil
 }
 
@@ -62,7 +62,7 @@ func TestConfig_RequiresIndex(t *testing.T) {
 
 	err := cfg.Validate()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Index")
+	assert.Contains(t, err.Error(), "index")
 }
 
 func TestConfig_RequiresDocs(t *testing.T) {
@@ -73,7 +73,7 @@ func TestConfig_RequiresDocs(t *testing.T) {
 
 	err := cfg.Validate()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Docs")
+	assert.Contains(t, err.Error(), "docs")
 }
 
 func TestConfig_RequiresRunner(t *testing.T) {
@@ -84,7 +84,7 @@ func TestConfig_RequiresRunner(t *testing.T) {
 
 	err := cfg.Validate()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Runner")
+	assert.Contains(t, err.Error(), "runner")
 }
 
 func TestConfig_ExecutorOptional(t *testing.T) {

@@ -53,7 +53,7 @@ func (m *MockIndex) GetTool(ctx context.Context, id string) (Tool, Backend, erro
 // MockStore implements a mock documentation store for testing
 type MockStore struct {
 	DescribeToolFunc func(ctx context.Context, id string, level string) (ToolDoc, error)
-	ListExamplesFunc func(ctx context.Context, id string, max int) ([]metatools.ToolExample, error)
+	ListExamplesFunc func(ctx context.Context, id string, maxExamples int) ([]metatools.ToolExample, error)
 }
 
 // ToolDoc represents a tool documentation for testing
@@ -73,9 +73,9 @@ func (m *MockStore) DescribeTool(ctx context.Context, id string, level string) (
 	return ToolDoc{}, nil
 }
 
-func (m *MockStore) ListExamples(ctx context.Context, id string, max int) ([]metatools.ToolExample, error) {
+func (m *MockStore) ListExamples(ctx context.Context, id string, maxExamples int) ([]metatools.ToolExample, error) {
 	if m.ListExamplesFunc != nil {
-		return m.ListExamplesFunc(ctx, id, max)
+		return m.ListExamplesFunc(ctx, id, maxExamples)
 	}
 	return []metatools.ToolExample{}, nil
 }

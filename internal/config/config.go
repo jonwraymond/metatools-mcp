@@ -17,13 +17,13 @@ type Config struct {
 // Validate checks that required dependencies are provided
 func (c *Config) Validate() error {
 	if c.Index == nil {
-		return errors.New("Index is required")
+		return errors.New("index is required")
 	}
 	if c.Docs == nil {
-		return errors.New("Docs is required")
+		return errors.New("docs is required")
 	}
 	if c.Runner == nil {
-		return errors.New("Runner is required")
+		return errors.New("runner is required")
 	}
 	// Executor is optional
 	return nil

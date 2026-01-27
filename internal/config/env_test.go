@@ -127,6 +127,8 @@ func clearSearchEnvVars(t *testing.T) {
 		"METATOOLS_SEARCH_BM25_MAX_DOCTEXT_LEN",
 	}
 	for _, v := range vars {
-		os.Unsetenv(v)
+		if err := os.Unsetenv(v); err != nil {
+			t.Fatalf("unset %s: %v", v, err)
+		}
 	}
 }

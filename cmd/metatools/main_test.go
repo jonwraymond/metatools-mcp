@@ -30,12 +30,20 @@ func TestCreateServer_ListToolsViaMCP(t *testing.T) {
 
 	serverSession, err := srv.MCPServer().Connect(ctx, serverTransport, nil)
 	require.NoError(t, err)
-	defer serverSession.Close()
+	defer func() {
+		if err := serverSession.Close(); err != nil {
+			t.Fatalf("server session close failed: %v", err)
+		}
+	}()
 
 	client := mcp.NewClient(&mcp.Implementation{Name: "metatools-test-client"}, nil)
 	clientSession, err := client.Connect(ctx, clientTransport, nil)
 	require.NoError(t, err)
-	defer clientSession.Close()
+	defer func() {
+		if err := clientSession.Close(); err != nil {
+			t.Fatalf("client session close failed: %v", err)
+		}
+	}()
 
 	res, err := clientSession.ListTools(ctx, nil)
 	require.NoError(t, err)
@@ -97,6 +105,8 @@ func clearSearchEnvVars(t *testing.T) {
 		"METATOOLS_SEARCH_BM25_MAX_DOCTEXT_LEN",
 	}
 	for _, v := range vars {
-		os.Unsetenv(v)
+		if err := os.Unsetenv(v); err != nil {
+			t.Fatalf("unset %s: %v", v, err)
+		}
 	}
 }
