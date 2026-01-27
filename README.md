@@ -27,6 +27,37 @@ progressive disclosure:
 - `run_chain`
 - `execute_code` (only when an executor is injected)
 
+## Search Strategy
+
+By default, metatools-mcp uses lexical search. For BM25 ranking:
+
+1. Build with the toolsearch tag:
+   ```bash
+   go build -tags toolsearch ./cmd/metatools
+   ```
+
+2. Set the environment variable:
+   ```bash
+   METATOOLS_SEARCH_STRATEGY=bm25 ./metatools
+   ```
+
+Notes:
+
+- BM25 requires the `toolsearch` build tag. If you set
+  `METATOOLS_SEARCH_STRATEGY=bm25` without it, the server now fails fast.
+- `METATOOLS_SEARCH_STRATEGY` is case-insensitive (for example, `BM25` works).
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `METATOOLS_SEARCH_STRATEGY` | `lexical` | `lexical` or `bm25` |
+| `METATOOLS_SEARCH_BM25_NAME_BOOST` | `3` | BM25 name field boost |
+| `METATOOLS_SEARCH_BM25_NAMESPACE_BOOST` | `2` | BM25 namespace field boost |
+| `METATOOLS_SEARCH_BM25_TAGS_BOOST` | `2` | BM25 tags field boost |
+| `METATOOLS_SEARCH_BM25_MAX_DOCS` | `0` | Max docs to index (0=unlimited) |
+| `METATOOLS_SEARCH_BM25_MAX_DOCTEXT_LEN` | `0` | Max doc text length (0=unlimited) |
+
 ## Optional toolruntime integration
 
 `execute_code` is wired behind a build tag so the server stays minimal by
@@ -110,7 +141,7 @@ From `go.mod`:
 - `github.com/jonwraymond/toolrun` `v0.1.1`
 - `github.com/jonwraymond/toolcode` `v0.1.1`
 - `github.com/jonwraymond/toolruntime` `v0.1.1` (when built with `-tags toolruntime`)
-- `github.com/jonwraymond/toolsearch` `v0.1.1` (optional)
+- `github.com/jonwraymond/toolsearch` `v0.1.1` (BM25 requires `-tags toolsearch`)
 - `github.com/modelcontextprotocol/go-sdk` `v1.2.0`
 
 ## CI

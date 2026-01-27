@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
@@ -47,4 +48,55 @@ func TestMain_ContextShutdown(t *testing.T) {
 	defer cancel()
 	<-ctx.Done()
 	assert.ErrorIs(t, ctx.Err(), context.DeadlineExceeded)
+}
+
+func TestCreateServer_LexicalStrategy(t *testing.T) {
+	clearSearchEnvVars(t)
+	t.Setenv("METATOOLS_SEARCH_STRATEGY", "lexical")
+
+	srv, err := createServer()
+	require.NoError(t, err)
+	require.NotNil(t, srv)
+
+	tools := srv.ListTools()
+	assert.GreaterOrEqual(t, len(tools), 6)
+}
+
+func TestCreateServer_DefaultStrategy(t *testing.T) {
+	clearSearchEnvVars(t)
+	// No env var set - should use default (lexical)
+
+	srv, err := createServer()
+	require.NoError(t, err)
+	require.NotNil(t, srv)
+
+	tools := srv.ListTools()
+	assert.GreaterOrEqual(t, len(tools), 6)
+}
+
+func TestCreateServer_InvalidStrategy(t *testing.T) {
+	clearSearchEnvVars(t)
+	t.Setenv("METATOOLS_SEARCH_STRATEGY", "invalid")
+
+	srv, err := createServer()
+	assert.Error(t, err)
+	assert.Nil(t, srv)
+	assert.Contains(t, err.Error(), "invalid config")
+	assert.Contains(t, err.Error(), "unknown search strategy")
+}
+
+// clearSearchEnvVars unsets all METATOOLS_SEARCH_* env vars for test isolation
+func clearSearchEnvVars(t *testing.T) {
+	t.Helper()
+	vars := []string{
+		"METATOOLS_SEARCH_STRATEGY",
+		"METATOOLS_SEARCH_BM25_NAME_BOOST",
+		"METATOOLS_SEARCH_BM25_NAMESPACE_BOOST",
+		"METATOOLS_SEARCH_BM25_TAGS_BOOST",
+		"METATOOLS_SEARCH_BM25_MAX_DOCS",
+		"METATOOLS_SEARCH_BM25_MAX_DOCTEXT_LEN",
+	}
+	for _, v := range vars {
+		os.Unsetenv(v)
+	}
 }
