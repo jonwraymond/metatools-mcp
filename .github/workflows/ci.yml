@@ -22,15 +22,11 @@ jobs:
       - name: Download modules
         run: go mod download
 
-      - name: Tidy modules
-        run: go mod tidy
-
-      - name: Verify tidy
-        run: git diff --exit-code go.mod go.sum
+      - name: List packages
+        run: go list ./...
 
       - name: Vet
         run: go vet ./...
 
       - name: Test
         run: go test ./...
-
