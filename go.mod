@@ -6,13 +6,13 @@ replace github.com/jonwraymond/metatools-mcp => .
 
 require (
 	github.com/caarlos0/env/v11 v11.3.1
-	github.com/jonwraymond/toolcode v0.1.5
-	github.com/jonwraymond/tooldocs v0.1.6
-	github.com/jonwraymond/toolindex v0.1.5
+	github.com/jonwraymond/toolcode v0.1.6
+	github.com/jonwraymond/tooldocs v0.1.7
+	github.com/jonwraymond/toolindex v0.1.6
 	github.com/jonwraymond/toolmodel v0.1.2
-	github.com/jonwraymond/toolrun v0.1.5
-	github.com/jonwraymond/toolruntime v0.1.5
-	github.com/jonwraymond/toolsearch v0.1.5
+	github.com/jonwraymond/toolrun v0.1.6
+	github.com/jonwraymond/toolruntime v0.1.6
+	github.com/jonwraymond/toolsearch v0.1.6
 	github.com/modelcontextprotocol/go-sdk v1.2.0
 	github.com/stretchr/testify v1.10.0
 )
