@@ -12,7 +12,7 @@ import (
 
 type mockStore struct {
 	describeToolFunc func(ctx context.Context, id string, level string) (ToolDoc, error)
-	listExamplesFunc func(ctx context.Context, id string, max int) ([]metatools.ToolExample, error)
+	listExamplesFunc func(ctx context.Context, id string, maxExamples int) ([]metatools.ToolExample, error)
 }
 
 func (m *mockStore) DescribeTool(ctx context.Context, id string, level string) (ToolDoc, error) {
@@ -22,9 +22,9 @@ func (m *mockStore) DescribeTool(ctx context.Context, id string, level string) (
 	return ToolDoc{}, nil
 }
 
-func (m *mockStore) ListExamples(ctx context.Context, id string, max int) ([]metatools.ToolExample, error) {
+func (m *mockStore) ListExamples(ctx context.Context, id string, maxExamples int) ([]metatools.ToolExample, error) {
 	if m.listExamplesFunc != nil {
-		return m.listExamplesFunc(ctx, id, max)
+		return m.listExamplesFunc(ctx, id, maxExamples)
 	}
 	return []metatools.ToolExample{}, nil
 }

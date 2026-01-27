@@ -11,7 +11,7 @@ import (
 
 func TestListNamespaces_Empty(t *testing.T) {
 	idx := &mockIndex{
-		listNamespacesFunc: func(ctx context.Context) ([]string, error) {
+		listNamespacesFunc: func(_ context.Context) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -25,7 +25,7 @@ func TestListNamespaces_Empty(t *testing.T) {
 
 func TestListNamespaces_ReturnsSorted(t *testing.T) {
 	idx := &mockIndex{
-		listNamespacesFunc: func(ctx context.Context) ([]string, error) {
+		listNamespacesFunc: func(_ context.Context) ([]string, error) {
 			// Index should return sorted, but we verify
 			return []string{"alpha", "beta", "gamma"}, nil
 		},
@@ -40,7 +40,7 @@ func TestListNamespaces_ReturnsSorted(t *testing.T) {
 
 func TestListNamespaces_IndexError(t *testing.T) {
 	idx := &mockIndex{
-		listNamespacesFunc: func(ctx context.Context) ([]string, error) {
+		listNamespacesFunc: func(_ context.Context) ([]string, error) {
 			return nil, errors.New("index error")
 		},
 	}

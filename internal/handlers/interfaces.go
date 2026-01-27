@@ -25,7 +25,7 @@ type ToolDoc struct {
 // Store provides tool documentation
 type Store interface {
 	DescribeTool(ctx context.Context, id string, level string) (ToolDoc, error)
-	ListExamples(ctx context.Context, id string, max int) ([]metatools.ToolExample, error)
+	ListExamples(ctx context.Context, id string, maxExamples int) ([]metatools.ToolExample, error)
 }
 
 // RunResult represents a tool execution result

@@ -12,7 +12,7 @@ import (
 // Mock implementations for testing
 type mockIndex struct{}
 
-func (m *mockIndex) Search(_ context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
+func (m *mockIndex) Search(_ context.Context, _ string, _ int) ([]metatools.ToolSummary, error) {
 	return nil, nil
 }
 func (m *mockIndex) ListNamespaces(_ context.Context) ([]string, error) {
@@ -21,10 +21,10 @@ func (m *mockIndex) ListNamespaces(_ context.Context) ([]string, error) {
 
 type mockStore struct{}
 
-func (m *mockStore) DescribeTool(_ context.Context, id string, level string) (handlers.ToolDoc, error) {
+func (m *mockStore) DescribeTool(_ context.Context, _ string, _ string) (handlers.ToolDoc, error) {
 	return handlers.ToolDoc{}, nil
 }
-func (m *mockStore) ListExamples(_ context.Context, id string, max int) ([]metatools.ToolExample, error) {
+func (m *mockStore) ListExamples(_ context.Context, _ string, _ int) ([]metatools.ToolExample, error) {
 	return nil, nil
 }
 
