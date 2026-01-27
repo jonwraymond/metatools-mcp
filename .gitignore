@@ -1,0 +1,37 @@
+# Binaries and build output
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+bin/
+build/
+dist/
+coverage/
+coverage.*
+
+# Go workspace and vendor
+go.work
+go.work.sum
+vendor/
+
+# Local runtime artifacts
+metatools
+
+# Environment and secrets
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+
+# OS / editor noise
+.DS_Store
+.idea/
+.vscode/
+*~
+~
