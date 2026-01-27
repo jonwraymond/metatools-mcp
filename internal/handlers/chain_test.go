@@ -15,7 +15,7 @@ import (
 
 func TestRunChain_SingleStep(t *testing.T) {
 	runner := &mockRunner{
-		runChainFunc: func(ctx context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
+		runChainFunc: func(_ context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
 			assert.Len(t, steps, 1)
 			return RunResult{
 					Structured: map[string]any{"final": "result"},
@@ -39,7 +39,7 @@ func TestRunChain_SingleStep(t *testing.T) {
 
 func TestRunChain_MultipleSteps(t *testing.T) {
 	runner := &mockRunner{
-		runChainFunc: func(ctx context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
+		runChainFunc: func(_ context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
 			assert.Len(t, steps, 3)
 			return RunResult{
 					Structured: map[string]any{"final": "combined"},
@@ -68,7 +68,7 @@ func TestRunChain_MultipleSteps(t *testing.T) {
 
 func TestRunChain_UsePrevious(t *testing.T) {
 	runner := &mockRunner{
-		runChainFunc: func(ctx context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
+		runChainFunc: func(_ context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
 			// Verify use_previous is passed through
 			assert.True(t, steps[1].UsePrevious)
 			return RunResult{
@@ -96,7 +96,7 @@ func TestRunChain_UsePrevious(t *testing.T) {
 
 func TestRunChain_UsePreviousInjectsAtArgsPrevious(t *testing.T) {
 	runner := &mockRunner{
-		runChainFunc: func(ctx context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
+		runChainFunc: func(_ context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
 			// The runner is responsible for injecting previous at args["previous"]
 			return RunResult{
 					Structured: map[string]any{"final": "result"},

@@ -118,7 +118,7 @@ func TestDescribeTool_Full(t *testing.T) {
 
 func TestDescribeTool_SummaryOmitsTool(t *testing.T) {
 	store := &mockStore{
-		describeToolFunc: func(_ context.Context, _ string, level string) (ToolDoc, error) {
+		describeToolFunc: func(_ context.Context, _ string, _ string) (ToolDoc, error) {
 			return ToolDoc{
 				Summary: "A test tool",
 				// Tool is intentionally nil for summary level
