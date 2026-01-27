@@ -110,7 +110,7 @@ From `go.mod`:
 - `github.com/jonwraymond/toolrun` `v0.1.1`
 - `github.com/jonwraymond/toolcode` `v0.1.1`
 - `github.com/jonwraymond/toolruntime` `v0.1.1` (when built with `-tags toolruntime`)
-- `github.com/jonwraymond/toolsearch` `v0.1.0` (optional)
+- `github.com/jonwraymond/toolsearch` `v0.1.1` (optional)
 - `github.com/modelcontextprotocol/go-sdk` `v1.2.0`
 
 ## CI
