@@ -18,7 +18,7 @@ func TestRunChain_SingleStep(t *testing.T) {
 		runChainFunc: func(_ context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
 			assert.Len(t, steps, 1)
 			return RunResult{
-					Structured: map[string]any{"final": "result"},
+				Structured: map[string]any{"final": "result"},
 				}, []StepResult{
 					{ToolID: "test.tool", Structured: map[string]any{"step": "result"}},
 				}, nil
@@ -42,7 +42,7 @@ func TestRunChain_MultipleSteps(t *testing.T) {
 		runChainFunc: func(_ context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
 			assert.Len(t, steps, 3)
 			return RunResult{
-					Structured: map[string]any{"final": "combined"},
+				Structured: map[string]any{"final": "combined"},
 				}, []StepResult{
 					{ToolID: "step1", Structured: map[string]any{"s": 1}},
 					{ToolID: "step2", Structured: map[string]any{"s": 2}},
@@ -72,7 +72,7 @@ func TestRunChain_UsePrevious(t *testing.T) {
 			// Verify use_previous is passed through
 			assert.True(t, steps[1].UsePrevious)
 			return RunResult{
-					Structured: map[string]any{"final": "result"},
+				Structured: map[string]any{"final": "result"},
 				}, []StepResult{
 					{ToolID: "step1", Structured: map[string]any{"data": "from step1"}},
 					{ToolID: "step2", Structured: map[string]any{"data": "used previous"}},
@@ -123,10 +123,10 @@ func TestRunChain_UsePreviousInjectsAtArgsPrevious(t *testing.T) {
 
 func TestRunChain_IncludeBackends(t *testing.T) {
 	runner := &mockRunner{
-		runChainFunc: func(_ context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
+		runChainFunc: func(_ context.Context, _ []ChainStep) (RunResult, []StepResult, error) {
 			return RunResult{
-					Structured: map[string]any{"final": "result"},
-				}, []StepResult{
+				Structured: map[string]any{"final": "result"},
+			}, []StepResult{
 					{
 						ToolID:     "step1",
 						Structured: map[string]any{"s": 1},
@@ -151,10 +151,10 @@ func TestRunChain_IncludeBackends(t *testing.T) {
 
 func TestRunChain_IncludeTools(t *testing.T) {
 	runner := &mockRunner{
-		runChainFunc: func(_ context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
+		runChainFunc: func(_ context.Context, _ []ChainStep) (RunResult, []StepResult, error) {
 			return RunResult{
-					Structured: map[string]any{"final": "result"},
-				}, []StepResult{
+				Structured: map[string]any{"final": "result"},
+			}, []StepResult{
 					{
 						ToolID:     "step1",
 						Structured: map[string]any{"s": 1},
@@ -181,7 +181,7 @@ func TestRunChain_IncludeTools(t *testing.T) {
 
 func TestRunChain_StopOnFirstError(t *testing.T) {
 	runner := &mockRunner{
-		runChainFunc: func(_ context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
+		runChainFunc: func(_ context.Context, _ []ChainStep) (RunResult, []StepResult, error) {
 			// Chain stops at step 2
 			return RunResult{}, []StepResult{
 				{ToolID: "step1", Structured: map[string]any{"s": 1}},
