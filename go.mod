@@ -2,6 +2,8 @@ module github.com/jonwraymond/metatools-mcp
 
 go 1.24.4
 
+replace github.com/jonwraymond/metatools-mcp => .
+
 require (
 	github.com/jonwraymond/toolcode v0.1.0
 	github.com/jonwraymond/tooldocs v0.1.1
