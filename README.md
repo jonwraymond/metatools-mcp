@@ -8,6 +8,7 @@ MCP-first "metatools" server that composes the core tool libraries:
 - `toolrun`: backend-agnostic execution + chaining
 - `toolcode`: optional code-style orchestration (engine/runtime backed)
 - `toolruntime`: recommended sandbox/runtime boundary for any code execution
+- `toolsearch`: optional search strategies (for example, BM25)
 
 This server exposes a small, opinionated MCP tool surface that optimizes
 progressive disclosure:
@@ -34,7 +35,7 @@ default.
 Enable it locally with:
 
 ```bash
-go get github.com/jonwraymond/toolruntime@v0.1.0
+go get github.com/jonwraymond/toolruntime@v0.1.1
 go run -tags toolruntime ./cmd/metatools
 ```
 
@@ -104,11 +105,12 @@ See a full working example (including a local tool + docs registration) in
 From `go.mod`:
 
 - `github.com/jonwraymond/toolmodel` `v0.1.0`
-- `github.com/jonwraymond/toolindex` `v0.1.1`
-- `github.com/jonwraymond/tooldocs` `v0.1.1`
-- `github.com/jonwraymond/toolrun` `v0.1.0`
-- `github.com/jonwraymond/toolcode` `v0.1.0`
-- `github.com/jonwraymond/toolruntime` `v0.1.0` (when built with `-tags toolruntime`)
+- `github.com/jonwraymond/toolindex` `v0.1.2`
+- `github.com/jonwraymond/tooldocs` `v0.1.2`
+- `github.com/jonwraymond/toolrun` `v0.1.1`
+- `github.com/jonwraymond/toolcode` `v0.1.1`
+- `github.com/jonwraymond/toolruntime` `v0.1.1` (when built with `-tags toolruntime`)
+- `github.com/jonwraymond/toolsearch` `v0.1.0` (optional)
 - `github.com/modelcontextprotocol/go-sdk` `v1.2.0`
 
 ## CI
