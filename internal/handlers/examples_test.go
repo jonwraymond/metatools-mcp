@@ -12,7 +12,7 @@ import (
 
 func TestListToolExamples_Default(t *testing.T) {
 	store := &mockStore{
-		listExamplesFunc: func(_ context.Context, id string, maxExamples int) ([]metatools.ToolExample, error) {
+		listExamplesFunc: func(_ context.Context, id string, _ int) ([]metatools.ToolExample, error) {
 			assert.Equal(t, "test.tool", id)
 			return []metatools.ToolExample{
 				{Title: "Example 1", Description: "First", Args: map[string]any{}},
@@ -33,7 +33,7 @@ func TestListToolExamples_Default(t *testing.T) {
 
 func TestListToolExamples_WithMax(t *testing.T) {
 	store := &mockStore{
-		listExamplesFunc: func(_ context.Context, id string, maxExamples int) ([]metatools.ToolExample, error) {
+		listExamplesFunc: func(_ context.Context, _ string, maxExamples int) ([]metatools.ToolExample, error) {
 			assert.Equal(t, 3, maxExamples)
 			return []metatools.ToolExample{
 				{Title: "Example 1", Description: "First", Args: map[string]any{}},
@@ -58,7 +58,7 @@ func TestListToolExamples_WithMax(t *testing.T) {
 func TestListToolExamples_CappedByStoreMax(t *testing.T) {
 	// Store has its own max cap (e.g., 5)
 	store := &mockStore{
-		listExamplesFunc: func(_ context.Context, id string, maxExamples int) ([]metatools.ToolExample, error) {
+		listExamplesFunc: func(_ context.Context, _ string, maxExamples int) ([]metatools.ToolExample, error) {
 			// If max is 10 but store caps at 5, return 5
 			examples := []metatools.ToolExample{
 				{Title: "Ex1", Description: "D1", Args: map[string]any{}},
@@ -88,7 +88,7 @@ func TestListToolExamples_CappedByStoreMax(t *testing.T) {
 
 func TestListToolExamples_NotFound(t *testing.T) {
 	store := &mockStore{
-		listExamplesFunc: func(_ context.Context, id string, maxExamples int) ([]metatools.ToolExample, error) {
+		listExamplesFunc: func(_ context.Context, _ string, _ int) ([]metatools.ToolExample, error) {
 			return nil, errors.New("tool not found")
 		},
 	}
@@ -104,7 +104,7 @@ func TestListToolExamples_NotFound(t *testing.T) {
 
 func TestListToolExamples_EmptyExamples(t *testing.T) {
 	store := &mockStore{
-		listExamplesFunc: func(_ context.Context, id string, maxExamples int) ([]metatools.ToolExample, error) {
+		listExamplesFunc: func(_ context.Context, _ string, _ int) ([]metatools.ToolExample, error) {
 			return []metatools.ToolExample{}, nil
 		},
 	}
