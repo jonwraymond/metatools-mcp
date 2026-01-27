@@ -14,34 +14,34 @@ import (
 // Mock implementations
 type mockIndex struct{}
 
-func (m *mockIndex) Search(ctx context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
+func (m *mockIndex) Search(_ context.Context, _ string, _ int) ([]metatools.ToolSummary, error) {
 	return nil, nil
 }
-func (m *mockIndex) ListNamespaces(ctx context.Context) ([]string, error) {
+func (m *mockIndex) ListNamespaces(_ context.Context) ([]string, error) {
 	return nil, nil
 }
 
 type mockStore struct{}
 
-func (m *mockStore) DescribeTool(ctx context.Context, id string, level string) (handlers.ToolDoc, error) {
+func (m *mockStore) DescribeTool(_ context.Context, _ string, _ string) (handlers.ToolDoc, error) {
 	return handlers.ToolDoc{}, nil
 }
-func (m *mockStore) ListExamples(ctx context.Context, id string, max int) ([]metatools.ToolExample, error) {
+func (m *mockStore) ListExamples(_ context.Context, _ string, _ int) ([]metatools.ToolExample, error) {
 	return nil, nil
 }
 
 type mockRunner struct{}
 
-func (m *mockRunner) Run(ctx context.Context, toolID string, args map[string]any) (handlers.RunResult, error) {
+func (m *mockRunner) Run(_ context.Context, _ string, _ map[string]any) (handlers.RunResult, error) {
 	return handlers.RunResult{}, nil
 }
-func (m *mockRunner) RunChain(ctx context.Context, steps []handlers.ChainStep) (handlers.RunResult, []handlers.StepResult, error) {
+func (m *mockRunner) RunChain(_ context.Context, _ []handlers.ChainStep) (handlers.RunResult, []handlers.StepResult, error) {
 	return handlers.RunResult{}, nil, nil
 }
 
 type mockExecutor struct{}
 
-func (m *mockExecutor) ExecuteCode(ctx context.Context, params handlers.ExecuteParams) (handlers.ExecuteResult, error) {
+func (m *mockExecutor) ExecuteCode(_ context.Context, _ handlers.ExecuteParams) (handlers.ExecuteResult, error) {
 	return handlers.ExecuteResult{}, nil
 }
 

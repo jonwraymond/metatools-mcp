@@ -43,9 +43,9 @@ func (a *DocsAdapter) DescribeTool(ctx context.Context, id string, level string)
 }
 
 // ListExamples delegates to tooldocs and converts the result.
-func (a *DocsAdapter) ListExamples(ctx context.Context, id string, max int) ([]metatools.ToolExample, error) {
+func (a *DocsAdapter) ListExamples(ctx context.Context, id string, maxExamples int) ([]metatools.ToolExample, error) {
 	_ = ctx
-	examples, err := a.store.ListExamples(id, max)
+	examples, err := a.store.ListExamples(id, maxExamples)
 	if err != nil {
 		return nil, err
 	}

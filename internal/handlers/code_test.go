@@ -23,7 +23,7 @@ func (m *mockExecutor) ExecuteCode(ctx context.Context, params ExecuteParams) (E
 
 func TestExecuteCode_Success(t *testing.T) {
 	executor := &mockExecutor{
-		executeCodeFunc: func(ctx context.Context, params ExecuteParams) (ExecuteResult, error) {
+		executeCodeFunc: func(_ context.Context, params ExecuteParams) (ExecuteResult, error) {
 			assert.Equal(t, "javascript", params.Language)
 			assert.Equal(t, "console.log('hello')", params.Code)
 			return ExecuteResult{
@@ -46,7 +46,7 @@ func TestExecuteCode_Success(t *testing.T) {
 
 func TestExecuteCode_WithValue(t *testing.T) {
 	executor := &mockExecutor{
-		executeCodeFunc: func(ctx context.Context, params ExecuteParams) (ExecuteResult, error) {
+		executeCodeFunc: func(_ context.Context, params ExecuteParams) (ExecuteResult, error) {
 			return ExecuteResult{
 				Value:      map[string]any{"result": 42},
 				DurationMs: 100,
@@ -70,7 +70,7 @@ func TestExecuteCode_WithValue(t *testing.T) {
 
 func TestExecuteCode_WithStdout(t *testing.T) {
 	executor := &mockExecutor{
-		executeCodeFunc: func(ctx context.Context, params ExecuteParams) (ExecuteResult, error) {
+		executeCodeFunc: func(_ context.Context, params ExecuteParams) (ExecuteResult, error) {
 			return ExecuteResult{
 				Stdout:     "Hello, World!\n",
 				DurationMs: 30,
@@ -91,7 +91,7 @@ func TestExecuteCode_WithStdout(t *testing.T) {
 
 func TestExecuteCode_WithStderr(t *testing.T) {
 	executor := &mockExecutor{
-		executeCodeFunc: func(ctx context.Context, params ExecuteParams) (ExecuteResult, error) {
+		executeCodeFunc: func(_ context.Context, params ExecuteParams) (ExecuteResult, error) {
 			return ExecuteResult{
 				Stderr:     "Warning: deprecated function\n",
 				DurationMs: 25,
@@ -112,7 +112,7 @@ func TestExecuteCode_WithStderr(t *testing.T) {
 
 func TestExecuteCode_Timeout(t *testing.T) {
 	executor := &mockExecutor{
-		executeCodeFunc: func(ctx context.Context, params ExecuteParams) (ExecuteResult, error) {
+		executeCodeFunc: func(_ context.Context, params ExecuteParams) (ExecuteResult, error) {
 			assert.Equal(t, 5000, params.TimeoutMs)
 			return ExecuteResult{
 				Value:      "completed",
@@ -136,7 +136,7 @@ func TestExecuteCode_Timeout(t *testing.T) {
 
 func TestExecuteCode_MaxToolCalls(t *testing.T) {
 	executor := &mockExecutor{
-		executeCodeFunc: func(ctx context.Context, params ExecuteParams) (ExecuteResult, error) {
+		executeCodeFunc: func(_ context.Context, params ExecuteParams) (ExecuteResult, error) {
 			assert.Equal(t, 10, params.MaxToolCalls)
 			return ExecuteResult{DurationMs: 100}, nil
 		},
@@ -157,7 +157,7 @@ func TestExecuteCode_MaxToolCalls(t *testing.T) {
 
 func TestExecuteCode_ExecutionError(t *testing.T) {
 	executor := &mockExecutor{
-		executeCodeFunc: func(ctx context.Context, params ExecuteParams) (ExecuteResult, error) {
+		executeCodeFunc: func(_ context.Context, params ExecuteParams) (ExecuteResult, error) {
 			return ExecuteResult{}, errors.New("syntax error: unexpected token")
 		},
 	}
