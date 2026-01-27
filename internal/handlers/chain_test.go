@@ -19,9 +19,9 @@ func TestRunChain_SingleStep(t *testing.T) {
 			assert.Len(t, steps, 1)
 			return RunResult{
 				Structured: map[string]any{"final": "result"},
-				}, []StepResult{
-					{ToolID: "test.tool", Structured: map[string]any{"step": "result"}},
-				}, nil
+			}, []StepResult{
+				{ToolID: "test.tool", Structured: map[string]any{"step": "result"}},
+			}, nil
 		},
 	}
 
@@ -43,11 +43,11 @@ func TestRunChain_MultipleSteps(t *testing.T) {
 			assert.Len(t, steps, 3)
 			return RunResult{
 				Structured: map[string]any{"final": "combined"},
-				}, []StepResult{
-					{ToolID: "step1", Structured: map[string]any{"s": 1}},
-					{ToolID: "step2", Structured: map[string]any{"s": 2}},
-					{ToolID: "step3", Structured: map[string]any{"s": 3}},
-				}, nil
+			}, []StepResult{
+				{ToolID: "step1", Structured: map[string]any{"s": 1}},
+				{ToolID: "step2", Structured: map[string]any{"s": 2}},
+				{ToolID: "step3", Structured: map[string]any{"s": 3}},
+			}, nil
 		},
 	}
 
@@ -73,10 +73,10 @@ func TestRunChain_UsePrevious(t *testing.T) {
 			assert.True(t, steps[1].UsePrevious)
 			return RunResult{
 				Structured: map[string]any{"final": "result"},
-				}, []StepResult{
-					{ToolID: "step1", Structured: map[string]any{"data": "from step1"}},
-					{ToolID: "step2", Structured: map[string]any{"data": "used previous"}},
-				}, nil
+			}, []StepResult{
+				{ToolID: "step1", Structured: map[string]any{"data": "from step1"}},
+				{ToolID: "step2", Structured: map[string]any{"data": "used previous"}},
+			}, nil
 		},
 	}
 
@@ -207,7 +207,7 @@ func TestRunChain_StopOnFirstError(t *testing.T) {
 
 func TestRunChain_PartialResultsOnError(t *testing.T) {
 	runner := &mockRunner{
-		runChainFunc: func(_ context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
+		runChainFunc: func(_ context.Context, _ []ChainStep) (RunResult, []StepResult, error) {
 			return RunResult{}, []StepResult{
 				{ToolID: "step1", Structured: map[string]any{"partial": "result1"}},
 				{ToolID: "step2", Error: errors.New("step failed")},
@@ -233,7 +233,7 @@ func TestRunChain_PartialResultsOnError(t *testing.T) {
 
 func TestRunChain_ErrorHasStepIndex(t *testing.T) {
 	runner := &mockRunner{
-		runChainFunc: func(_ context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
+		runChainFunc: func(_ context.Context, _ []ChainStep) (RunResult, []StepResult, error) {
 			return RunResult{}, []StepResult{
 				{ToolID: "step1", Structured: map[string]any{"s": 1}},
 				{ToolID: "step2", Structured: map[string]any{"s": 2}},
@@ -262,7 +262,7 @@ func TestRunChain_ErrorHasStepIndex(t *testing.T) {
 
 func TestRunChain_ErrorHasCauseDetails(t *testing.T) {
 	runner := &mockRunner{
-		runChainFunc: func(_ context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
+		runChainFunc: func(_ context.Context, _ []ChainStep) (RunResult, []StepResult, error) {
 			return RunResult{}, []StepResult{
 				{ToolID: "step1", Structured: map[string]any{"s": 1}},
 				{ToolID: "step2", Error: merrors.ErrToolNotFound},
