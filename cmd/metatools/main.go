@@ -39,6 +39,11 @@ func createServer() (*server.Server, error) {
 	docs := tooldocs.NewInMemoryStore(tooldocs.StoreOptions{Index: idx})
 	runner := toolrun.NewRunner(toolrun.WithIndex(idx))
 
-	cfg := adapters.NewConfig(idx, docs, runner, nil)
+	exec, err := maybeCreateExecutor(idx, docs, runner)
+	if err != nil {
+		return nil, err
+	}
+
+	cfg := adapters.NewConfig(idx, docs, runner, exec)
 	return server.New(cfg)
 }

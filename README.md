@@ -26,6 +26,31 @@ progressive disclosure:
 - `run_chain`
 - `execute_code` (only when an executor is injected)
 
+## Optional toolruntime integration
+
+`execute_code` is wired behind a build tag so the server stays minimal by
+default.
+
+Enable it locally with:
+
+```bash
+go get github.com/jonwraymond/toolruntime@v0.1.0
+go run -tags toolruntime ./cmd/metatools
+```
+
+If you are developing `toolruntime` locally:
+
+```bash
+go mod edit -replace github.com/jonwraymond/toolruntime=../toolruntime
+go run -tags toolruntime ./cmd/metatools
+```
+
+Notes:
+
+- The build tag enables a `toolruntime`-backed `toolcode.Executor`.
+- The default profile is `dev` and uses the unsafe host backend.
+- This is intentionally dev-only until the runtime backends are hardened.
+
 ## Quickstart (server wiring)
 
 Minimal wiring uses the adapter layer plus the official MCP Go SDK transport:
@@ -83,12 +108,13 @@ From `go.mod`:
 - `github.com/jonwraymond/tooldocs` `v0.1.1`
 - `github.com/jonwraymond/toolrun` `v0.1.0`
 - `github.com/jonwraymond/toolcode` `v0.1.0`
+- `github.com/jonwraymond/toolruntime` `v0.1.0` (when built with `-tags toolruntime`)
 - `github.com/modelcontextprotocol/go-sdk` `v1.2.0`
 
 ## CI
 
 CI runs on pushes and pull requests to `main` and enforces:
 
-- `go mod tidy` (no drift in `go.mod`/`go.sum`)
+- `go mod download`
 - `go vet ./...`
 - `go test ./...`
