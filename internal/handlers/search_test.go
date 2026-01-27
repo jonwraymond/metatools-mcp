@@ -11,8 +11,8 @@ import (
 )
 
 type mockIndex struct {
-	searchFunc         func(ctx context.Context, query string, limit int) ([]metatools.ToolSummary, error)
-	listNamespacesFunc func(ctx context.Context) ([]string, error)
+	searchFunc         func(_ context.Context, query string, limit int) ([]metatools.ToolSummary, error)
+	listNamespacesFunc func(_ context.Context) ([]string, error)
 }
 
 func (m *mockIndex) Search(ctx context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
@@ -31,7 +31,7 @@ func (m *mockIndex) ListNamespaces(ctx context.Context) ([]string, error) {
 
 func TestSearchTools_EmptyQuery(t *testing.T) {
 	idx := &mockIndex{
-		searchFunc: func(ctx context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
+		searchFunc: func(_ context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
 			// Empty query should still work, returns all tools
 			return []metatools.ToolSummary{
 				{ID: "test.tool1", Name: "tool1"},
@@ -50,7 +50,7 @@ func TestSearchTools_EmptyQuery(t *testing.T) {
 
 func TestSearchTools_WithQuery(t *testing.T) {
 	idx := &mockIndex{
-		searchFunc: func(ctx context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
+		searchFunc: func(_ context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
 			assert.Equal(t, "test query", query)
 			return []metatools.ToolSummary{
 				{ID: "test.matching", Name: "matching", ShortDescription: "test query match"},
@@ -69,7 +69,7 @@ func TestSearchTools_WithQuery(t *testing.T) {
 
 func TestSearchTools_WithLimit(t *testing.T) {
 	idx := &mockIndex{
-		searchFunc: func(ctx context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
+		searchFunc: func(_ context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
 			// Verify limit is passed through
 			assert.Equal(t, 5, limit)
 			return []metatools.ToolSummary{
@@ -93,7 +93,7 @@ func TestSearchTools_WithCursor(t *testing.T) {
 	}
 
 	idx := &mockIndex{
-		searchFunc: func(ctx context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
+		searchFunc: func(_ context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
 			return allTools, nil
 		},
 	}
@@ -123,7 +123,7 @@ func TestSearchTools_ReturnsNextCursor(t *testing.T) {
 	}
 
 	idx := &mockIndex{
-		searchFunc: func(ctx context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
+		searchFunc: func(_ context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
 			return allTools, nil
 		},
 	}
@@ -139,7 +139,7 @@ func TestSearchTools_ReturnsNextCursor(t *testing.T) {
 
 func TestSearchTools_ReturnsSummariesNotFullSchemas(t *testing.T) {
 	idx := &mockIndex{
-		searchFunc: func(ctx context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
+		searchFunc: func(_ context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
 			return []metatools.ToolSummary{
 				{
 					ID:               "test.tool",
@@ -165,7 +165,7 @@ func TestSearchTools_ReturnsSummariesNotFullSchemas(t *testing.T) {
 
 func TestSearchTools_IndexError(t *testing.T) {
 	idx := &mockIndex{
-		searchFunc: func(ctx context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
+		searchFunc: func(_ context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
 			return nil, errors.New("index error")
 		},
 	}

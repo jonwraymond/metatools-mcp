@@ -31,7 +31,7 @@ func (m *mockStore) ListExamples(ctx context.Context, id string, maxExamples int
 
 func TestDescribeTool_Summary(t *testing.T) {
 	store := &mockStore{
-		describeToolFunc: func(ctx context.Context, id string, level string) (ToolDoc, error) {
+		describeToolFunc: func(_ context.Context, id string, level string) (ToolDoc, error) {
 			assert.Equal(t, "summary", level)
 			return ToolDoc{
 				Summary: "A test tool for testing",
@@ -52,7 +52,7 @@ func TestDescribeTool_Summary(t *testing.T) {
 
 func TestDescribeTool_Schema(t *testing.T) {
 	store := &mockStore{
-		describeToolFunc: func(ctx context.Context, id string, level string) (ToolDoc, error) {
+		describeToolFunc: func(_ context.Context, id string, level string) (ToolDoc, error) {
 			assert.Equal(t, "schema", level)
 			return ToolDoc{
 				Summary: "A test tool",
@@ -82,7 +82,7 @@ func TestDescribeTool_Schema(t *testing.T) {
 func TestDescribeTool_Full(t *testing.T) {
 	notes := "These are usage notes"
 	store := &mockStore{
-		describeToolFunc: func(ctx context.Context, id string, level string) (ToolDoc, error) {
+		describeToolFunc: func(_ context.Context, id string, level string) (ToolDoc, error) {
 			assert.Equal(t, "full", level)
 			return ToolDoc{
 				Summary: "A test tool",
@@ -118,7 +118,7 @@ func TestDescribeTool_Full(t *testing.T) {
 
 func TestDescribeTool_SummaryOmitsTool(t *testing.T) {
 	store := &mockStore{
-		describeToolFunc: func(ctx context.Context, id string, level string) (ToolDoc, error) {
+		describeToolFunc: func(_ context.Context, id string, level string) (ToolDoc, error) {
 			return ToolDoc{
 				Summary: "A test tool",
 				// Tool is intentionally nil for summary level
