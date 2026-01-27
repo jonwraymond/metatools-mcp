@@ -96,7 +96,7 @@ func TestRunChain_UsePrevious(t *testing.T) {
 
 func TestRunChain_UsePreviousInjectsAtArgsPrevious(t *testing.T) {
 	runner := &mockRunner{
-		runChainFunc: func(_ context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
+		runChainFunc: func(_ context.Context, _ []ChainStep) (RunResult, []StepResult, error) {
 			// The runner is responsible for injecting previous at args["previous"]
 			return RunResult{
 					Structured: map[string]any{"final": "result"},
