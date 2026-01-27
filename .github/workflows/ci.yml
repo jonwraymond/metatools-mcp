@@ -22,9 +22,6 @@ jobs:
       - name: Download modules
         run: go mod download
 
-      - name: List packages
-        run: go list ./...
-
       - name: Vet
         run: go vet ./...
 
