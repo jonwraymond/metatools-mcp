@@ -11,7 +11,7 @@ import (
 )
 
 type mockRunner struct {
-	runFunc      func(_ context.Context, toolID string, args map[string]any) (RunResult, error)
+	runFunc      func(_ context.Context, _ string, _ map[string]any) (RunResult, error)
 	runChainFunc func(_ context.Context, steps []ChainStep) (RunResult, []StepResult, error)
 }
 
@@ -33,7 +33,7 @@ func (m *mockRunner) RunChain(ctx context.Context, steps []ChainStep) (RunResult
 
 func TestRunTool_Success(t *testing.T) {
 	runner := &mockRunner{
-		runFunc: func(_ context.Context, toolID string, args map[string]any) (RunResult, error) {
+		runFunc: func(_ context.Context, _ string, _ map[string]any) (RunResult, error) {
 			return RunResult{
 				Structured: map[string]any{"result": "success"},
 				DurationMs: 100,
@@ -55,7 +55,7 @@ func TestRunTool_Success(t *testing.T) {
 
 func TestRunTool_SuccessWithStructured(t *testing.T) {
 	runner := &mockRunner{
-		runFunc: func(_ context.Context, toolID string, args map[string]any) (RunResult, error) {
+		runFunc: func(_ context.Context, _ string, _ map[string]any) (RunResult, error) {
 			return RunResult{
 				Structured: map[string]any{"key": "value", "count": 42},
 			}, nil
@@ -77,7 +77,7 @@ func TestRunTool_SuccessWithStructured(t *testing.T) {
 
 func TestRunTool_IncludeTool(t *testing.T) {
 	runner := &mockRunner{
-		runFunc: func(_ context.Context, toolID string, args map[string]any) (RunResult, error) {
+		runFunc: func(_ context.Context, _ string, _ map[string]any) (RunResult, error) {
 			return RunResult{
 				Structured: map[string]any{"result": "ok"},
 				Tool:       map[string]any{"name": "tool", "id": "test.tool"},
@@ -99,7 +99,7 @@ func TestRunTool_IncludeTool(t *testing.T) {
 
 func TestRunTool_IncludeBackend(t *testing.T) {
 	runner := &mockRunner{
-		runFunc: func(_ context.Context, toolID string, args map[string]any) (RunResult, error) {
+		runFunc: func(_ context.Context, _ string, _ map[string]any) (RunResult, error) {
 			return RunResult{
 				Structured: map[string]any{"result": "ok"},
 				Backend:    map[string]any{"kind": "mcp", "serverName": "test-server"},
@@ -121,7 +121,7 @@ func TestRunTool_IncludeBackend(t *testing.T) {
 
 func TestRunTool_IncludeMCPResult(t *testing.T) {
 	runner := &mockRunner{
-		runFunc: func(_ context.Context, toolID string, args map[string]any) (RunResult, error) {
+		runFunc: func(_ context.Context, _ string, _ map[string]any) (RunResult, error) {
 			return RunResult{
 				Structured: map[string]any{"result": "ok"},
 				MCPResult:  map[string]any{"structuredContent": map[string]any{"result": "ok"}},
@@ -146,7 +146,7 @@ func TestRunTool_IncludeMCPResult(t *testing.T) {
 
 func TestRunTool_ToolNotFound_ReturnsToolError(t *testing.T) {
 	runner := &mockRunner{
-		runFunc: func(_ context.Context, toolID string, args map[string]any) (RunResult, error) {
+		runFunc: func(_ context.Context, _ string, _ map[string]any) (RunResult, error) {
 			return RunResult{}, merrors.ErrToolNotFound
 		},
 	}
@@ -163,7 +163,7 @@ func TestRunTool_ToolNotFound_ReturnsToolError(t *testing.T) {
 
 func TestRunTool_NoBackends_ReturnsToolError(t *testing.T) {
 	runner := &mockRunner{
-		runFunc: func(_ context.Context, toolID string, args map[string]any) (RunResult, error) {
+		runFunc: func(_ context.Context, _ string, _ map[string]any) (RunResult, error) {
 			return RunResult{}, merrors.ErrNoBackends
 		},
 	}
@@ -180,7 +180,7 @@ func TestRunTool_NoBackends_ReturnsToolError(t *testing.T) {
 
 func TestRunTool_ValidationInput_ReturnsToolError(t *testing.T) {
 	runner := &mockRunner{
-		runFunc: func(_ context.Context, toolID string, args map[string]any) (RunResult, error) {
+		runFunc: func(_ context.Context, _ string, _ map[string]any) (RunResult, error) {
 			return RunResult{}, merrors.ErrValidationInput
 		},
 	}
@@ -197,7 +197,7 @@ func TestRunTool_ValidationInput_ReturnsToolError(t *testing.T) {
 
 func TestRunTool_ValidationOutput_ReturnsToolError(t *testing.T) {
 	runner := &mockRunner{
-		runFunc: func(_ context.Context, toolID string, args map[string]any) (RunResult, error) {
+		runFunc: func(_ context.Context, _ string, _ map[string]any) (RunResult, error) {
 			return RunResult{}, merrors.ErrValidationOutput
 		},
 	}
@@ -214,7 +214,7 @@ func TestRunTool_ValidationOutput_ReturnsToolError(t *testing.T) {
 
 func TestRunTool_ExecutionFailed_ReturnsToolError(t *testing.T) {
 	runner := &mockRunner{
-		runFunc: func(_ context.Context, toolID string, args map[string]any) (RunResult, error) {
+		runFunc: func(_ context.Context, _ string, _ map[string]any) (RunResult, error) {
 			return RunResult{}, merrors.ErrExecution
 		},
 	}
@@ -235,7 +235,7 @@ func TestRunTool_ExecutionFailed_ReturnsToolError(t *testing.T) {
 func TestRunTool_BackendOverride_Valid(t *testing.T) {
 	called := false
 	runner := &mockRunner{
-		runFunc: func(_ context.Context, toolID string, args map[string]any) (RunResult, error) {
+		runFunc: func(_ context.Context, _ string, _ map[string]any) (RunResult, error) {
 			called = true
 			return RunResult{Structured: map[string]any{"result": "ok"}}, nil
 		},
@@ -261,7 +261,7 @@ func TestRunTool_BackendOverride_Valid(t *testing.T) {
 func TestRunTool_BackendOverride_Invalid(t *testing.T) {
 	called := false
 	runner := &mockRunner{
-		runFunc: func(_ context.Context, toolID string, args map[string]any) (RunResult, error) {
+		runFunc: func(_ context.Context, _ string, _ map[string]any) (RunResult, error) {
 			called = true
 			return RunResult{}, nil
 		},
@@ -286,7 +286,7 @@ func TestRunTool_BackendOverride_Invalid(t *testing.T) {
 func TestRunTool_BackendOverride_NoMatch(t *testing.T) {
 	called := false
 	runner := &mockRunner{
-		runFunc: func(_ context.Context, toolID string, args map[string]any) (RunResult, error) {
+		runFunc: func(_ context.Context, _ string, _ map[string]any) (RunResult, error) {
 			called = true
 			return RunResult{}, nil
 		},
@@ -314,7 +314,7 @@ func TestRunTool_BackendOverride_NoMatch(t *testing.T) {
 func TestRunTool_Stream_NotSupported(t *testing.T) {
 	called := false
 	runner := &mockRunner{
-		runFunc: func(_ context.Context, toolID string, args map[string]any) (RunResult, error) {
+		runFunc: func(_ context.Context, _ string, _ map[string]any) (RunResult, error) {
 			called = true
 			return RunResult{}, nil
 		},
