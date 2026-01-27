@@ -30,16 +30,16 @@ func (m *mockStore) ListExamples(_ context.Context, _ string, _ int) ([]metatool
 
 type mockRunner struct{}
 
-func (m *mockRunner) Run(ctx context.Context, toolID string, args map[string]any) (handlers.RunResult, error) {
+func (m *mockRunner) Run(_ context.Context, _ string, _ map[string]any) (handlers.RunResult, error) {
 	return handlers.RunResult{}, nil
 }
-func (m *mockRunner) RunChain(ctx context.Context, steps []handlers.ChainStep) (handlers.RunResult, []handlers.StepResult, error) {
+func (m *mockRunner) RunChain(_ context.Context, _ []handlers.ChainStep) (handlers.RunResult, []handlers.StepResult, error) {
 	return handlers.RunResult{}, nil, nil
 }
 
 type mockExecutor struct{}
 
-func (m *mockExecutor) ExecuteCode(ctx context.Context, params handlers.ExecuteParams) (handlers.ExecuteResult, error) {
+func (m *mockExecutor) ExecuteCode(_ context.Context, _ handlers.ExecuteParams) (handlers.ExecuteResult, error) {
 	return handlers.ExecuteResult{}, nil
 }
 
