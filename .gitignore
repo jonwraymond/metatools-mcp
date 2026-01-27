@@ -18,7 +18,7 @@ go.work.sum
 vendor/
 
 # Local runtime artifacts
-metatools
+/metatools
 
 # Environment and secrets
 .env
