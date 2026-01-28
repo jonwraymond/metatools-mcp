@@ -1,5 +1,7 @@
 # metatools-mcp
 
+[![Docs](https://img.shields.io/badge/docs-ai--tools--stack-blue)](https://jonwraymond.github.io/ai-tools-stack/)
+
 MCP-first "metatools" server that composes the core tool libraries:
 
 - `toolmodel`: canonical MCP-aligned tool definitions and IDs

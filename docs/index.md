@@ -54,3 +54,7 @@ _ = server.Run(context.Background(), &mcp.StdioTransport{})
 - [Component Library Analysis](proposals/component-library-analysis.md) - Tool* library ecosystem
 - [Multi-Tenancy Extension](proposals/multi-tenancy.md) - Tenant isolation patterns
 - [Architecture Evaluation](proposals/architecture-evaluation.md) - Championship-level comparison
+
+!!! note "Deep dives"
+    - Design Notes: `design-notes.md`
+    - User Journey: `user-journey.md`
