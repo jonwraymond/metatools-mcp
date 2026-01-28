@@ -23,11 +23,23 @@ The design leverages Go's interface-based composition, build-tag gating, and con
 2. [Current Architecture Analysis](#current-architecture-analysis)
 3. [Proposed Architecture](#proposed-architecture)
 4. [Extension Points](#extension-points)
+   - [Transport Layer](#1-transport-layer)
+   - [Search Strategy](#2-search-strategy)
+   - [Tool Provider Registry](#3-tool-provider-registry)
+   - [Backend Registry](#4-backend-registry)
+   - [Middleware Chain](#5-middleware-chain)
 5. [Multi-Backend Architecture](#multi-backend-architecture)
 6. [Configuration Design](#configuration-design)
 7. [Implementation Approach](#implementation-approach)
-8. [Comparative Analysis](#comparative-analysis)
-9. [References](#references)
+8. [End-to-End Examples](#end-to-end-examples)
+   - [Enterprise AI Assistant](#example-1-enterprise-ai-assistant)
+   - [Local Development Setup](#example-2-local-development-setup)
+   - [Multi-LLM Tool Router](#example-3-multi-llm-tool-router)
+   - [Microservices Tool Mesh](#example-4-microservices-tool-mesh)
+   - [Request Flow Diagram](#example-5-request-flow-diagram)
+9. [Comparative Analysis](#comparative-analysis)
+10. [References](#references)
+11. [Architecture Validation](#architecture-validation)
 
 ---
 
@@ -200,31 +212,683 @@ type BackendRegistry interface {
 
 ### 1. Transport Layer
 
-| Transport | Use Case | Implementation |
-|-----------|----------|----------------|
-| **stdio** | MCP client spawns process | Current default |
-| **SSE** | Web-based MCP clients | HTTP + Server-Sent Events |
-| **HTTP** | REST API access | Standard HTTP endpoints |
-| **gRPC** | High-performance RPC | Future consideration |
+The transport layer abstracts how MCP clients connect to the server. This enables the same tool logic to be exposed via multiple protocols.
+
+#### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         TRANSPORT LAYER                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│                              MCP CLIENTS                                      │
+│   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
+│   │   Claude    │  │   Cursor    │  │  Web App    │  │   Custom    │        │
+│   │   Desktop   │  │    IDE      │  │  Frontend   │  │   Client    │        │
+│   └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘        │
+│          │                │                │                │                │
+│          │ stdio          │ stdio          │ HTTP/SSE       │ gRPC          │
+│          │                │                │                │                │
+│          ▼                ▼                ▼                ▼                │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                     TRANSPORT REGISTRY                               │   │
+│   │                                                                       │   │
+│   │   ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐        │   │
+│   │   │   STDIO   │  │    SSE    │  │   HTTP    │  │   gRPC    │        │   │
+│   │   │ Transport │  │ Transport │  │ Transport │  │ Transport │        │   │
+│   │   └─────┬─────┘  └─────┬─────┘  └─────┬─────┘  └─────┬─────┘        │   │
+│   │         │              │              │              │               │   │
+│   │         └──────────────┴──────────────┴──────────────┘               │   │
+│   │                              │                                        │   │
+│   │                              ▼                                        │   │
+│   │                    transport.Transport                                │   │
+│   │                       interface                                       │   │
+│   │                                                                       │   │
+│   └───────────────────────────────┬─────────────────────────────────────┘   │
+│                                   │                                          │
+│                                   ▼                                          │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                    MCP REQUEST HANDLER                               │   │
+│   │                                                                       │   │
+│   │   Unified handler processes all requests regardless of transport    │   │
+│   │                                                                       │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### The Transport Interface
 
 ```go
-// Transport interface
+// Transport defines how MCP clients connect to the server
 type Transport interface {
+    // Name returns the transport identifier (e.g., "stdio", "sse")
+    Name() string
+
+    // Serve starts the transport and blocks until ctx is cancelled
     Serve(ctx context.Context, handler RequestHandler) error
+
+    // Close gracefully shuts down the transport
     Close() error
+
+    // Info returns runtime information about the transport
+    Info() TransportInfo
 }
 
-// Factory pattern
-func NewTransport(cfg TransportConfig) (Transport, error) {
-    switch cfg.Type {
-    case "stdio":
-        return NewStdioTransport(), nil
-    case "sse":
-        return NewSSETransport(cfg.HTTP), nil
-    default:
+// RequestHandler processes incoming MCP requests
+type RequestHandler interface {
+    HandleRequest(ctx context.Context, req *mcp.Request) (*mcp.Response, error)
+}
+
+// TransportInfo provides runtime details
+type TransportInfo struct {
+    Name      string            // Transport name
+    Listening bool              // Is it accepting connections?
+    Address   string            // Listening address (for network transports)
+    Metadata  map[string]string // Additional info
+}
+
+// TransportFactory creates configured transport instances
+type TransportFactory func(cfg TransportConfig) (Transport, error)
+
+// TransportRegistry manages available transports
+type TransportRegistry struct {
+    transports map[string]TransportFactory
+}
+
+func (r *TransportRegistry) Register(name string, factory TransportFactory) {
+    r.transports[name] = factory
+}
+
+func (r *TransportRegistry) Create(cfg TransportConfig) (Transport, error) {
+    factory, ok := r.transports[cfg.Type]
+    if !ok {
         return nil, fmt.Errorf("unknown transport: %s", cfg.Type)
     }
+    return factory(cfg)
 }
+```
+
+#### Transport Types
+
+##### 1. Stdio Transport (Current Default)
+
+For MCP clients that spawn the server as a subprocess.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          STDIO TRANSPORT                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│   ┌───────────────────────┐         ┌───────────────────────┐               │
+│   │      MCP Client       │         │    metatools-mcp      │               │
+│   │   (Claude, Cursor)    │         │       server          │               │
+│   │                       │         │                       │               │
+│   │   Spawns process ─────┼────────▶│   Started as child    │               │
+│   │                       │         │                       │               │
+│   │   stdin  ─────────────┼────────▶│   Reads JSON-RPC      │               │
+│   │                       │         │                       │               │
+│   │   stdout ◀────────────┼─────────│   Writes JSON-RPC     │               │
+│   │                       │         │                       │               │
+│   └───────────────────────┘         └───────────────────────┘               │
+│                                                                               │
+│   Characteristics:                                                           │
+│   - Single client per process                                               │
+│   - Process lifecycle tied to client                                        │
+│   - No network configuration needed                                         │
+│   - Ideal for desktop MCP clients                                           │
+│                                                                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Implementation:                                                             │
+│                                                                               │
+│  type StdioTransport struct {                                               │
+│      reader  io.Reader  // os.Stdin                                         │
+│      writer  io.Writer  // os.Stdout                                        │
+│      decoder *json.Decoder                                                  │
+│      encoder *json.Encoder                                                  │
+│  }                                                                           │
+│                                                                               │
+│  func (t *StdioTransport) Serve(ctx context.Context, h RequestHandler)      │
+│      error {                                                                │
+│      for {                                                                  │
+│          select {                                                           │
+│          case <-ctx.Done():                                                 │
+│              return ctx.Err()                                               │
+│          default:                                                           │
+│              var req mcp.Request                                            │
+│              if err := t.decoder.Decode(&req); err != nil {                 │
+│                  return err                                                 │
+│              }                                                              │
+│              resp, err := h.HandleRequest(ctx, &req)                        │
+│              if err := t.encoder.Encode(resp); err != nil {                 │
+│                  return err                                                 │
+│              }                                                              │
+│          }                                                                  │
+│      }                                                                      │
+│  }                                                                           │
+│                                                                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Config:                                                                     │
+│    transport:                                                               │
+│      type: stdio                                                            │
+│      # No additional config needed                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+##### 2. SSE Transport (Server-Sent Events)
+
+For web-based MCP clients using the Streamable HTTP protocol.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           SSE TRANSPORT                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│   ┌───────────────────────┐         ┌───────────────────────┐               │
+│   │     Web Browser       │         │    metatools-mcp      │               │
+│   │    or HTTP Client     │         │       server          │               │
+│   │                       │         │                       │               │
+│   │   POST /mcp ──────────┼────────▶│   Handle request      │               │
+│   │   (JSON-RPC request)  │         │                       │               │
+│   │                       │         │                       │               │
+│   │   SSE stream ◀────────┼─────────│   Stream response     │               │
+│   │   (chunked events)    │         │   via SSE             │               │
+│   │                       │         │                       │               │
+│   └───────────────────────┘         └───────────────────────┘               │
+│                                                                               │
+│   HTTP Endpoints:                                                            │
+│   - POST /mcp           → Submit MCP request, receive SSE stream            │
+│   - GET  /mcp/sse       → Establish SSE connection for server push          │
+│   - GET  /health        → Health check endpoint                              │
+│   - GET  /ready         → Readiness probe                                   │
+│                                                                               │
+│   Characteristics:                                                           │
+│   - Multiple concurrent clients                                             │
+│   - Stateless (each request independent)                                    │
+│   - Web-friendly (works through firewalls/proxies)                          │
+│   - Supports streaming responses                                            │
+│   - Can be load balanced                                                    │
+│                                                                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Request/Response Flow:                                                      │
+│                                                                               │
+│  Client                              Server                                  │
+│    │                                   │                                     │
+│    │  POST /mcp                        │                                     │
+│    │  Content-Type: application/json   │                                     │
+│    │  Accept: text/event-stream        │                                     │
+│    │  ─────────────────────────────▶   │                                     │
+│    │                                   │                                     │
+│    │  HTTP/1.1 200 OK                  │                                     │
+│    │  Content-Type: text/event-stream  │                                     │
+│    │  ◀─────────────────────────────   │                                     │
+│    │                                   │                                     │
+│    │  event: message                   │                                     │
+│    │  data: {"jsonrpc":"2.0",...}      │                                     │
+│    │  ◀─────────────────────────────   │                                     │
+│    │                                   │                                     │
+│    │  event: message                   │                                     │
+│    │  data: {"jsonrpc":"2.0",...}      │  (streaming)                       │
+│    │  ◀─────────────────────────────   │                                     │
+│    │                                   │                                     │
+│    │  event: done                      │                                     │
+│    │  data: {}                         │                                     │
+│    │  ◀─────────────────────────────   │                                     │
+│    │                                   │                                     │
+│                                                                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Config:                                                                     │
+│    transport:                                                               │
+│      type: sse                                                              │
+│      http:                                                                  │
+│        host: "0.0.0.0"                                                     │
+│        port: 8080                                                          │
+│        base_path: /mcp                                                     │
+│        cors:                                                               │
+│          enabled: true                                                     │
+│          origins: ["https://app.example.com"]                             │
+│        tls:                                                                │
+│          enabled: true                                                     │
+│          cert: /etc/ssl/cert.pem                                          │
+│          key: /etc/ssl/key.pem                                            │
+│        timeouts:                                                           │
+│          read: 30s                                                         │
+│          write: 60s                                                        │
+│          idle: 120s                                                        │
+│        keepalive: 30s                                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+##### 3. HTTP Transport (REST-style)
+
+For simple request/response without streaming.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          HTTP TRANSPORT                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│   Endpoints:                                                                 │
+│                                                                               │
+│   POST /mcp/tools/list                                                       │
+│   ├─ Request:  {}                                                            │
+│   └─ Response: { "tools": [...] }                                           │
+│                                                                               │
+│   POST /mcp/tools/call                                                       │
+│   ├─ Request:  { "name": "search_tools", "arguments": {...} }               │
+│   └─ Response: { "content": [...] }                                         │
+│                                                                               │
+│   GET /mcp/tools/:name                                                       │
+│   └─ Response: { "name": "...", "description": "...", "inputSchema": {...}} │
+│                                                                               │
+│   Characteristics:                                                           │
+│   - Simple request/response                                                  │
+│   - No streaming support                                                    │
+│   - Easy to debug with curl                                                 │
+│   - Good for simple integrations                                            │
+│                                                                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Config:                                                                     │
+│    transport:                                                               │
+│      type: http                                                             │
+│      http:                                                                  │
+│        host: "0.0.0.0"                                                     │
+│        port: 8080                                                          │
+│        base_path: /mcp                                                     │
+│        # Same TLS/timeout options as SSE                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+##### 4. WebSocket Transport
+
+For bidirectional real-time communication.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        WEBSOCKET TRANSPORT                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│   ┌───────────────────────┐         ┌───────────────────────┐               │
+│   │       Client          │         │    metatools-mcp      │               │
+│   │                       │         │       server          │               │
+│   │                       │         │                       │               │
+│   │   WS Connect ─────────┼────────▶│   Accept connection   │               │
+│   │   ws://host/mcp/ws    │         │                       │               │
+│   │                       │         │                       │               │
+│   │   ◀───────────────────┼─────────┼───────────────────▶   │               │
+│   │      Bidirectional    │         │   Full duplex         │               │
+│   │      JSON-RPC         │         │   messaging           │               │
+│   │                       │         │                       │               │
+│   └───────────────────────┘         └───────────────────────┘               │
+│                                                                               │
+│   Characteristics:                                                           │
+│   - Full duplex communication                                               │
+│   - Server can push notifications                                           │
+│   - Lower latency than HTTP                                                 │
+│   - Persistent connection                                                   │
+│   - Good for real-time applications                                         │
+│                                                                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Config:                                                                     │
+│    transport:                                                               │
+│      type: websocket                                                        │
+│      websocket:                                                             │
+│        host: "0.0.0.0"                                                     │
+│        port: 8080                                                          │
+│        path: /mcp/ws                                                       │
+│        ping_interval: 30s                                                  │
+│        pong_timeout: 10s                                                   │
+│        max_message_size: 1MB                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+##### 5. gRPC Transport
+
+For high-performance, strongly-typed RPC.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          gRPC TRANSPORT                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│   Protocol Buffer Definition:                                                │
+│                                                                               │
+│   service MCPService {                                                       │
+│     rpc ListTools(ListToolsRequest) returns (ListToolsResponse);            │
+│     rpc CallTool(CallToolRequest) returns (CallToolResponse);               │
+│     rpc CallToolStream(CallToolRequest) returns (stream ToolEvent);         │
+│   }                                                                          │
+│                                                                               │
+│   Characteristics:                                                           │
+│   - High performance (binary protocol)                                       │
+│   - Strong typing via protobuf                                              │
+│   - Bidirectional streaming                                                 │
+│   - Built-in load balancing                                                 │
+│   - Good for service-to-service communication                               │
+│                                                                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Config:                                                                     │
+│    transport:                                                               │
+│      type: grpc                                                             │
+│      grpc:                                                                  │
+│        host: "0.0.0.0"                                                     │
+│        port: 9090                                                          │
+│        tls:                                                                │
+│          enabled: true                                                     │
+│          cert: /etc/ssl/cert.pem                                          │
+│          key: /etc/ssl/key.pem                                            │
+│          client_ca: /etc/ssl/ca.pem  # For mTLS                           │
+│        reflection: true  # Enable gRPC reflection                          │
+│        max_recv_msg_size: 4MB                                              │
+│        max_send_msg_size: 4MB                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Multi-Transport Support
+
+Run multiple transports simultaneously:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      MULTI-TRANSPORT ARCHITECTURE                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                    METATOOLS-MCP SERVER                              │   │
+│   │                                                                       │   │
+│   │   ┌─────────────┐ ┌─────────────┐ ┌─────────────┐                   │   │
+│   │   │   STDIO     │ │    SSE      │ │    gRPC     │                   │   │
+│   │   │  Transport  │ │  Transport  │ │  Transport  │                   │   │
+│   │   │             │ │  :8080      │ │  :9090      │                   │   │
+│   │   └──────┬──────┘ └──────┬──────┘ └──────┬──────┘                   │   │
+│   │          │               │               │                           │   │
+│   │          └───────────────┴───────────────┘                           │   │
+│   │                          │                                            │   │
+│   │                          ▼                                            │   │
+│   │          ┌───────────────────────────────┐                           │   │
+│   │          │     SHARED REQUEST HANDLER    │                           │   │
+│   │          │                               │                           │   │
+│   │          │   All transports share the    │                           │   │
+│   │          │   same middleware, tools,     │                           │   │
+│   │          │   and backend registries      │                           │   │
+│   │          │                               │                           │   │
+│   │          └───────────────────────────────┘                           │   │
+│   │                                                                       │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                               │
+│   Config:                                                                    │
+│     transports:                                                             │
+│       - type: stdio                                                         │
+│         enabled: true                                                       │
+│                                                                               │
+│       - type: sse                                                           │
+│         enabled: true                                                       │
+│         http:                                                               │
+│           port: 8080                                                        │
+│                                                                               │
+│       - type: grpc                                                          │
+│         enabled: true                                                       │
+│         grpc:                                                               │
+│           port: 9090                                                        │
+│                                                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Implementing Custom Transports
+
+```go
+// Example: Unix socket transport for local high-performance IPC
+type UnixSocketTransport struct {
+    path     string
+    listener net.Listener
+    handler  RequestHandler
+}
+
+func NewUnixSocketTransport(cfg TransportConfig) (Transport, error) {
+    return &UnixSocketTransport{
+        path: cfg.UnixSocket.Path,
+    }, nil
+}
+
+func (t *UnixSocketTransport) Name() string {
+    return "unix"
+}
+
+func (t *UnixSocketTransport) Serve(ctx context.Context, h RequestHandler) error {
+    t.handler = h
+
+    var err error
+    t.listener, err = net.Listen("unix", t.path)
+    if err != nil {
+        return err
+    }
+
+    go func() {
+        <-ctx.Done()
+        t.listener.Close()
+    }()
+
+    for {
+        conn, err := t.listener.Accept()
+        if err != nil {
+            if ctx.Err() != nil {
+                return nil // Graceful shutdown
+            }
+            return err
+        }
+        go t.handleConnection(ctx, conn)
+    }
+}
+
+func (t *UnixSocketTransport) handleConnection(ctx context.Context, conn net.Conn) {
+    defer conn.Close()
+    decoder := json.NewDecoder(conn)
+    encoder := json.NewEncoder(conn)
+
+    for {
+        var req mcp.Request
+        if err := decoder.Decode(&req); err != nil {
+            return
+        }
+        resp, _ := t.handler.HandleRequest(ctx, &req)
+        if err := encoder.Encode(resp); err != nil {
+            return
+        }
+    }
+}
+
+func (t *UnixSocketTransport) Close() error {
+    if t.listener != nil {
+        return t.listener.Close()
+    }
+    return nil
+}
+
+func (t *UnixSocketTransport) Info() TransportInfo {
+    return TransportInfo{
+        Name:      "unix",
+        Listening: t.listener != nil,
+        Address:   t.path,
+    }
+}
+
+// Register the custom transport
+func init() {
+    transport.Register("unix", NewUnixSocketTransport)
+}
+```
+
+#### High Availability Configuration
+
+For production deployments with HTTP/SSE transport:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    HIGH AVAILABILITY DEPLOYMENT                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                       LOAD BALANCER                                  │   │
+│   │                    (nginx, HAProxy, ALB)                             │   │
+│   │                                                                       │   │
+│   │   - TLS termination                                                  │   │
+│   │   - Health checks                                                    │   │
+│   │   - Round-robin / least-connections                                 │   │
+│   │                                                                       │   │
+│   └────────────────┬────────────────┬────────────────┬──────────────────┘   │
+│                    │                │                │                       │
+│                    ▼                ▼                ▼                       │
+│   ┌────────────────────┐ ┌────────────────────┐ ┌────────────────────┐     │
+│   │   metatools-mcp    │ │   metatools-mcp    │ │   metatools-mcp    │     │
+│   │    instance 1      │ │    instance 2      │ │    instance 3      │     │
+│   │                    │ │                    │ │                    │     │
+│   │  SSE :8080         │ │  SSE :8080         │ │  SSE :8080         │     │
+│   │  gRPC :9090        │ │  gRPC :9090        │ │  gRPC :9090        │     │
+│   │                    │ │                    │ │                    │     │
+│   └─────────┬──────────┘ └─────────┬──────────┘ └─────────┬──────────┘     │
+│             │                      │                      │                 │
+│             └──────────────────────┴──────────────────────┘                 │
+│                                    │                                         │
+│                                    ▼                                         │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                      SHARED STATE (Optional)                         │   │
+│   │                                                                       │   │
+│   │   - Redis for rate limiting                                          │   │
+│   │   - Redis for caching                                                │   │
+│   │   - Shared tool registry (if dynamic)                               │   │
+│   │                                                                       │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+```yaml
+# Kubernetes-ready configuration
+transport:
+  type: sse
+  http:
+    host: "0.0.0.0"
+    port: 8080
+
+    # Health endpoints for k8s probes
+    health:
+      enabled: true
+      liveness_path: /healthz
+      readiness_path: /ready
+
+    # Graceful shutdown
+    shutdown:
+      timeout: 30s
+      drain_connections: true
+
+    # TLS (or terminate at ingress)
+    tls:
+      enabled: false  # Terminated at ingress
+
+middleware:
+  rate_limit:
+    enabled: true
+    storage: redis
+    redis:
+      address: redis:6379
+
+  cache:
+    enabled: true
+    backend: redis
+    redis:
+      address: redis:6379
+```
+
+#### CLI Integration
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          CLI SUBCOMMANDS                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│  metatools stdio                                                             │
+│  └─ Run as stdio server (default, for MCP clients)                          │
+│                                                                               │
+│  metatools serve                                                             │
+│  └─ Run as HTTP/SSE server                                                  │
+│  └─ Options:                                                                │
+│       --port 8080          HTTP port                                        │
+│       --grpc-port 9090     gRPC port (optional)                            │
+│       --tls                Enable TLS                                       │
+│       --cert FILE          TLS certificate                                  │
+│       --key FILE           TLS key                                          │
+│                                                                               │
+│  metatools serve --multi                                                     │
+│  └─ Run all enabled transports from config                                  │
+│                                                                               │
+│  metatools version                                                           │
+│  └─ Print version and exit                                                  │
+│                                                                               │
+│  metatools validate                                                          │
+│  └─ Validate configuration file                                             │
+│                                                                               │
+│  metatools tools list                                                        │
+│  └─ List all registered tools (from all backends)                          │
+│                                                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Transport Configuration Summary
+
+```yaml
+# Complete transport configuration example
+transports:
+  # Stdio for MCP desktop clients
+  - type: stdio
+    enabled: true
+
+  # SSE for web clients
+  - type: sse
+    enabled: true
+    http:
+      host: "0.0.0.0"
+      port: 8080
+      base_path: /mcp
+      cors:
+        enabled: true
+        origins: ["*"]
+        methods: ["GET", "POST", "OPTIONS"]
+        headers: ["Content-Type", "Authorization"]
+      tls:
+        enabled: true
+        cert: /etc/ssl/certs/server.crt
+        key: /etc/ssl/private/server.key
+      timeouts:
+        read: 30s
+        write: 60s
+        idle: 120s
+      health:
+        enabled: true
+        liveness_path: /healthz
+        readiness_path: /ready
+
+  # WebSocket for real-time apps
+  - type: websocket
+    enabled: false
+    websocket:
+      host: "0.0.0.0"
+      port: 8081
+      path: /ws
+
+  # gRPC for service-to-service
+  - type: grpc
+    enabled: false
+    grpc:
+      host: "0.0.0.0"
+      port: 9090
+      reflection: true
+
+  # Unix socket for local IPC
+  - type: unix
+    enabled: false
+    unix:
+      path: /var/run/metatools.sock
+      permissions: "0660"
 ```
 
 ### 2. Search Strategy
@@ -1403,6 +2067,740 @@ type Plugin interface {
 
 ---
 
+## End-to-End Examples
+
+This section demonstrates how the pluggable architecture works in practice with complete examples.
+
+### Example 1: Enterprise AI Assistant
+
+An internal AI assistant that aggregates tools from multiple sources.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    ENTERPRISE AI ASSISTANT                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                      FRONTEND / CLIENTS                              │   │
+│   │                                                                       │   │
+│   │   ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐        │   │
+│   │   │  Slack    │  │  Teams    │  │   Web     │  │  VS Code  │        │   │
+│   │   │   Bot     │  │   Bot     │  │   App     │  │ Extension │        │   │
+│   │   └─────┬─────┘  └─────┬─────┘  └─────┬─────┘  └─────┬─────┘        │   │
+│   │         │              │              │              │               │   │
+│   │         └──────────────┴──────────────┴──────────────┘               │   │
+│   │                              │ HTTPS/SSE                             │   │
+│   └──────────────────────────────┼───────────────────────────────────────┘   │
+│                                  ▼                                           │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                      METATOOLS-MCP SERVER                            │   │
+│   │                         (HA Cluster)                                 │   │
+│   │                                                                       │   │
+│   │   Transport: SSE on :8080                                           │   │
+│   │                                                                       │   │
+│   │   Middleware Chain:                                                  │   │
+│   │   ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐           │   │
+│   │   │  Log   │→│ OAuth  │→│ Rate   │→│ Audit  │→│ Cache  │           │   │
+│   │   └────────┘ └────────┘ └────────┘ └────────┘ └────────┘           │   │
+│   │                                                                       │   │
+│   │   Tool Providers:                                                    │   │
+│   │   ┌──────────────┐ ┌──────────────┐ ┌──────────────┐               │   │
+│   │   │ search_tools │ │ describe    │ │ run_tool    │               │   │
+│   │   │              │ │ _tool       │ │             │               │   │
+│   │   └──────────────┘ └──────────────┘ └──────────────┘               │   │
+│   │                                                                       │   │
+│   │   Backends:                                                          │   │
+│   │   ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐              │   │
+│   │   │  Jira    │ │Confluence│ │  GitHub  │ │ Internal │              │   │
+│   │   │   MCP    │ │   MCP    │ │   MCP    │ │   API    │              │   │
+│   │   └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘              │   │
+│   │        │            │            │            │                     │   │
+│   └────────┼────────────┼────────────┼────────────┼─────────────────────┘   │
+│            ▼            ▼            ▼            ▼                         │
+│   ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐       │
+│   │    Jira      │ │  Confluence  │ │    GitHub    │ │   Company    │       │
+│   │    Cloud     │ │    Cloud     │ │              │ │     API      │       │
+│   └──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘       │
+│                                                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Configuration:**
+
+```yaml
+# metatools-enterprise.yaml
+server:
+  name: "enterprise-ai-assistant"
+  version: "1.0.0"
+
+transport:
+  type: sse
+  http:
+    host: "0.0.0.0"
+    port: 8080
+    tls:
+      enabled: true
+      cert: /etc/ssl/certs/server.crt
+      key: /etc/ssl/private/server.key
+    cors:
+      enabled: true
+      origins:
+        - "https://chat.company.com"
+        - "https://slack-bot.company.internal"
+    health:
+      enabled: true
+
+middleware:
+  chain: [logging, auth, rate_limit, audit, cache]
+
+  logging:
+    enabled: true
+    level: info
+    format: json
+
+  auth:
+    enabled: true
+    type: oauth2
+    issuer: https://auth.company.com
+    audience: metatools-api
+    jwks_uri: https://auth.company.com/.well-known/jwks.json
+
+  rate_limit:
+    enabled: true
+    storage: redis
+    redis:
+      address: redis.company.internal:6379
+    default:
+      requests_per_minute: 60
+    per_user: true
+
+  audit:
+    enabled: true
+    destination: elasticsearch
+    elasticsearch:
+      addresses: ["https://es.company.internal:9200"]
+      index: metatools-audit
+
+  cache:
+    enabled: true
+    backend: redis
+    redis:
+      address: redis.company.internal:6379
+    per_tool:
+      search_tools:
+        ttl: 1m
+      describe_tool:
+        ttl: 10m
+
+backends:
+  jira:
+    enabled: true
+    kind: mcp
+    config:
+      command: npx
+      args: ["-y", "@anthropic/mcp-server-jira"]
+      env:
+        JIRA_URL: https://company.atlassian.net
+        JIRA_EMAIL: ${JIRA_EMAIL}
+        JIRA_API_TOKEN: ${JIRA_API_TOKEN}
+
+  confluence:
+    enabled: true
+    kind: mcp
+    config:
+      command: npx
+      args: ["-y", "@anthropic/mcp-server-confluence"]
+      env:
+        CONFLUENCE_URL: https://company.atlassian.net/wiki
+        CONFLUENCE_EMAIL: ${CONFLUENCE_EMAIL}
+        CONFLUENCE_API_TOKEN: ${CONFLUENCE_API_TOKEN}
+
+  github:
+    enabled: true
+    kind: mcp
+    config:
+      command: npx
+      args: ["-y", "@modelcontextprotocol/server-github"]
+      env:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
+
+  internal-api:
+    enabled: true
+    kind: http
+    config:
+      base_url: https://api.company.internal/tools/v1
+      auth:
+        type: oauth2
+        token_url: https://auth.company.com/oauth/token
+        client_id: ${INTERNAL_CLIENT_ID}
+        client_secret: ${INTERNAL_CLIENT_SECRET}
+        scopes: ["tools:read", "tools:execute"]
+```
+
+---
+
+### Example 2: Local Development Setup
+
+A developer workstation with file system access and code execution.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    LOCAL DEVELOPMENT SETUP                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                       DEVELOPER MACHINE                              │   │
+│   │                                                                       │   │
+│   │   ┌───────────────────┐                                             │   │
+│   │   │   Claude Desktop  │ ←── stdio ──┐                               │   │
+│   │   │   or Cursor IDE   │             │                               │   │
+│   │   └───────────────────┘             │                               │   │
+│   │                                      │                               │   │
+│   │                                      ▼                               │   │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │   │
+│   │   │              METATOOLS-MCP (stdio mode)                      │   │   │
+│   │   │                                                               │   │   │
+│   │   │   Build: go build -tags "toolsearch,toolruntime"            │   │   │
+│   │   │                                                               │   │   │
+│   │   │   Features:                                                  │   │   │
+│   │   │   - BM25 search (toolsearch tag)                            │   │   │
+│   │   │   - Code execution (toolruntime tag)                        │   │   │
+│   │   │                                                               │   │   │
+│   │   │   Backends:                                                  │   │   │
+│   │   │   ┌────────────┐ ┌────────────┐ ┌────────────┐              │   │   │
+│   │   │   │   Local    │ │ Filesystem │ │   Git      │              │   │   │
+│   │   │   │   Tools    │ │    MCP     │ │   MCP      │              │   │   │
+│   │   │   └─────┬──────┘ └─────┬──────┘ └─────┬──────┘              │   │   │
+│   │   │         │              │              │                      │   │   │
+│   │   └─────────┼──────────────┼──────────────┼──────────────────────┘   │   │
+│   │             │              │              │                          │   │
+│   │             ▼              ▼              ▼                          │   │
+│   │   ┌────────────┐   ┌────────────┐   ┌────────────┐                  │   │
+│   │   │ ~/.config/ │   │ ~/Projects │   │ .git repos │                  │   │
+│   │   │ metatools/ │   │            │   │            │                  │   │
+│   │   │ tools/     │   │            │   │            │                  │   │
+│   │   └────────────┘   └────────────┘   └────────────┘                  │   │
+│   │                                                                       │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Configuration:**
+
+```yaml
+# ~/.config/metatools/config.yaml
+server:
+  name: "dev-metatools"
+  version: "local"
+
+transport:
+  type: stdio
+
+search:
+  strategy: bm25
+  bm25:
+    name_boost: 3
+    namespace_boost: 2
+
+execution:
+  timeout: 30s
+  max_tool_calls: 100
+
+middleware:
+  chain: [logging]
+  logging:
+    enabled: true
+    level: debug
+    output: /tmp/metatools.log
+
+backends:
+  local:
+    enabled: true
+    paths:
+      - ~/.config/metatools/tools
+    watch: true
+
+  filesystem:
+    enabled: true
+    kind: mcp
+    config:
+      command: npx
+      args:
+        - "-y"
+        - "@modelcontextprotocol/server-filesystem"
+        - "~/Projects"
+        - "~/Documents"
+
+  git:
+    enabled: true
+    kind: mcp
+    config:
+      command: npx
+      args: ["-y", "@modelcontextprotocol/server-git"]
+```
+
+**Custom Local Tool Definition:**
+
+```yaml
+# ~/.config/metatools/tools/project-tools.yaml
+tools:
+  - name: run_tests
+    namespace: dev
+    description: Run project tests with optional coverage
+    inputSchema:
+      type: object
+      properties:
+        path:
+          type: string
+          description: Project path
+        coverage:
+          type: boolean
+          default: false
+      required: [path]
+
+    backend:
+      kind: local
+      handler: run_tests
+
+  - name: lint_code
+    namespace: dev
+    description: Run linter on project
+    inputSchema:
+      type: object
+      properties:
+        path:
+          type: string
+        fix:
+          type: boolean
+          default: false
+      required: [path]
+
+    backend:
+      kind: local
+      handler: lint_code
+```
+
+---
+
+### Example 3: Multi-LLM Tool Router
+
+A gateway that routes tool calls to different LLM providers.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      MULTI-LLM TOOL ROUTER                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│                         ┌─────────────────┐                                  │
+│                         │   Application   │                                  │
+│                         │   (Your App)    │                                  │
+│                         └────────┬────────┘                                  │
+│                                  │ MCP                                       │
+│                                  ▼                                           │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                      METATOOLS-MCP ROUTER                            │   │
+│   │                                                                       │   │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │   │
+│   │   │                    TOOL AGGREGATOR                           │   │   │
+│   │   │                                                               │   │   │
+│   │   │   All tools from all backends visible as one unified set    │   │   │
+│   │   │                                                               │   │   │
+│   │   │   search_tools("weather") →                                  │   │   │
+│   │   │   [                                                          │   │   │
+│   │   │     { id: "openai/get_weather", backend: "openai" },        │   │   │
+│   │   │     { id: "anthropic/weather_lookup", backend: "anthropic" },│   │   │
+│   │   │     { id: "local/weather_api", backend: "local" }           │   │   │
+│   │   │   ]                                                          │   │   │
+│   │   │                                                               │   │   │
+│   │   └─────────────────────────────────────────────────────────────┘   │   │
+│   │                              │                                        │   │
+│   │                              ▼                                        │   │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │   │
+│   │   │                    SMART ROUTER                              │   │   │
+│   │   │                                                               │   │   │
+│   │   │   Routes based on:                                           │   │   │
+│   │   │   - Tool prefix (openai/*, anthropic/*, local/*)            │   │   │
+│   │   │   - Cost optimization                                        │   │   │
+│   │   │   - Latency requirements                                     │   │   │
+│   │   │   - Fallback on failure                                     │   │   │
+│   │   │                                                               │   │   │
+│   │   └─────────────────────────────────────────────────────────────┘   │   │
+│   │                              │                                        │   │
+│   │          ┌───────────────────┼───────────────────┐                   │   │
+│   │          │                   │                   │                   │   │
+│   │          ▼                   ▼                   ▼                   │   │
+│   │   ┌────────────┐     ┌────────────┐     ┌────────────┐              │   │
+│   │   │   OpenAI   │     │ Anthropic  │     │   Local    │              │   │
+│   │   │  Backend   │     │  Backend   │     │  Backend   │              │   │
+│   │   └─────┬──────┘     └─────┬──────┘     └─────┬──────┘              │   │
+│   │         │                   │                 │                      │   │
+│   └─────────┼───────────────────┼─────────────────┼──────────────────────┘   │
+│             │                   │                 │                          │
+│             ▼                   ▼                 ▼                          │
+│   ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐            │
+│   │    OpenAI API    │ │  Anthropic API   │ │   Local Tools    │            │
+│   │                  │ │                  │ │                  │            │
+│   │  - GPT-4 tools   │ │  - Claude tools  │ │  - Custom tools  │            │
+│   │  - DALL-E        │ │  - Computer use  │ │  - File ops      │            │
+│   │  - Whisper       │ │                  │ │  - Scripts       │            │
+│   └──────────────────┘ └──────────────────┘ └──────────────────┘            │
+│                                                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Configuration:**
+
+```yaml
+# multi-llm-router.yaml
+server:
+  name: "llm-tool-router"
+  version: "1.0.0"
+
+transport:
+  type: sse
+  http:
+    port: 8080
+
+middleware:
+  chain: [logging, metrics, cost_tracking]
+
+  cost_tracking:
+    enabled: true
+    storage: postgres
+    postgres:
+      connection_string: ${DATABASE_URL}
+
+backends:
+  openai:
+    enabled: true
+    kind: openai
+    config:
+      api_key: ${OPENAI_API_KEY}
+      organization: ${OPENAI_ORG}
+      models:
+        - gpt-4
+        - gpt-4-turbo
+        - dall-e-3
+      default_model: gpt-4-turbo
+      timeout: 60s
+
+  anthropic:
+    enabled: true
+    kind: anthropic
+    config:
+      api_key: ${ANTHROPIC_API_KEY}
+      models:
+        - claude-3-opus
+        - claude-3-sonnet
+      default_model: claude-3-sonnet
+      timeout: 60s
+
+  local:
+    enabled: true
+    paths:
+      - /opt/metatools/tools
+
+routing:
+  # Route by prefix
+  prefix_routing:
+    "openai/*": openai
+    "anthropic/*": anthropic
+    "local/*": local
+
+  # Fallback chain
+  fallback:
+    - openai
+    - anthropic
+    - local
+
+  # Cost optimization
+  cost_aware:
+    enabled: true
+    prefer_cheaper: true
+    budget_per_hour: 10.00
+    currency: USD
+```
+
+---
+
+### Example 4: Microservices Tool Mesh
+
+A distributed architecture where each service exposes tools via MCP.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     MICROSERVICES TOOL MESH                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                        API GATEWAY                                   │   │
+│   │                    (Kong / Envoy / etc)                             │   │
+│   └────────────────────────────┬────────────────────────────────────────┘   │
+│                                │                                             │
+│                                ▼                                             │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                   METATOOLS-MCP AGGREGATOR                           │   │
+│   │                                                                       │   │
+│   │   Transport: gRPC (internal), SSE (external)                        │   │
+│   │                                                                       │   │
+│   │   Service Discovery: Kubernetes / Consul                            │   │
+│   │                                                                       │   │
+│   │   Aggregates tools from all registered MCP services                 │   │
+│   │                                                                       │   │
+│   └────────────────────────────┬────────────────────────────────────────┘   │
+│                                │                                             │
+│         ┌──────────────────────┼──────────────────────┐                     │
+│         │                      │                      │                     │
+│         ▼                      ▼                      ▼                     │
+│   ┌────────────┐        ┌────────────┐        ┌────────────┐               │
+│   │  Orders    │        │  Users     │        │  Inventory │               │
+│   │  Service   │        │  Service   │        │  Service   │               │
+│   │            │        │            │        │            │               │
+│   │  MCP Tools:│        │  MCP Tools:│        │  MCP Tools:│               │
+│   │  - create  │        │  - lookup  │        │  - check   │               │
+│   │    _order  │        │    _user   │        │    _stock  │               │
+│   │  - cancel  │        │  - update  │        │  - reserve │               │
+│   │    _order  │        │    _prefs  │        │    _item   │               │
+│   │  - track   │        │  - auth    │        │  - release │               │
+│   │    _order  │        │            │        │    _item   │               │
+│   │            │        │            │        │            │               │
+│   └────────────┘        └────────────┘        └────────────┘               │
+│         │                      │                      │                     │
+│         ▼                      ▼                      ▼                     │
+│   ┌────────────┐        ┌────────────┐        ┌────────────┐               │
+│   │ Orders DB  │        │ Users DB   │        │Inventory DB│               │
+│   └────────────┘        └────────────┘        └────────────┘               │
+│                                                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Aggregator Configuration:**
+
+```yaml
+# aggregator.yaml
+server:
+  name: "tool-mesh-aggregator"
+  version: "1.0.0"
+
+transports:
+  - type: sse
+    enabled: true
+    http:
+      port: 8080
+      # External-facing
+
+  - type: grpc
+    enabled: true
+    grpc:
+      port: 9090
+      # Internal service mesh
+
+service_discovery:
+  type: kubernetes
+  kubernetes:
+    namespace: production
+    label_selector: "mcp.enabled=true"
+    port_name: mcp-grpc
+
+backends:
+  # Auto-discovered from Kubernetes
+  auto_discover:
+    enabled: true
+    refresh_interval: 30s
+
+  # Or explicit configuration
+  orders:
+    enabled: true
+    kind: grpc
+    config:
+      address: orders-service.production.svc:9090
+      tls:
+        enabled: true
+        ca_cert: /etc/ssl/ca.crt
+
+  users:
+    enabled: true
+    kind: grpc
+    config:
+      address: users-service.production.svc:9090
+
+  inventory:
+    enabled: true
+    kind: grpc
+    config:
+      address: inventory-service.production.svc:9090
+```
+
+**Service Configuration (e.g., Orders Service):**
+
+```yaml
+# orders-service/mcp-config.yaml
+server:
+  name: "orders-service-mcp"
+  version: "2.1.0"
+
+transport:
+  type: grpc
+  grpc:
+    port: 9090
+
+providers:
+  create_order:
+    enabled: true
+  cancel_order:
+    enabled: true
+  track_order:
+    enabled: true
+
+backends:
+  local:
+    enabled: true
+    # Orders service tools implemented in Go
+```
+
+---
+
+### Example 5: Request Flow Diagram
+
+A complete request flow through all layers:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    COMPLETE REQUEST FLOW                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│   1. CLIENT REQUEST                                                          │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │  POST /mcp HTTP/1.1                                                  │   │
+│   │  Content-Type: application/json                                      │   │
+│   │  Authorization: Bearer eyJhbGc...                                   │   │
+│   │                                                                       │   │
+│   │  {                                                                   │   │
+│   │    "jsonrpc": "2.0",                                                │   │
+│   │    "method": "tools/call",                                          │   │
+│   │    "params": {                                                      │   │
+│   │      "name": "github/create_issue",                                 │   │
+│   │      "arguments": {                                                 │   │
+│   │        "repo": "company/project",                                   │   │
+│   │        "title": "Bug: Login fails",                                 │   │
+│   │        "body": "Steps to reproduce..."                              │   │
+│   │      }                                                              │   │
+│   │    },                                                               │   │
+│   │    "id": "req-123"                                                  │   │
+│   │  }                                                                   │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                     │                                        │
+│                                     ▼                                        │
+│   2. TRANSPORT LAYER (SSE)                                                   │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │  - Accept HTTP connection                                           │   │
+│   │  - Parse JSON-RPC request                                           │   │
+│   │  - Create context with request ID                                   │   │
+│   │  - Pass to handler chain                                            │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                     │                                        │
+│                                     ▼                                        │
+│   3. MIDDLEWARE CHAIN                                                        │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                                                                       │   │
+│   │  ┌──────────────────────────────────────────────────────────────┐   │   │
+│   │  │ LOGGING                                                       │   │   │
+│   │  │ - Log: "Incoming request req-123 for github/create_issue"    │   │   │
+│   │  │ - Start timer                                                 │   │   │
+│   │  └──────────────────────────────────────────────────────────────┘   │   │
+│   │                              │                                        │   │
+│   │                              ▼                                        │   │
+│   │  ┌──────────────────────────────────────────────────────────────┐   │   │
+│   │  │ AUTH                                                          │   │   │
+│   │  │ - Validate JWT token                                          │   │   │
+│   │  │ - Extract user: "alice@company.com"                          │   │   │
+│   │  │ - Inject user into context                                    │   │   │
+│   │  └──────────────────────────────────────────────────────────────┘   │   │
+│   │                              │                                        │   │
+│   │                              ▼                                        │   │
+│   │  ┌──────────────────────────────────────────────────────────────┐   │   │
+│   │  │ RATE LIMIT                                                    │   │   │
+│   │  │ - Check: alice@company.com has 45/60 requests remaining      │   │   │
+│   │  │ - Consume 1 token                                             │   │   │
+│   │  │ - Pass through                                                │   │   │
+│   │  └──────────────────────────────────────────────────────────────┘   │   │
+│   │                              │                                        │   │
+│   │                              ▼                                        │   │
+│   │  ┌──────────────────────────────────────────────────────────────┐   │   │
+│   │  │ AUDIT                                                         │   │   │
+│   │  │ - Log to audit trail:                                        │   │   │
+│   │  │   { user: "alice", tool: "github/create_issue", time: ... }  │   │   │
+│   │  └──────────────────────────────────────────────────────────────┘   │   │
+│   │                                                                       │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                     │                                        │
+│                                     ▼                                        │
+│   4. TOOL ROUTER                                                             │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │  - Parse tool ID: "github/create_issue"                             │   │
+│   │  - Extract backend: "github"                                         │   │
+│   │  - Extract tool name: "create_issue"                                │   │
+│   │  - Lookup backend in registry                                        │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                     │                                        │
+│                                     ▼                                        │
+│   5. BACKEND (GitHub MCP)                                                    │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │  - Backend type: MCP subprocess                                      │   │
+│   │  - Command: npx @modelcontextprotocol/server-github                 │   │
+│   │  - Forward MCP call to subprocess                                    │   │
+│   │  - Wait for response                                                 │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                     │                                        │
+│                                     ▼                                        │
+│   6. EXTERNAL SERVICE (GitHub API)                                           │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │  - GitHub MCP server calls GitHub API                               │   │
+│   │  - POST https://api.github.com/repos/company/project/issues        │   │
+│   │  - Response: { "number": 456, "url": "..." }                        │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                     │                                        │
+│                                     ▼                                        │
+│   7. RESPONSE FLOW (reverse through middleware)                              │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │  - Audit: Log success                                                │   │
+│   │  - Rate limit: (no action)                                          │   │
+│   │  - Auth: (no action)                                                │   │
+│   │  - Logging: Log "Completed req-123 in 1.2s, status: success"        │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                     │                                        │
+│                                     ▼                                        │
+│   8. CLIENT RESPONSE                                                         │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │  HTTP/1.1 200 OK                                                     │   │
+│   │  Content-Type: text/event-stream                                    │   │
+│   │                                                                       │   │
+│   │  event: message                                                      │   │
+│   │  data: {                                                             │   │
+│   │    "jsonrpc": "2.0",                                                │   │
+│   │    "result": {                                                      │   │
+│   │      "content": [{                                                  │   │
+│   │        "type": "text",                                              │   │
+│   │        "text": "Created issue #456"                                 │   │
+│   │      }],                                                            │   │
+│   │      "metadata": {                                                  │   │
+│   │        "issue_number": 456,                                         │   │
+│   │        "url": "https://github.com/company/project/issues/456"      │   │
+│   │      }                                                              │   │
+│   │    },                                                               │   │
+│   │    "id": "req-123"                                                  │   │
+│   │  }                                                                   │   │
+│   │                                                                       │   │
+│   │  event: done                                                         │   │
+│   │  data: {}                                                            │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## Comparative Analysis
 
 ### Your Tool Libraries vs. Industry Patterns
@@ -1451,6 +2849,130 @@ type Plugin interface {
 
 ---
 
+## Architecture Validation
+
+This section documents validation of the proposed architecture against industry best practices and real-world implementations, gathered from multiple research sources (Exa, Firecrawl, GitHub, Context7).
+
+### Plugin Architecture Validation ✓
+
+**Sources:** cekrem.github.io, blog.devcoffee.me, skoredin.pro, caffeinatedcoder.medium.com, reintech.io
+
+Our proposed architecture aligns with established Go plugin patterns:
+
+| Pattern | Our Implementation | Industry Validation |
+|---------|-------------------|---------------------|
+| **Dependency Inversion** | ToolProvider interface abstracts concrete implementations | "High-level modules depend only on abstractions (interfaces)" - Clean Architecture |
+| **Interface-Driven Design** | `handlers/interfaces.go` defines stable contracts | "Define stable, simple core interfaces" - Go best practices |
+| **Plugin Registry** | ToolProviderRegistry with Register/Get methods | "Central hub for registering plugins with unique names" - Plugin Registry pattern |
+| **Plugin Factories** | Factory functions for backend creation | "A function that returns a new instance of a plugin" - Factory pattern |
+| **Graceful Shutdown** | Context-based cancellation propagation | "Critical feature for supporting context cancellation" - Production patterns |
+
+**RPC-Based Plugin Pattern (HashiCorp):** Our Backend interface supports both in-process and RPC-based plugins, aligning with the industry-recommended approach for fault tolerance.
+
+### Middleware Chain Validation ✓
+
+**Sources:** go-chi/chi (21.7k⭐), grpc-ecosystem/go-grpc-middleware (6.7k⭐)
+
+The chi router's `chain.go` demonstrates the exact pattern we're proposing:
+
+```go
+// From go-chi/chi - validates our decorator pattern
+func chain(middlewares []func(http.Handler) http.Handler, endpoint http.Handler) http.Handler {
+    if len(middlewares) == 0 {
+        return endpoint
+    }
+    h := middlewares[len(middlewares)-1](endpoint)
+    for i := len(middlewares) - 2; i >= 0; i-- {
+        h = middlewares[i](h)
+    }
+    return h
+}
+```
+
+**grpc-ecosystem interceptor categories** match our proposed middleware types:
+- `auth/` → Our Auth middleware
+- `logging/` → Our Logging middleware
+- `ratelimit/` → Our RateLimit middleware
+- `recovery/` → Our Recovery/error handling
+- `retry/` → Our Circuit breaker patterns
+- `timeout/` → Our Timeout middleware
+
+### Transport Layer Validation ✓
+
+**Sources:** FreeCodeCamp, go-zero.dev, goa.design, Centrifugo
+
+**SSE Implementation Requirements (validated):**
+```go
+// Required headers for SSE - confirmed across all sources
+w.Header().Set("Content-Type", "text/event-stream")
+w.Header().Set("Cache-Control", "no-cache")
+w.Header().Set("Connection", "keep-alive")
+```
+
+**Multi-Transport Architecture Patterns:**
+| Transport | Use Case | Our Support |
+|-----------|----------|-------------|
+| HTTP/REST | Request-response APIs | ✓ Proposed |
+| SSE | Server-to-client streaming | ✓ Proposed |
+| WebSocket | Bidirectional real-time | ✓ Proposed |
+| gRPC | High-performance RPC | ✓ Proposed |
+| stdio | Local MCP clients | ✓ Current |
+
+**Centrifugo WebSocket Scaling Patterns:** Validates our approach of using shared state (Redis) for HA deployments with multiple transport instances.
+
+### MCP Server Ecosystem Validation ✓
+
+**Sources:** viant/mcp, mcp-golang, go-mcp (Reddit), bytesizego.com, dev.to
+
+Active Go MCP implementations confirm the viability of our approach:
+
+| Project | Stars | Approach | Notes |
+|---------|-------|----------|-------|
+| viant/mcp | Active | Interface-based | Validates our pattern |
+| mcp-golang | Active | Framework approach | Similar extensibility goals |
+| mark3labs/mcp-go | Popular | Simple MCP | Basic implementation |
+
+**Key insight:** No existing Go MCP server offers the combination of:
+- Multi-transport support (stdio + HTTP/SSE)
+- Pluggable tool providers
+- Configurable search strategies
+- Multi-backend aggregation
+- Middleware chain
+
+This confirms metatools-mcp's unique positioning in the ecosystem.
+
+### Configuration Library Validation ✓
+
+**Sources:** Context7 library research, GitHub documentation
+
+| Library | Reputation | Code Snippets | Recommendation |
+|---------|------------|---------------|----------------|
+| **Koanf** | High | 23 | ✓ "Cleaner, lighter alternative to Viper" |
+| **Cobra** | High | 1,126+ | ✓ "Powerful CLI with subcommands" |
+
+This validates our choice of Koanf + Cobra over Viper for configuration management.
+
+### Validation Summary
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                  ARCHITECTURE VALIDATION MATRIX                  │
+├─────────────────────────────────────────────────────────────────┤
+│ Component              │ Pattern Validated  │ Source Quality    │
+├────────────────────────┼────────────────────┼───────────────────┤
+│ Plugin Registry        │ ✓ Industry standard│ High (multiple)   │
+│ Middleware Chain       │ ✓ go-chi pattern   │ High (21.7k⭐)    │
+│ Transport Abstraction  │ ✓ Multi-impl refs  │ High (docs + OSS) │
+│ SSE Implementation     │ ✓ Standard headers │ High (RFC 6455)   │
+│ Backend Interface      │ ✓ DIP/Clean Arch   │ High (canonical)  │
+│ Config Framework       │ ✓ Koanf + Cobra    │ High (Context7)   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Conclusion:** The proposed architecture follows established best practices and patterns validated across multiple high-quality sources. The design is sustainable, maintainable, and aligned with the Go ecosystem's conventions.
+
+---
+
 ## Open Questions
 
 1. **ToolProvider interface** - Does the proposed interface feel right for plug-and-play tools?
@@ -1467,3 +2989,6 @@ type Plugin interface {
 | 2026-01-27 | Initial draft |
 | 2026-01-27 | Added Multi-Backend Architecture section with diagrams |
 | 2026-01-27 | Expanded Middleware Chain section with pluggable design |
+| 2026-01-27 | Added comprehensive Transport Layer section with all protocols |
+| 2026-01-27 | Added End-to-End Examples section with 5 real-world scenarios |
+| 2026-01-27 | Added Architecture Validation section with industry pattern verification |

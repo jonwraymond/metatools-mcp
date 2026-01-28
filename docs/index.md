@@ -4,12 +4,15 @@
 progressive-disclosure tool surface. It composes toolmodel, toolindex, tooldocs,
 toolrun, and optionally toolcode/toolruntime.
 
-## What this server provides
+## MCP tools exposed
 
-- MCP tools: `search_tools`, `list_namespaces`, `describe_tool`, `list_tool_examples`,
-  `run_tool`, `run_chain`, and optional `execute_code`
-- Official MCP Go SDK integration
-- Configurable search strategy (lexical or BM25)
+- `search_tools`
+- `list_namespaces`
+- `describe_tool`
+- `list_tool_examples`
+- `run_tool`
+- `run_chain`
+- `execute_code` (optional)
 
 ## Quickstart
 

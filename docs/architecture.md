@@ -2,6 +2,8 @@
 
 `metatools-mcp` composes the core libraries and exposes a small MCP tool surface.
 
+## Component wiring
+
 ```mermaid
 flowchart LR
   A[metatools-mcp] --> B[toolindex]
@@ -37,4 +39,17 @@ sequenceDiagram
   MCP->>Run: Run
   Run-->>MCP: result
   MCP-->>Agent: result
+```
+
+## MCP tool mapping
+
+```mermaid
+flowchart LR
+  search_tools --> toolindex
+  list_namespaces --> toolindex
+  describe_tool --> tooldocs
+  list_tool_examples --> tooldocs
+  run_tool --> toolrun
+  run_chain --> toolrun
+  execute_code --> toolcode
 ```
