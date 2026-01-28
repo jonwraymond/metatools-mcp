@@ -46,6 +46,7 @@ The design leverages Go's interface-based composition, build-tag gating, and con
 15. [Extension Point Catalog](#extension-point-catalog)
 16. [Revised Implementation Timeline](#revised-implementation-timeline)
 17. [Architecture Evaluation](#architecture-evaluation)
+18. [Protocol-Agnostic Tools](#protocol-agnostic-tools)
 
 ---
 
@@ -3383,6 +3384,63 @@ A comprehensive evaluation against championship-level implementations has been p
 
 ---
 
+## Protocol-Agnostic Tools
+
+A comprehensive proposal for protocol-agnostic tool exposure and composable toolsets has been created. See **[protocol-agnostic-tools.md](./protocol-agnostic-tools.md)** for:
+
+### Key Capabilities
+
+| Capability | Description |
+|------------|-------------|
+| **Protocol-agnostic interface** | Canonical tool representation independent of source or destination protocol |
+| **Bidirectional adapters** | Convert tools between MCP, OpenAI, Anthropic, LangChain formats |
+| **Toolset composition** | Create curated tool collections from multiple sources |
+| **Multi-transport exposure** | Serve toolsets via MCP, direct client interfaces, REST, or A2A |
+
+### Proposed New Libraries
+
+| Library | Purpose |
+|---------|---------|
+| **tooladapter** | Canonical tool abstraction with protocol adapters |
+| **toolset** | Composable tool collections with access control |
+
+### Adapter Support Matrix
+
+| Protocol | Import | Export | Notes |
+|----------|--------|--------|-------|
+| MCP | ✅ | ✅ | Full JSON Schema support |
+| OpenAI | ✅ | ✅ | Includes strict mode |
+| Anthropic | ✅ | ✅ | input_schema mapping |
+| LangChain | ✅ | ✅ | Zod schema conversion |
+| OpenAPI | ✅ | - | Operation extraction |
+
+### Toolset Composition Pattern
+
+```go
+// Create customer-specific toolset from multiple sources
+customerSet, _ := toolset.NewBuilder("customer-acme").
+    FromRegistry(registry).
+    WithTools(
+        "mcp.support.create_ticket",
+        "mcp.docs.search",
+        "openai.functions.analyze",
+    ).
+    WithPolicy(&toolset.AccessPolicy{
+        AllowedTenants: []string{"acme-corp"},
+    }).
+    Build()
+```
+
+### Implementation Timeline
+
+- **Phase 1**: Core adapter library (2 weeks)
+- **Phase 2**: Toolset composition (2 weeks)
+- **Phase 3**: Multi-transport exposure (2 weeks)
+
+**Total: ~6 weeks**
+
+---
+
 ## Open Questions
 
 1. **ToolProvider interface** - Does the proposed interface feel right for plug-and-play tools?
@@ -3411,3 +3469,5 @@ A comprehensive evaluation against championship-level implementations has been p
 | 2026-01-28 | Key finding: Architecture is already 85%+ pluggable - needs exposure and configuration, not redesign |
 | 2026-01-28 | Added Architecture Evaluation comparing against 5 championship-level implementations |
 | 2026-01-28 | Identified 4 potential new libraries: toolobserve, toolsemantic, toolresource, toolgateway |
+| 2026-01-28 | Added Protocol-Agnostic Tools section with 2 new proposed libraries: tooladapter, toolset |
+| 2026-01-28 | Created comprehensive proposal for composable toolsets and protocol adapters (see [protocol-agnostic-tools.md](./protocol-agnostic-tools.md)) |

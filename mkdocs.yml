@@ -14,3 +14,4 @@ nav:
       - Component Library Analysis: proposals/component-library-analysis.md
       - Architecture Evaluation: proposals/architecture-evaluation.md
       - Multi-Tenancy: proposals/multi-tenancy.md
+      - Protocol-Agnostic Tools: proposals/protocol-agnostic-tools.md
