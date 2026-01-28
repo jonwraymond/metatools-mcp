@@ -1,0 +1,49 @@
+direction: right
+
+style: {
+  font-size: 14
+}
+
+agent: "Agent / Client" { shape: person }
+
+phase1: {
+  label: "Discover"
+  style: {
+    border-radius: 8
+    shadow: true
+  }
+  search_tools: { shape: step }
+  toolindex: { shape: cylinder }
+  summary: "Summaries" { shape: document }
+}
+
+phase2: {
+  label: "Inspect"
+  style: {
+    border-radius: 8
+    shadow: true
+  }
+  describe_tool: { shape: step }
+  tooldocs: { shape: document }
+  schema: "Schemas" { shape: page }
+}
+
+phase3: {
+  label: "Execute"
+  style: {
+    border-radius: 8
+    shadow: true
+  }
+  run_tool: { shape: step }
+  toolrun: { shape: step }
+  result: "Results" { shape: document }
+}
+
+agent -> search_tools -> toolindex -> summary
+summary -> describe_tool -> tooldocs -> schema
+schema -> run_tool -> toolrun -> result
+
+agent -> describe_tool
+agent -> run_tool
+
+phase1 -> phase2 -> phase3

@@ -55,10 +55,19 @@ _ = server.Run(context.Background(), &mcp.StdioTransport{})
 
 ## Proposals
 
+**Master Plan:**
+- [ROADMAP](proposals/ROADMAP.md) - Master roadmap with all work streams, phases, and milestones
+
+**Architecture:**
 - [Pluggable Architecture](proposals/pluggable-architecture.md) - Extensible, modular design
-- [Implementation Phases](proposals/implementation-phases.md) - Phased rollout plan
-- [Component Library Analysis](proposals/component-library-analysis.md) - Tool* library ecosystem
-- [Multi-Tenancy Extension](proposals/multi-tenancy.md) - Tenant isolation patterns
 - [Architecture Evaluation](proposals/architecture-evaluation.md) - Championship-level comparison
+- [Component Library Analysis](proposals/component-library-analysis.md) - Tool* library ecosystem
+
+**Features:**
 - [Protocol-Agnostic Tools](proposals/protocol-agnostic-tools.md) - Composable toolsets and protocol adapters
+- [Multi-Tenancy Extension](proposals/multi-tenancy.md) - Tenant isolation patterns
+- Agent Skills - Higher-level capability composition (see [ROADMAP](proposals/ROADMAP.md#stream-e-agent-skills))
+
+**Implementation:**
+- [Implementation Phases](proposals/implementation-phases.md) - Phased rollout plan
 

@@ -1,0 +1,47 @@
+direction: right
+
+style: {
+  font-size: 14
+}
+
+surface: {
+  label: "MCP Tool Surface"
+  style: {
+    border-radius: 8
+    shadow: true
+  }
+
+  search_tools: { shape: step }
+  list_namespaces: { shape: step }
+  describe_tool: { shape: step }
+  list_tool_examples: { shape: step }
+  run_tool: { shape: step }
+  run_chain: { shape: step }
+  execute_code: { shape: step }
+}
+
+libs: {
+  label: "Library Wiring"
+  style: {
+    border-radius: 8
+    stroke-width: 2
+  }
+
+  toolindex: { shape: cylinder }
+  tooldocs: { shape: document }
+  toolrun: { shape: step }
+  toolcode: { shape: page }
+}
+
+search_tools -> toolindex
+list_namespaces -> toolindex
+
+describe_tool -> tooldocs
+list_tool_examples -> tooldocs
+
+run_tool -> toolrun
+run_chain -> toolrun
+
+execute_code -> toolcode
+
+surface -> libs

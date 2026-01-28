@@ -4,34 +4,7 @@ This journey shows the full end-to-end agent workflow via MCP metatools.
 
 ## End-to-end flow (agent view)
 
-```mermaid
-sequenceDiagram
-  participant Agent
-  participant MCP as metatools-mcp
-  participant Index as toolindex
-  participant Docs as tooldocs
-  participant Runner as toolrun
-  participant Code as toolcode
-
-  Agent->>MCP: search_tools("create ticket")
-  MCP->>Index: Search
-  MCP-->>Agent: tool summaries
-
-  Agent->>MCP: describe_tool(tool_id, schema)
-  MCP->>Docs: DescribeTool(schema)
-  MCP-->>Agent: tool schema
-
-  Agent->>MCP: run_tool(tool_id, args)
-  MCP->>Runner: Run
-  MCP-->>Agent: structured result
-
-  Agent->>MCP: execute_code(code)
-  MCP->>Code: ExecuteCode
-  Code->>Index: SearchTools
-  Code->>Docs: DescribeTool
-  Code->>Runner: RunTool/RunChain
-  Code-->>MCP: ExecuteResult
-```
+![Diagram](assets/diagrams/user-journey.svg)
 
 ## Step-by-step
 

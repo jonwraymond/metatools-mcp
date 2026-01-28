@@ -1,0 +1,43 @@
+direction: right
+
+style: {
+  font-size: 14
+}
+
+metatools: "metatools-mcp" {
+  shape: hexagon
+  style: { shadow: true }
+}
+
+core: {
+  label: "Core Tool Libraries"
+  style: {
+    border-radius: 8
+    shadow: true
+    stroke-width: 2
+  }
+
+  toolmodel: { shape: package }
+  toolindex: { shape: cylinder }
+  tooldocs: { shape: document }
+  toolrun: { shape: step }
+}
+
+optional: {
+  label: "Optional Extensions"
+  style: {
+    border-radius: 8
+    stroke-dash: 4
+  }
+
+  toolcode: { shape: page }
+  toolruntime: { shape: cloud }
+  toolsearch: { shape: diamond }
+}
+
+metatools -> core
+metatools -> optional
+
+toolindex -> toolsearch
+
+toolcode -> toolruntime

@@ -1,0 +1,52 @@
+direction: down
+
+style: {
+  font-size: 14
+}
+
+agent: "Agent" {
+  shape: oval
+}
+
+mcp: "metatools-mcp" {
+  shape: hexagon
+  style: { shadow: true }
+}
+
+index: "toolindex" {
+  shape: cylinder
+}
+
+docs: "tooldocs" {
+  shape: document
+}
+
+runner: "toolrun" {
+  shape: step
+}
+
+code: "toolcode" {
+  shape: page
+}
+
+agent -> mcp: "search_tools('create ticket')"
+mcp -> index: "Search"
+index -> mcp: "summaries"
+mcp -> agent: "tool summaries"
+
+agent -> mcp: "describe_tool(tool_id, schema)"
+mcp -> docs: "DescribeTool(schema)"
+docs -> mcp: "tool schema"
+mcp -> agent: "tool schema"
+
+agent -> mcp: "run_tool(tool_id, args)"
+mcp -> runner: "Run"
+runner -> mcp: "result"
+mcp -> agent: "structured result"
+
+agent -> mcp: "execute_code(code)"
+mcp -> code: "ExecuteCode"
+code -> index: "SearchTools"
+code -> docs: "DescribeTool"
+code -> runner: "RunTool/RunChain"
+code -> mcp: "ExecuteResult"

@@ -50,6 +50,7 @@ The design leverages Go's interface-based composition, build-tag gating, and con
 17. [Architecture Evaluation](#architecture-evaluation)
 18. [Protocol-Agnostic Tools](#protocol-agnostic-tools)
 19. [Versioning Strategy](#versioning-strategy)
+20. [Multi-Language Extensibility](#multi-language-extensibility)
 
 ---
 
@@ -61,10 +62,11 @@ The design leverages Go's interface-based composition, build-tag gating, and con
 2. **Plug-and-play extensibility** - Add new tools, backends, and search strategies without modifying core
 3. **Configuration-driven** - YAML/JSON config files with environment variable overrides
 4. **Framework potential** - Enable metatools-mcp as a reusable framework for building MCP servers
+5. **Multi-language support** - Enable components in Python, Rust, TypeScript via standardized interface contracts
 
 ### Non-Goals
 
-- Runtime plugin loading (Go's plugin package has platform limitations)
+- Go's native plugin package (platform limitations; use gRPC/WASM instead)
 - Breaking changes to existing tool* library interfaces
 - Over-engineering for hypothetical future requirements
 
@@ -4861,6 +4863,52 @@ toolversion/
 
 ---
 
+## Multi-Language Extensibility
+
+> **Key Insight**: The pluggable architecture is not limited to Go implementations. Any component defined by an interface can be implemented in **any programming language** through standardized interface contracts.
+
+### Architecture Principle
+
+All extension points in this architecture (Transport, Searcher, Cache, Backend, etc.) are defined as Go interfaces. These interfaces can be implemented in any language using:
+
+1. **gRPC + Protocol Buffers** (recommended) - Battle-tested, used by HashiCorp Terraform/Vault
+2. **WebAssembly Component Model** - Sandboxed, portable, no network overhead
+3. **JSON-RPC over stdio** - Simple, any executable works
+
+### Use Cases
+
+| Component | Preferred Language | Rationale |
+|-----------|-------------------|-----------|
+| Embedder | **Python** | Rich ML ecosystem (PyTorch, sentence-transformers) |
+| VectorIndex | **Rust** | SIMD performance, memory safety |
+| Reranker | **Python** | Hugging Face cross-encoders |
+| KnowledgeGraph | **Python/Java** | Neo4j, NetworkX bindings |
+| Custom Adapter | **TypeScript** | Existing MCP servers, quick prototypes |
+
+### Interface Contracts via Protocol Buffers
+
+All Go interfaces are documented as Protocol Buffer service definitions, enabling automatic SDK generation for Python, Rust, TypeScript, Java, and more.
+
+```protobuf
+// Example: Embedder interface as protobuf
+service Embedder {
+  rpc Embed(EmbedRequest) returns (EmbedResponse);
+  rpc EmbedBatch(EmbedBatchRequest) returns (EmbedBatchResponse);
+  rpc Info(InfoRequest) returns (EmbedderInfo);
+}
+```
+
+### Full Specification
+
+See **[ROADMAP.md Section 8: Multi-Language Extensibility](./ROADMAP.md#8-multi-language-extensibility)** for:
+- Complete gRPC plugin architecture with HashiCorp go-plugin patterns
+- WebAssembly Interface Types (WIT) definitions
+- JSON-RPC fallback for simple plugins
+- SDK generation for Python, Rust, TypeScript
+- Configuration examples for multi-language plugins
+
+---
+
 ## Open Questions
 
 1. **ToolProvider interface** - Does the proposed interface feel right for plug-and-play tools?
@@ -4872,6 +4920,7 @@ toolversion/
 7. **MCP protocol versions** - How far back should we support? (2024-11-05 is the oldest stable)
 8. **Tool version in tool names** - Should version be part of tool name (`github/create_issue@2`) or metadata?
 9. **Breaking change policy** - What's the minimum deprecation window before sunset?
+10. **Multi-language plugins** - Should gRPC be the primary contract mechanism, or prioritize WASM for sandboxing?
 
 ---
 
@@ -4905,3 +4954,6 @@ toolversion/
 | 2026-01-28 | Added schema evolution with BACKWARD/FORWARD/FULL compatibility modes |
 | 2026-01-28 | Added blue/green and canary deployment support for multi-version coexistence |
 | 2026-01-28 | Proposed new library: `toolversion` for semantic versioning and version negotiation |
+| 2026-01-28 | Created master ROADMAP.md consolidating all proposals into 4 work streams and 17-week timeline |
+| 2026-01-28 | Total library inventory: 7 existing + 14 proposed = 21 libraries for enterprise-ready platform |
+| 2026-01-28 | Added Section 20: Multi-Language Extensibility - gRPC/WASM/JSON-RPC plugin contracts for Python, Rust, TypeScript |

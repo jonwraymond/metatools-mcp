@@ -15,7 +15,7 @@ This document evaluates the metatools ecosystem against championship-level imple
 1. [Research Methodology](#research-methodology)
 2. [Championship Implementations Analyzed](#championship-implementations-analyzed)
 3. [Pattern Comparison Matrix](#pattern-comparison-matrix)
-4. [What You Already Have (Championship Features)](#what-you-already-have)
+4. [What You Already Have (Championship Features)](#what-you-already-have-championship-features)
 5. [Gaps and Opportunities](#gaps-and-opportunities)
 6. [Recommended Extensions](#recommended-extensions)
 7. [New Libraries to Consider](#new-libraries-to-consider)
