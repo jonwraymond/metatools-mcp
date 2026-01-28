@@ -48,6 +48,7 @@ _ = server.Run(context.Background(), &mcp.StdioTransport{})
 ## Next
 
 - Server architecture: `architecture.md`
+- Ordered execution plan: `plan-of-record.md`
 - Configuration and env vars: `usage.md`
 - Examples: `examples.md`
 - Design Notes: `design-notes.md`
@@ -62,6 +63,8 @@ _ = server.Run(context.Background(), &mcp.StdioTransport{})
 - [Pluggable Architecture](proposals/pluggable-architecture.md) - Extensible, modular design
 - [Architecture Evaluation](proposals/architecture-evaluation.md) - Championship-level comparison
 - [Component Library Analysis](proposals/component-library-analysis.md) - Tool* library ecosystem
+- [Architecture Review](proposals/ARCHITECTURE-REVIEW.md) - Comprehensive proposal analysis and consistency check
+- [MCP Spec Alignment](proposals/mcp-spec-alignment.md) - Targeted spec compliance improvements
 
 **Features:**
 - [Protocol-Agnostic Tools](proposals/protocol-agnostic-tools.md) - Composable toolsets and protocol adapters
@@ -70,4 +73,3 @@ _ = server.Run(context.Background(), &mcp.StdioTransport{})
 
 **Implementation:**
 - [Implementation Phases](proposals/implementation-phases.md) - Phased rollout plan
-

@@ -349,7 +349,7 @@ type Transport interface {
     Close() error
 
     // Info returns runtime information about the transport
-    Info() Info
+    Info() TransportInfo
 }
 
 // RequestHandler processes incoming MCP requests
@@ -357,11 +357,12 @@ type RequestHandler interface {
     HandleRequest(ctx context.Context, req *Request) (*Response, error)
 }
 
-// Info provides runtime details about a transport
-type Info struct {
+// TransportInfo provides runtime details about a transport
+type TransportInfo struct {
     Name      string
+    Protocol  string            // "stdio", "http", "sse", "grpc"
+    Address   string            // "" for stdio, "localhost:8080" for HTTP
     Listening bool
-    Address   string
     Metadata  map[string]string
 }
 
@@ -460,11 +461,12 @@ func (t *StdioTransport) Serve(ctx context.Context, handler RequestHandler) erro
 
 func (t *StdioTransport) Close() error { return nil }
 
-func (t *StdioTransport) Info() Info {
-    return Info{
+func (t *StdioTransport) Info() TransportInfo {
+    return TransportInfo{
         Name:      "stdio",
-        Listening: true,
+        Protocol:  "stdio",
         Address:   "stdin/stdout",
+        Listening: true,
     }
 }
 ```
