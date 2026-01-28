@@ -5,3 +5,5 @@ nav:
   - Architecture: architecture.md
   - Usage: usage.md
   - Examples: examples.md
+  - Proposals:
+      - Pluggable Architecture: proposals/pluggable-architecture.md
