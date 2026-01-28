@@ -66,8 +66,8 @@ github.com/jonwraymond/toolmodel v0.1.2 h1:v9YIEopwdxTnLV5N5VBkTNqIjKK3eKScbzM9l
 github.com/jonwraymond/toolmodel v0.1.2/go.mod h1:2S1YAIv2IGcwxqEaB0V4egvnY7opCdoTNknKJMg2pkE=
 github.com/jonwraymond/toolrun v0.1.9 h1:i49dZJVPV9y2EwLZyZnNIy5E9hLV3/twQZ22RyrCZJM=
 github.com/jonwraymond/toolrun v0.1.9/go.mod h1:b8WDmgMZsEoLT+ps7sjwDq0rXw18FlsLGeN5v4mFUqY=
-github.com/jonwraymond/toolruntime v0.1.9 h1:cDn/TFrEiJ0VFOg/tRPKVsNn6sHDOQXdLkmDNe7Aqdg=
-github.com/jonwraymond/toolruntime v0.1.9/go.mod h1:pRlQebDrsagrTtPQuMY6x1SPNRnDxm1lOOibckRs+3s=
+github.com/jonwraymond/toolruntime v0.1.10 h1:WV/XllJej4nmhn7GlHN7tMyYThvEfGV0RnKSdWhc7AY=
+github.com/jonwraymond/toolruntime v0.1.10/go.mod h1:NEume2Ym6AtxHv3ODKg5Q+LLge3B2foYRLp6ckJJ8qs=
 github.com/jonwraymond/toolsearch v0.1.8 h1:LsRSJXCsa7UcTHSEX0gCIkqvZoEzRetbOD5vaC19C3U=
 github.com/jonwraymond/toolsearch v0.1.8/go.mod h1:d8/dtlCFJLHSikmvb8RqcMn0VnKzF7b5IXscrbQzbjk=
 github.com/json-iterator/go v0.0.0-20171115153421-f7279a603ede h1:YrgBGwxMRK0Vq0WSCWFaZUnTsrA/PZE/xs1QZh+/edg=
