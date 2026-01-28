@@ -5,6 +5,8 @@ nav:
   - Architecture: architecture.md
   - Usage: usage.md
   - Examples: examples.md
+  - API Reference: api.md
   - Proposals:
       - Pluggable Architecture: proposals/pluggable-architecture.md
       - Implementation Phases: proposals/implementation-phases.md
+      - Component Library Analysis: proposals/component-library-analysis.md

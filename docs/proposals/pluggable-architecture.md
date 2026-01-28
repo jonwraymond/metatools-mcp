@@ -41,6 +41,7 @@ The design leverages Go's interface-based composition, build-tag gating, and con
 10. [References](#references)
 11. [Architecture Validation](#architecture-validation)
 12. [Implementation Phases](#implementation-phases)
+13. [Component Library Analysis](#component-library-analysis)
 
 ---
 
@@ -2996,6 +2997,44 @@ Each phase includes:
 
 ---
 
+## Component Library Analysis
+
+A comprehensive analysis of the metatools component library ecosystem has been performed. See **[component-library-analysis.md](./component-library-analysis.md)** for:
+
+### Library Ecosystem (7 libraries)
+
+| Library | Version | Purpose | Changes Needed |
+|---------|---------|---------|----------------|
+| **toolmodel** | v0.1.2 | Core data models | Add HTTP/gRPC backend kinds |
+| **toolindex** | v0.1.8 | Tool registry | Add ListTools, OnChange |
+| **tooldocs** | v0.1.10 | Documentation | Add BulkRegisterDocs |
+| **toolrun** | v0.1.9 | Execution | Add HTTPExecutor, GRPCExecutor, ExecutionHook |
+| **toolcode** | v0.1.10 | Code execution | Add EngineRegistry |
+| **toolsearch** | v0.1.9 | BM25 search | No changes (already pluggable) |
+| **toolruntime** | v0.1.10 | Sandbox runtime | Minor config additions |
+
+### Key Findings
+
+1. **All changes are additive** - No breaking changes to existing interfaces
+2. **toolsearch is exemplary** - Already implements pluggable pattern via `Searcher` interface
+3. **toolrun needs most work** - Core execution layer requires new executor interfaces
+4. **Error taxonomy needed** - Consistent error types across all libraries
+
+### Dependency Graph
+
+```
+metatools-mcp
+    ├── toolcode ──┬── toolrun ──┬── toolindex ── toolmodel ── mcp-go-sdk
+    │              │             │
+    │              ├── tooldocs ─┤
+    │              │             │
+    └── toolruntime ─────────────┘
+                          │
+                   toolsearch (optional, implements toolindex.Searcher)
+```
+
+---
+
 ## Open Questions
 
 1. **ToolProvider interface** - Does the proposed interface feel right for plug-and-play tools?
@@ -3016,3 +3055,4 @@ Each phase includes:
 | 2026-01-27 | Added End-to-End Examples section with 5 real-world scenarios |
 | 2026-01-27 | Added Architecture Validation section with industry pattern verification |
 | 2026-01-27 | Created detailed Implementation Phases document (see [implementation-phases.md](./implementation-phases.md)) |
+| 2026-01-27 | Added Component Library Analysis for all 7 tool* libraries (see [component-library-analysis.md](./component-library-analysis.md)) |
