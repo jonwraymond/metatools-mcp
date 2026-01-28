@@ -68,8 +68,8 @@ github.com/jonwraymond/toolrun v0.1.9 h1:i49dZJVPV9y2EwLZyZnNIy5E9hLV3/twQZ22Ryr
 github.com/jonwraymond/toolrun v0.1.9/go.mod h1:b8WDmgMZsEoLT+ps7sjwDq0rXw18FlsLGeN5v4mFUqY=
 github.com/jonwraymond/toolruntime v0.1.10 h1:WV/XllJej4nmhn7GlHN7tMyYThvEfGV0RnKSdWhc7AY=
 github.com/jonwraymond/toolruntime v0.1.10/go.mod h1:NEume2Ym6AtxHv3ODKg5Q+LLge3B2foYRLp6ckJJ8qs=
-github.com/jonwraymond/toolsearch v0.1.8 h1:LsRSJXCsa7UcTHSEX0gCIkqvZoEzRetbOD5vaC19C3U=
-github.com/jonwraymond/toolsearch v0.1.8/go.mod h1:d8/dtlCFJLHSikmvb8RqcMn0VnKzF7b5IXscrbQzbjk=
+github.com/jonwraymond/toolsearch v0.1.9 h1:aqnoCr2kCj3WYxMSi6fQ2QKIDOlrj0aAPy2qngrRbqo=
+github.com/jonwraymond/toolsearch v0.1.9/go.mod h1:d8/dtlCFJLHSikmvb8RqcMn0VnKzF7b5IXscrbQzbjk=
 github.com/json-iterator/go v0.0.0-20171115153421-f7279a603ede h1:YrgBGwxMRK0Vq0WSCWFaZUnTsrA/PZE/xs1QZh+/edg=
 github.com/json-iterator/go v0.0.0-20171115153421-f7279a603ede/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCVDaaPEHmU=
 github.com/modelcontextprotocol/go-sdk v1.2.0 h1:Y23co09300CEk8iZ/tMxIX1dVmKZkzoSBZOpJwUnc/s=
