@@ -49,6 +49,7 @@ The design leverages Go's interface-based composition, build-tag gating, and con
 16. [Revised Implementation Timeline](#revised-implementation-timeline)
 17. [Architecture Evaluation](#architecture-evaluation)
 18. [Protocol-Agnostic Tools](#protocol-agnostic-tools)
+19. [Versioning Strategy](#versioning-strategy)
 
 ---
 
@@ -4329,6 +4330,537 @@ customerSet, _ := toolset.NewBuilder("customer-acme").
 
 ---
 
+## Versioning Strategy
+
+> **Critical Finding**: Tool versioning causes 60% of production agent failures. Backward compatibility is the foundation of agent ecosystem stability.
+
+A comprehensive versioning strategy is essential for fast rollforward, safe rollback, and multi-version coexistence.
+
+### Versioning Layers
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        VERSIONING ARCHITECTURE                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│  Layer 1: MCP PROTOCOL VERSION                                               │
+│  ┌─────────────────────────────────────────────────────────────────────────┐ │
+│  │ Version negotiation during initialization                                │ │
+│  │ Current: 2025-11-25 | Supported: [2024-11-05, 2025-03-26, 2025-06-18]  │ │
+│  │ → Server advertises supported versions                                   │ │
+│  │ → Client selects compatible version                                      │ │
+│  │ → Single version used for session                                        │ │
+│  └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                               │
+│  Layer 2: TOOL SCHEMA VERSION                                                │
+│  ┌─────────────────────────────────────────────────────────────────────────┐ │
+│  │ Per-tool semantic versioning (MAJOR.MINOR.PATCH)                        │ │
+│  │ → MAJOR: Breaking input/output schema changes                           │ │
+│  │ → MINOR: New optional parameters, backward-compatible                   │ │
+│  │ → PATCH: Bug fixes, documentation updates                                │ │
+│  │ Multiple versions can be active simultaneously                           │ │
+│  └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                               │
+│  Layer 3: BACKEND VERSION                                                    │
+│  ┌─────────────────────────────────────────────────────────────────────────┐ │
+│  │ External API versions (OpenAI v1/v2, GitHub REST/GraphQL)               │ │
+│  │ → Version-specific adapters                                              │ │
+│  │ → Automatic version detection                                            │ │
+│  │ → Graceful degradation                                                   │ │
+│  └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                               │
+│  Layer 4: CONFIGURATION VERSION                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────┐ │
+│  │ Config file schema versioning                                            │ │
+│  │ → Version field at config root                                           │ │
+│  │ → Migration scripts for version upgrades                                 │ │
+│  │ → Validation against versioned schema                                    │ │
+│  └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                               │
+│  Layer 5: DEPLOYMENT VERSION                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐ │
+│  │ Blue/green, canary deployment support                                    │ │
+│  │ → Multiple server versions running simultaneously                       │ │
+│  │ → Traffic splitting by version                                          │ │
+│  │ → Instant rollback capability                                           │ │
+│  └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### MCP Protocol Version Negotiation
+
+```go
+// toolversion/protocol.go
+
+// ProtocolVersions lists supported MCP specification versions
+var ProtocolVersions = []string{
+    "2025-11-25",  // Latest (default)
+    "2025-06-18",  // OAuth 2.1 authorization
+    "2025-03-26",  // Batching (later removed)
+    "2024-11-05",  // Initial stable release
+}
+
+// VersionNegotiator handles protocol version selection
+type VersionNegotiator struct {
+    supported []string
+    preferred string
+}
+
+func (n *VersionNegotiator) Negotiate(clientVersions []string) (string, error) {
+    // Find best matching version
+    for _, preferred := range n.supported {
+        for _, client := range clientVersions {
+            if preferred == client {
+                return preferred, nil
+            }
+        }
+    }
+    return "", ErrNoCompatibleVersion
+}
+
+// Server initialization with version negotiation
+func (s *Server) Initialize(ctx context.Context, req *mcp.InitializeRequest) (*mcp.InitializeResult, error) {
+    version, err := s.negotiator.Negotiate(req.ProtocolVersions)
+    if err != nil {
+        return nil, err
+    }
+
+    s.activeVersion = version
+
+    return &mcp.InitializeResult{
+        ProtocolVersion: version,
+        ServerInfo: mcp.ServerInfo{
+            Name:    "metatools-mcp",
+            Version: s.serverVersion,
+        },
+        Capabilities: s.capabilitiesForVersion(version),
+    }, nil
+}
+```
+
+### Tool Schema Versioning
+
+```go
+// toolversion/tool.go
+
+// VersionedTool represents a tool with semantic versioning
+type VersionedTool struct {
+    toolmodel.Tool
+
+    Version       semver.Version    // e.g., 2.1.0
+    MinVersion    semver.Version    // Minimum compatible version
+    Deprecated    bool
+    DeprecatedMsg string
+    Sunset        time.Time         // When this version will be removed
+}
+
+// ToolVersionRegistry manages multiple versions of tools
+type ToolVersionRegistry struct {
+    tools map[string]map[semver.Version]*VersionedTool  // name -> version -> tool
+    mu    sync.RWMutex
+}
+
+// Register adds a versioned tool
+func (r *ToolVersionRegistry) Register(tool *VersionedTool) error {
+    r.mu.Lock()
+    defer r.mu.Unlock()
+
+    name := tool.Name()
+    if r.tools[name] == nil {
+        r.tools[name] = make(map[semver.Version]*VersionedTool)
+    }
+
+    r.tools[name][tool.Version] = tool
+    return nil
+}
+
+// Resolve finds the best matching tool version
+func (r *ToolVersionRegistry) Resolve(name string, constraint string) (*VersionedTool, error) {
+    r.mu.RLock()
+    defer r.mu.RUnlock()
+
+    versions, ok := r.tools[name]
+    if !ok {
+        return nil, ErrToolNotFound
+    }
+
+    // Parse constraint (e.g., ">=1.0.0 <2.0.0", "^1.2.3", "~1.2.0")
+    c, err := semver.NewConstraint(constraint)
+    if err != nil {
+        // No constraint = latest stable
+        return r.latestStable(name)
+    }
+
+    // Find best matching version
+    var best *VersionedTool
+    for ver, tool := range versions {
+        if c.Check(&ver) && !tool.Deprecated {
+            if best == nil || ver.GreaterThan(&best.Version) {
+                best = tool
+            }
+        }
+    }
+
+    if best == nil {
+        return nil, ErrNoCompatibleVersion
+    }
+    return best, nil
+}
+
+// ListVersions returns all versions of a tool
+func (r *ToolVersionRegistry) ListVersions(name string) []VersionInfo {
+    r.mu.RLock()
+    defer r.mu.RUnlock()
+
+    var versions []VersionInfo
+    for ver, tool := range r.tools[name] {
+        versions = append(versions, VersionInfo{
+            Version:    ver,
+            Deprecated: tool.Deprecated,
+            Sunset:     tool.Sunset,
+        })
+    }
+
+    sort.Slice(versions, func(i, j int) bool {
+        return versions[i].Version.GreaterThan(&versions[j].Version)
+    })
+
+    return versions
+}
+```
+
+### Schema Evolution & Compatibility
+
+```go
+// toolversion/schema.go
+
+// CompatibilityMode defines schema evolution rules
+type CompatibilityMode string
+
+const (
+    // BACKWARD: New schema can read old data
+    CompatibilityBackward CompatibilityMode = "BACKWARD"
+    // FORWARD: Old schema can read new data
+    CompatibilityForward CompatibilityMode = "FORWARD"
+    // FULL: Both backward and forward compatible
+    CompatibilityFull CompatibilityMode = "FULL"
+    // NONE: No compatibility guarantees
+    CompatibilityNone CompatibilityMode = "NONE"
+)
+
+// SchemaEvolutionRules defines allowed changes per compatibility mode
+var SchemaEvolutionRules = map[CompatibilityMode]EvolutionRules{
+    CompatibilityBackward: {
+        AllowAddOptionalField:    true,
+        AllowRemoveOptionalField: false,
+        AllowAddRequiredField:    false,  // Breaks old clients
+        AllowRemoveRequiredField: true,   // Old clients still work
+        AllowFieldTypeWidening:   true,   // int → long
+        AllowFieldTypeNarrowing:  false,
+    },
+    CompatibilityForward: {
+        AllowAddOptionalField:    false,  // Old readers can't handle
+        AllowRemoveOptionalField: true,
+        AllowAddRequiredField:    true,
+        AllowRemoveRequiredField: false,
+        AllowFieldTypeWidening:   false,
+        AllowFieldTypeNarrowing:  true,
+    },
+    CompatibilityFull: {
+        AllowAddOptionalField:    true,   // Only safe change
+        AllowRemoveOptionalField: false,
+        AllowAddRequiredField:    false,
+        AllowRemoveRequiredField: false,
+        AllowFieldTypeWidening:   false,
+        AllowFieldTypeNarrowing:  false,
+    },
+}
+
+// SchemaValidator checks if schema change is compatible
+type SchemaValidator struct {
+    mode CompatibilityMode
+}
+
+func (v *SchemaValidator) ValidateChange(old, new *jsonschema.Schema) error {
+    rules := SchemaEvolutionRules[v.mode]
+    changes := v.detectChanges(old, new)
+
+    for _, change := range changes {
+        if !rules.IsAllowed(change) {
+            return &CompatibilityError{
+                Change: change,
+                Mode:   v.mode,
+            }
+        }
+    }
+
+    return nil
+}
+```
+
+### Version-Aware Tool Resolution
+
+```go
+// toolversion/resolver.go
+
+// VersionedToolRequest specifies version constraints
+type VersionedToolRequest struct {
+    Name           string
+    VersionSpec    string  // Semver constraint: "^1.0.0", ">=2.0.0", "latest"
+    PreferStable   bool
+    AllowPrerelease bool
+}
+
+// Resolver determines which tool version to use
+type Resolver struct {
+    registry *ToolVersionRegistry
+    cache    Cache
+    metrics  VersionMetrics
+}
+
+func (r *Resolver) Resolve(ctx context.Context, req VersionedToolRequest) (*VersionedTool, error) {
+    // Check cache first
+    cacheKey := fmt.Sprintf("resolve:%s:%s", req.Name, req.VersionSpec)
+    if cached, ok := r.cache.Get(ctx, cacheKey); ok {
+        return cached.(*VersionedTool), nil
+    }
+
+    var tool *VersionedTool
+    var err error
+
+    switch req.VersionSpec {
+    case "", "latest":
+        tool, err = r.registry.Resolve(req.Name, "*")
+    default:
+        tool, err = r.registry.Resolve(req.Name, req.VersionSpec)
+    }
+
+    if err != nil {
+        return nil, err
+    }
+
+    // Warn if using deprecated version
+    if tool.Deprecated {
+        r.metrics.DeprecatedToolUsage.Inc(labels{
+            "tool":    req.Name,
+            "version": tool.Version.String(),
+        })
+        log.Warn("Using deprecated tool version",
+            "tool", req.Name,
+            "version", tool.Version,
+            "message", tool.DeprecatedMsg,
+            "sunset", tool.Sunset,
+        )
+    }
+
+    r.cache.Set(ctx, cacheKey, tool, 5*time.Minute)
+    return tool, nil
+}
+```
+
+### Multi-Version Deployment
+
+```go
+// toolversion/deployment.go
+
+// DeploymentVersion represents a running server version
+type DeploymentVersion struct {
+    ServerVersion string
+    GitCommit     string
+    BuildTime     time.Time
+    Features      []string
+}
+
+// VersionRouter routes requests to appropriate server versions
+type VersionRouter struct {
+    versions map[string]*ServerInstance
+    weights  map[string]int  // Traffic percentage
+}
+
+// Route selects server version based on routing rules
+func (r *VersionRouter) Route(ctx context.Context, req *Request) (*ServerInstance, error) {
+    // Check for explicit version header
+    if ver := req.Header.Get("X-Tool-Version"); ver != "" {
+        if instance, ok := r.versions[ver]; ok {
+            return instance, nil
+        }
+    }
+
+    // Check for client-specified version preference
+    if pref := ctx.Value(versionPreferenceKey); pref != nil {
+        if instance, ok := r.versions[pref.(string)]; ok {
+            return instance, nil
+        }
+    }
+
+    // Weighted random selection (for canary deployments)
+    return r.weightedSelect(), nil
+}
+
+// DeploymentManager handles version lifecycle
+type DeploymentManager struct {
+    router   *VersionRouter
+    registry *ToolVersionRegistry
+}
+
+// Canary starts a canary deployment
+func (m *DeploymentManager) Canary(newVersion string, percentage int) error {
+    m.router.weights[newVersion] = percentage
+    m.router.weights["stable"] = 100 - percentage
+    return nil
+}
+
+// Promote makes a version the new stable
+func (m *DeploymentManager) Promote(version string) error {
+    m.router.weights = map[string]int{version: 100}
+    return nil
+}
+
+// Rollback reverts to previous stable version
+func (m *DeploymentManager) Rollback() error {
+    // Instant traffic shift to previous stable
+    return m.Promote(m.previousStable)
+}
+```
+
+### Version Configuration
+
+```yaml
+# metatools.yaml
+version: "1.0.0"  # Config schema version
+
+server:
+  version: "2.3.1"
+
+protocol:
+  supported_versions:
+    - "2025-11-25"
+    - "2025-06-18"
+    - "2024-11-05"
+  default_version: "2025-11-25"
+
+tools:
+  versioning:
+    enabled: true
+    compatibility_mode: BACKWARD  # BACKWARD, FORWARD, FULL, NONE
+
+    # Per-tool version configuration
+    versions:
+      github/create_issue:
+        - version: "2.0.0"
+          status: stable
+        - version: "1.5.0"
+          status: deprecated
+          sunset: "2026-06-01"
+          message: "Use v2.0.0 - improved error handling"
+        - version: "1.0.0"
+          status: sunset  # Will be removed
+
+    # Version resolution rules
+    resolution:
+      prefer_stable: true
+      allow_prerelease: false
+      default_constraint: "^"  # Caret = compatible with major version
+
+deployment:
+  strategy: canary  # blue_green, canary, rolling
+
+  canary:
+    initial_percentage: 5
+    increment: 10
+    interval: 5m
+    rollback_threshold:
+      error_rate: 0.05
+      latency_p99: 2s
+
+  versions:
+    stable: "2.3.0"
+    canary: "2.3.1"
+```
+
+### MCP Tool Registration with Versioning
+
+```go
+// Expose versioned tools via MCP
+func (s *Server) listTools(ctx context.Context) ([]mcp.Tool, error) {
+    var tools []mcp.Tool
+
+    for _, vt := range s.versionRegistry.AllLatestStable() {
+        tool := vt.Tool.ToMCP()
+
+        // Add version metadata as annotations
+        tool.Annotations = map[string]any{
+            "version":      vt.Version.String(),
+            "min_version":  vt.MinVersion.String(),
+            "deprecated":   vt.Deprecated,
+            "sunset":       vt.Sunset,
+        }
+
+        // Version in description for AI visibility
+        if vt.Deprecated {
+            tool.Description = fmt.Sprintf("[DEPRECATED: %s] %s",
+                vt.DeprecatedMsg, tool.Description)
+        }
+
+        tools = append(tools, tool)
+    }
+
+    return tools, nil
+}
+
+// Handle tool calls with version resolution
+func (s *Server) callTool(ctx context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+    // Extract version from request (if specified)
+    versionSpec := "latest"
+    if v, ok := req.Arguments["_version"].(string); ok {
+        versionSpec = v
+        delete(req.Arguments, "_version")  // Remove meta-argument
+    }
+
+    // Resolve tool version
+    tool, err := s.resolver.Resolve(ctx, VersionedToolRequest{
+        Name:        req.Name,
+        VersionSpec: versionSpec,
+    })
+    if err != nil {
+        return nil, err
+    }
+
+    // Execute with resolved version
+    return tool.Execute(ctx, req.Arguments)
+}
+```
+
+### Versioning Best Practices
+
+| Rule | Rationale |
+|------|-----------|
+| **Never break existing function signatures** | Old clients must continue working |
+| **Add optional parameters, never remove required ones** | Backward compatibility |
+| **Don't delete safety rules or constraints** | Maintain security guarantees |
+| **Deprecate before removing** | Give users migration time |
+| **Version from day one** | Adding versioning later is exponentially harder |
+| **Announce breaking changes in MAJOR** | Clear semantic meaning |
+| **Maintain audit trails for version changes** | Compliance and debugging |
+
+### Proposed Library: `toolversion`
+
+```
+toolversion/
+├── protocol.go        # MCP protocol version negotiation
+├── semver.go          # Semantic version parsing and comparison
+├── registry.go        # Multi-version tool registry
+├── resolver.go        # Version constraint resolution
+├── schema.go          # Schema evolution validation
+├── compatibility.go   # Compatibility mode enforcement
+├── deployment.go      # Blue/green, canary deployment support
+├── migration.go       # Version migration helpers
+└── metrics.go         # Version usage metrics
+```
+
+---
+
 ## Open Questions
 
 1. **ToolProvider interface** - Does the proposed interface feel right for plug-and-play tools?
@@ -4336,6 +4868,10 @@ customerSet, _ := toolset.NewBuilder("customer-acme").
 3. **Backend configuration** - YAML-driven or code-only for now?
 4. **Semantic search** - Priority for vector/embedding-based search strategy?
 5. **Multi-tenancy** - Which isolation strategy (shared, namespace, process) is primary target?
+6. **Versioning compatibility mode** - Should BACKWARD be the default, or FULL for maximum safety?
+7. **MCP protocol versions** - How far back should we support? (2024-11-05 is the oldest stable)
+8. **Tool version in tool names** - Should version be part of tool name (`github/create_issue@2`) or metadata?
+9. **Breaking change policy** - What's the minimum deprecation window before sunset?
 
 ---
 
@@ -4364,3 +4900,8 @@ customerSet, _ := toolset.NewBuilder("customer-acme").
 | 2026-01-28 | Added section 7: Additional Cross-Cutting Concerns with comprehensive enterprise patterns |
 | 2026-01-28 | Documented 12 cross-cutting concerns: cache, circuit breaker, retry, bulkhead, health checks, secrets, config reload, feature flags, audit trail, backpressure, timeout, tracing |
 | 2026-01-28 | Proposed 6 new libraries for cross-cutting concerns: toolresilience, toolhealth, toolsecrets, toolflags, toolaudit, toolpressure |
+| 2026-01-28 | Added comprehensive Versioning Strategy section (section 19) |
+| 2026-01-28 | Documented 5 versioning layers: MCP protocol, tool schema, backend, configuration, deployment |
+| 2026-01-28 | Added schema evolution with BACKWARD/FORWARD/FULL compatibility modes |
+| 2026-01-28 | Added blue/green and canary deployment support for multi-version coexistence |
+| 2026-01-28 | Proposed new library: `toolversion` for semantic versioning and version negotiation |
