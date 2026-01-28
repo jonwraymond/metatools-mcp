@@ -4,6 +4,12 @@
 progressive-disclosure tool surface. It composes toolmodel, toolindex, tooldocs,
 toolrun, and optionally toolcode/toolruntime.
 
+[![Docs](https://img.shields.io/badge/docs-ai--tools--stack-blue)](https://jonwraymond.github.io/ai-tools-stack/)
+
+## Deep dives
+- Design Notes: `design-notes.md`
+- User Journey: `user-journey.md`
+
 ## Motivation
 
 - **One MCP surface** for discovery, docs, and execution
@@ -55,6 +61,3 @@ _ = server.Run(context.Background(), &mcp.StdioTransport{})
 - [Multi-Tenancy Extension](proposals/multi-tenancy.md) - Tenant isolation patterns
 - [Architecture Evaluation](proposals/architecture-evaluation.md) - Championship-level comparison
 
-!!! note "Deep dives"
-    - Design Notes: `design-notes.md`
-    - User Journey: `user-journey.md`
