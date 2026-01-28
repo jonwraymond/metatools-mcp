@@ -131,6 +131,12 @@ See a full working example (including a local tool + docs registration) in
   - docs caps and schema derivation come from `tooldocs`
   - execution/chain semantics come from `toolrun`
 
+## Documentation
+
+- `docs/index.md` — overview
+- `docs/design-notes.md` — tradeoffs and error semantics
+- `docs/user-journey.md` — end-to-end agent workflow
+
 ## Version compatibility
 
 See `VERSIONS.md` for the authoritative, auto-generated compatibility matrix.

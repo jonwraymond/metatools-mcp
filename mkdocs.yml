@@ -5,6 +5,8 @@ nav:
   - Architecture: architecture.md
   - Usage: usage.md
   - Examples: examples.md
+  - Design Notes: design-notes.md
+  - User Journey: user-journey.md
   - API Reference: api.md
   - Proposals:
       - Pluggable Architecture: proposals/pluggable-architecture.md

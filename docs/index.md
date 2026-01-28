@@ -44,3 +44,5 @@ _ = server.Run(context.Background(), &mcp.StdioTransport{})
 - Server architecture: `architecture.md`
 - Configuration and env vars: `usage.md`
 - Examples: `examples.md`
+- Design Notes: `design-notes.md`
+- User Journey: `user-journey.md`
