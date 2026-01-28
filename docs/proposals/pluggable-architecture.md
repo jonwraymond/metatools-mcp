@@ -40,6 +40,7 @@ The design leverages Go's interface-based composition, build-tag gating, and con
 9. [Comparative Analysis](#comparative-analysis)
 10. [References](#references)
 11. [Architecture Validation](#architecture-validation)
+12. [Implementation Phases](#implementation-phases)
 
 ---
 
@@ -2973,6 +2974,28 @@ This validates our choice of Koanf + Cobra over Viper for configuration manageme
 
 ---
 
+## Implementation Phases
+
+A detailed phased implementation plan has been created to break this proposal into manageable chunks. See **[implementation-phases.md](./implementation-phases.md)** for:
+
+- **Phase 1: CLI Framework & Configuration** (~2 weeks) - Cobra + Koanf foundation
+- **Phase 2: Transport Layer Abstraction** (~2 weeks) - Stdio + SSE transports
+- **Phase 3: Tool Provider Registry** (~1 week) - Plug-and-play tool registration
+- **Phase 4: Backend Registry** (~2 weeks) - Multi-source tool aggregation
+- **Phase 5: Middleware Chain** (~2 weeks) - Cross-cutting concerns
+
+**MVP (Phases 1-3):** ~5 weeks
+**Full Implementation:** ~9 weeks
+
+Each phase includes:
+- Detailed directory structure changes
+- Interface definitions with Go code
+- Implementation tasks with code examples
+- Verification criteria checklist
+- Migration notes for backward compatibility
+
+---
+
 ## Open Questions
 
 1. **ToolProvider interface** - Does the proposed interface feel right for plug-and-play tools?
@@ -2992,3 +3015,4 @@ This validates our choice of Koanf + Cobra over Viper for configuration manageme
 | 2026-01-27 | Added comprehensive Transport Layer section with all protocols |
 | 2026-01-27 | Added End-to-End Examples section with 5 real-world scenarios |
 | 2026-01-27 | Added Architecture Validation section with industry pattern verification |
+| 2026-01-27 | Created detailed Implementation Phases document (see [implementation-phases.md](./implementation-phases.md)) |

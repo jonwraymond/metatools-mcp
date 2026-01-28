@@ -7,3 +7,4 @@ nav:
   - Examples: examples.md
   - Proposals:
       - Pluggable Architecture: proposals/pluggable-architecture.md
+      - Implementation Phases: proposals/implementation-phases.md
