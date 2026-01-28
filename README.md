@@ -131,18 +131,9 @@ See a full working example (including a local tool + docs registration) in
   - docs caps and schema derivation come from `tooldocs`
   - execution/chain semantics come from `toolrun`
 
-## Dependency versions (current module)
+## Version compatibility
 
-From `go.mod`:
-
-- `github.com/jonwraymond/toolmodel` `v0.1.0`
-- `github.com/jonwraymond/toolindex` `v0.1.2`
-- `github.com/jonwraymond/tooldocs` `v0.1.2`
-- `github.com/jonwraymond/toolrun` `v0.1.1`
-- `github.com/jonwraymond/toolcode` `v0.1.1`
-- `github.com/jonwraymond/toolruntime` `v0.1.1` (when built with `-tags toolruntime`)
-- `github.com/jonwraymond/toolsearch` `v0.1.1` (BM25 requires `-tags toolsearch`)
-- `github.com/modelcontextprotocol/go-sdk` `v1.2.0`
+See `VERSIONS.md` for the authoritative, auto-generated compatibility matrix.
 
 ## CI
 
