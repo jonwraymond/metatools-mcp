@@ -42,6 +42,10 @@ The design leverages Go's interface-based composition, build-tag gating, and con
 11. [Architecture Validation](#architecture-validation)
 12. [Implementation Phases](#implementation-phases)
 13. [Component Library Analysis](#component-library-analysis)
+14. [Multi-Tenancy Extension](#multi-tenancy-extension)
+15. [Extension Point Catalog](#extension-point-catalog)
+16. [Revised Implementation Timeline](#revised-implementation-timeline)
+17. [Architecture Evaluation](#architecture-evaluation)
 
 ---
 
@@ -3035,12 +3039,357 @@ metatools-mcp
 
 ---
 
+## Multi-Tenancy Extension
+
+A comprehensive multi-tenancy design has been created as an extension to this architecture. See **[multi-tenancy.md](./multi-tenancy.md)** for:
+
+### Core Concepts
+
+| Concept | Description |
+|---------|-------------|
+| **Pluggable Tenant Resolution** | JWT, API Key, Header, or custom resolvers |
+| **Tenant-Aware Middleware** | Rate limiting, tool filtering, audit per tenant |
+| **Tenant-Scoped Registries** | Isolated tool/backend views per tenant |
+| **Configuration Hierarchy** | Defaults → Tier → Tenant overrides |
+| **Isolation Strategies** | Shared, Namespace, or Process isolation |
+
+### Architecture
+
+```
+Request → Tenant Resolver → Tenant Middleware Chain → Tenant-Scoped Registry → Execution
+              │                     │                        │
+              ▼                     ▼                        ▼
+         TenantContext      Rate Limit + Filter     Filtered Tools/Backends
+```
+
+### Key Interfaces
+
+```go
+// Pluggable tenant identification
+type TenantResolver interface {
+    Resolve(ctx context.Context, req *Request) (*TenantContext, error)
+}
+
+// Tenant configuration overrides
+type TenantConfig struct {
+    AllowedTools    []string
+    DeniedTools     []string
+    AllowedBackends []string
+    RateLimits      *RateLimitConfig
+    Quotas          *QuotaConfig
+    Features        map[string]bool
+}
+```
+
+### Implementation Priority
+
+| Phase | Focus | Duration |
+|-------|-------|----------|
+| Phase 1 | Core multi-tenancy (Tenant, TenantContext, resolvers) | 2 weeks |
+| Phase 2 | Tenant-aware middleware (rate limit, filter, audit) | 1 week |
+| Phase 3 | Tenant storage (memory, Postgres implementations) | 1 week |
+| Phase 4 | Advanced features (scoped registries, isolation strategies) | 2 weeks |
+
+---
+
+## Extension Point Catalog
+
+Comprehensive architecture analysis has revealed that the metatools ecosystem is **already 85%+ pluggable**. The following 13 extension points exist across the component libraries, ready for configuration and exposure.
+
+### Critical Finding
+
+> **The architecture is NOT a monolith to be refactored.** It is a mature, layered, pluggable architecture that needs:
+> - **Exposure** - Make internal extension points accessible via configuration
+> - **Configuration** - Add CLI + config layer (Cobra + Koanf)
+> - **Documentation** - Catalog the 13 extension points with examples
+> - **Examples** - Show how to extend each interface
+
+### Extension Points by Library
+
+| # | Interface | Library | Purpose | Pluggability |
+|---|-----------|---------|---------|--------------|
+| 1 | `SchemaValidator` | toolmodel | JSON Schema validation | ✅ Interface-based |
+| 2 | `Searcher` | toolindex | Tool search strategy | ✅ Interface-based |
+| 3 | `BackendSelector` | toolindex | Multi-backend selection | ✅ Function-based |
+| 4 | `Store` | tooldocs | Documentation storage | ✅ Interface-based |
+| 5 | `ToolResolver` | tooldocs | Tool resolution for docs | ✅ Function-based |
+| 6 | `Runner` | toolrun | Tool execution | ✅ Interface-based |
+| 7 | `MCPExecutor` | toolrun | MCP backend executor | ✅ Interface-based |
+| 8 | `ProviderExecutor` | toolrun | Provider backend executor | ✅ Interface-based |
+| 9 | `LocalRegistry` | toolrun | Local handler lookup | ✅ Interface-based |
+| 10 | `Backend` | toolruntime | Sandbox isolation backend | ✅ Interface-based |
+| 11 | `ToolGateway` | toolruntime | Sandbox tool access | ✅ Interface-based |
+| 12 | `Logger` | toolcode | Execution logging | ✅ Interface-based |
+| 13 | `Engine` | toolcode | Language-specific execution | ✅ Interface-based |
+
+### Interface Definitions
+
+```go
+// 1. SchemaValidator - JSON Schema validation strategy
+type SchemaValidator interface {
+    ValidateSchema(schema map[string]any) error
+    ValidateInput(schema map[string]any, input map[string]any) error
+}
+
+// 2. Searcher - Tool search strategy (toolsearch.BM25Searcher implements this)
+type Searcher interface {
+    Search(query string, limit int) ([]SearchResult, error)
+    Close() error
+}
+
+// 3. BackendSelector - Multi-backend selection policy
+type BackendSelector func(tool Tool, backends []ToolBackend) ToolBackend
+
+// 4. Store - Documentation storage
+type Store interface {
+    DescribeTool(id string, level DetailLevel) (ToolDoc, error)
+    ListExamples(id string, max int) ([]ToolExample, error)
+    RegisterDoc(id string, entry DocEntry) error
+}
+
+// 5. ToolResolver - Tool resolution for documentation
+type ToolResolver func(id string) (*toolmodel.Tool, error)
+
+// 6. Runner - Tool execution orchestration
+type Runner interface {
+    Run(ctx context.Context, toolID string, args map[string]any) (RunResult, error)
+    RunStream(ctx context.Context, toolID string, args map[string]any) (<-chan StreamEvent, error)
+    RunChain(ctx context.Context, steps []ChainStep) (RunResult, []StepResult, error)
+}
+
+// 7. MCPExecutor - MCP backend execution
+type MCPExecutor interface {
+    CallTool(ctx context.Context, server, tool string, args map[string]any) (any, error)
+    CallToolStream(ctx context.Context, server, tool string, args map[string]any) (<-chan StreamEvent, error)
+}
+
+// 8. ProviderExecutor - Provider backend execution
+type ProviderExecutor interface {
+    CallTool(ctx context.Context, provider, tool string, args map[string]any) (any, error)
+    CallToolStream(ctx context.Context, provider, tool string, args map[string]any) (<-chan StreamEvent, error)
+}
+
+// 9. LocalRegistry - Local handler lookup
+type LocalRegistry interface {
+    Get(name string) (LocalHandler, bool)
+}
+
+// 10. Backend - Sandbox isolation backend (10 implementations exist)
+type Backend interface {
+    Name() string
+    Execute(ctx context.Context, req ExecuteRequest) (ExecuteResult, error)
+    Capabilities() BackendCapabilities
+    Close() error
+}
+
+// 11. ToolGateway - Tool access from sandboxed code
+type ToolGateway interface {
+    SearchTools(ctx context.Context, query string, limit int) ([]SearchResult, error)
+    ListNamespaces(ctx context.Context) ([]string, error)
+    DescribeTool(ctx context.Context, id string, level DetailLevel) (ToolDoc, error)
+    ListToolExamples(ctx context.Context, id string, max int) ([]ToolExample, error)
+    RunTool(ctx context.Context, toolID string, args map[string]any) (any, error)
+    RunChain(ctx context.Context, steps []ChainStep) (any, []StepResult, error)
+}
+
+// 12. Logger - Execution logging
+type Logger interface {
+    Info(msg string, fields ...any)
+    Error(msg string, fields ...any)
+    Debug(msg string, fields ...any)
+}
+
+// 13. Engine - Language-specific code execution
+type Engine interface {
+    Name() string
+    Execute(ctx context.Context, code string, gateway ToolGateway) (any, error)
+    Capabilities() EngineCapabilities
+}
+```
+
+### Existing Implementations
+
+| Interface | Built-in Implementations |
+|-----------|-------------------------|
+| `SchemaValidator` | `DefaultValidator` (jsonschema-go) |
+| `Searcher` | `BM25Searcher` (toolsearch, uses Bleve) |
+| `BackendSelector` | `DefaultBackendSelector` (local > provider > mcp) |
+| `Store` | `InMemoryStore` |
+| `Runner` | `DefaultRunner` |
+| `Backend` | **10 implementations**: unsafe, docker, containerd, kubernetes, firecracker, kata, gvisor, wasm, temporal, remote |
+| `ToolGateway` | `toolcodeengine.WrapTools()` adapter |
+| `Engine` | Language-specific engines (JS, Python, etc.) |
+
+### Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         METATOOLS PLUGGABLE ARCHITECTURE                        │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  ┌────────────────────────────────────────────────────────────────────────────┐ │
+│  │                         MCP Protocol Layer                                  │ │
+│  │              Transport: Stdio (current) | SSE | WebSocket                  │ │
+│  └──────────────────────────────────┬─────────────────────────────────────────┘ │
+│                                     │                                            │
+│  ┌──────────────────────────────────▼─────────────────────────────────────────┐ │
+│  │                         metatools-mcp Server                                │ │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐│ │
+│  │  │  Handlers   │  │  Adapters   │  │   Config    │  │    Middleware       ││ │
+│  │  │  (MCP ops)  │  │  (bridge)   │  │  (YAML/env) │  │  (auth/rate/log)   ││ │
+│  │  └──────┬──────┘  └──────┬──────┘  └─────────────┘  └─────────────────────┘│ │
+│  └─────────┼────────────────┼───────────────────────────────────────────────────┘ │
+│            │                │                                                    │
+│  ┌─────────▼────────────────▼───────────────────────────────────────────────────┐ │
+│  │                    Component Library Layer                                   │ │
+│  │                                                                              │ │
+│  │   ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                  │ │
+│  │   │  toolcode    │───▶│   toolrun    │───▶│  toolindex   │                  │ │
+│  │   │  [13:Engine] │    │  [6-9:Exec]  │    │  [2-3:Search]│                  │ │
+│  │   │  [12:Logger] │    │              │    │              │                  │ │
+│  │   └──────┬───────┘    └──────────────┘    └──────┬───────┘                  │ │
+│  │          │                                       │                          │ │
+│  │   ┌──────▼───────┐    ┌──────────────┐    ┌──────▼───────┐                  │ │
+│  │   │ toolruntime  │    │   tooldocs   │    │  toolmodel   │                  │ │
+│  │   │ [10:Backend] │    │  [4-5:Store] │    │ [1:Validator]│                  │ │
+│  │   │ [11:Gateway] │    │              │    │              │                  │ │
+│  │   └──────────────┘    └──────────────┘    └──────────────┘                  │ │
+│  │                                                                              │ │
+│  │              toolsearch (optional, implements Searcher #2)                  │ │
+│  └──────────────────────────────────────────────────────────────────────────────┘ │
+│                                                                                  │
+│  ┌──────────────────────────────────────────────────────────────────────────────┐ │
+│  │                    Sandbox/Runtime Layer (10 backends)                      │ │
+│  │   unsafe | docker | containerd | k8s | firecracker | kata | gvisor | wasm  │ │
+│  └──────────────────────────────────────────────────────────────────────────────┘ │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Revised Implementation Timeline
+
+Based on the architecture discovery, the implementation timeline has been **reduced from 9 weeks to 6-7 weeks** because the core pluggable architecture already exists.
+
+### Updated Phase Summary
+
+| Phase | Focus | Duration | Rationale |
+|-------|-------|----------|-----------|
+| **Phase 1** | CLI + Config | 2 weeks | Add Cobra CLI and Koanf configuration to expose existing extension points |
+| **Phase 2** | Transport Layer | 1-2 weeks | Transport interface exists conceptually, needs explicit abstraction |
+| **Phase 3** | Public APIs | 1 week | Export internal packages, document extension points, provide examples |
+| **Phase 4** | Backend Integration | 2 weeks | Complete Docker/WASM integration, backend registry configuration |
+| **Total** | | **6-7 weeks** | **25% reduction** from original 9-week estimate |
+
+### Key Insight
+
+The original proposal assumed significant refactoring work. The architecture discovery revealed:
+
+1. **13 extension points already exist** as Go interfaces
+2. **10 sandbox backends already implemented** (docker, k8s, wasm, etc.)
+3. **Multi-backend per tool** already supported with `BackendSelector`
+4. **Progressive disclosure** already implemented (summary/schema/full)
+5. **Security profiles** already exist (dev/standard/hardened)
+
+The work is primarily **configuration and exposure**, not **architecture redesign**.
+
+### Phase 1 Detailed Plan (CLI + Config)
+
+**Goal:** Make the 13 extension points configurable via YAML and CLI flags.
+
+```yaml
+# config.yaml - Complete configuration schema
+server:
+  transport: stdio  # stdio | sse | websocket
+  port: 8080        # For HTTP transports
+
+# Extension Point #2: Searcher
+search:
+  strategy: bm25    # bm25 | simple | semantic
+  config:
+    name_boost: 3.0
+    tags_boost: 2.0
+
+# Extension Point #3: BackendSelector
+backends:
+  selector: default  # default | latency | cost | custom
+  priority: [local, provider, mcp]
+
+# Extension Point #10: Runtime Backend
+runtime:
+  backend: docker    # unsafe | docker | k8s | wasm | gvisor
+  profile: standard  # dev | standard | hardened
+
+# Extension Point #12: Logger
+logging:
+  level: info
+  format: json
+```
+
+**CLI Commands:**
+```bash
+metatools serve --transport=stdio                    # Default MCP mode
+metatools serve --transport=sse --port=8080          # HTTP/SSE mode
+metatools serve --config=/path/to/config.yaml        # Full configuration
+metatools list-tools                                 # List registered tools
+metatools describe <tool-id>                         # Show tool documentation
+```
+
+---
+
+## Architecture Evaluation
+
+A comprehensive evaluation against championship-level implementations has been performed. See **[architecture-evaluation.md](./architecture-evaluation.md)** for:
+
+### Championship Implementations Analyzed
+
+| Project | Stars | Key Patterns |
+|---------|-------|--------------|
+| **Tencent WeKnora** | 12,566 | Multi-tenant RAG, layered architecture |
+| **go-kratos/blades** | 700 | Tool interfaces, middleware chain |
+| **Official MCP Go SDK** | - | Reference implementation patterns |
+| **Google ADK for Go** | - | A2A protocol, multi-agent |
+| **fastmcp** | 22,398 | Rapid MCP server development |
+
+### Current Position: 85% Championship Level
+
+| Category | Score | Status |
+|----------|-------|--------|
+| Core Architecture | 95% | ✅ Excellent |
+| Pluggability | 90% | ✅ 13 extension points |
+| Security | 95% | ✅ 10 backends, 3 profiles |
+| Observability | 40% | ⚠️ Needs OpenTelemetry |
+| Semantic Search | 60% | ⚠️ BM25 only |
+| Protocol Coverage | 70% | ⚠️ Missing resources/prompts |
+
+### Recommended New Libraries
+
+| Library | Purpose | Priority |
+|---------|---------|----------|
+| **toolobserve** | OpenTelemetry tracing + metrics | High |
+| **toolsemantic** | Vector-based semantic search | Medium |
+| **toolresource** | MCP Resources support | Medium |
+| **toolgateway** | Auth, rate limit, analytics proxy | Medium |
+
+### Path to Championship
+
+1. **Observability** (toolobserve) - 2 weeks
+2. **Semantic search** (toolsemantic) - 2 weeks
+3. **MCP Resources** (toolresource) - 2 weeks
+4. **Gateway/Proxy** (toolgateway) - 2 weeks
+
+**Total to 95%+ championship level: ~8 weeks**
+
+---
+
 ## Open Questions
 
 1. **ToolProvider interface** - Does the proposed interface feel right for plug-and-play tools?
 2. **Middleware chain** - Useful now, or defer until needed?
 3. **Backend configuration** - YAML-driven or code-only for now?
 4. **Semantic search** - Priority for vector/embedding-based search strategy?
+5. **Multi-tenancy** - Which isolation strategy (shared, namespace, process) is primary target?
 
 ---
 
@@ -3056,3 +3405,9 @@ metatools-mcp
 | 2026-01-27 | Added Architecture Validation section with industry pattern verification |
 | 2026-01-27 | Created detailed Implementation Phases document (see [implementation-phases.md](./implementation-phases.md)) |
 | 2026-01-27 | Added Component Library Analysis for all 7 tool* libraries (see [component-library-analysis.md](./component-library-analysis.md)) |
+| 2026-01-28 | Added Multi-Tenancy Extension for pluggable tenant isolation (see [multi-tenancy.md](./multi-tenancy.md)) |
+| 2026-01-28 | Added Extension Point Catalog documenting 13 existing pluggable interfaces across all component libraries |
+| 2026-01-28 | Added Revised Implementation Timeline (6-7 weeks, 25% reduction from original 9-week estimate) |
+| 2026-01-28 | Key finding: Architecture is already 85%+ pluggable - needs exposure and configuration, not redesign |
+| 2026-01-28 | Added Architecture Evaluation comparing against 5 championship-level implementations |
+| 2026-01-28 | Identified 4 potential new libraries: toolobserve, toolsemantic, toolresource, toolgateway |

@@ -12,3 +12,5 @@ nav:
       - Pluggable Architecture: proposals/pluggable-architecture.md
       - Implementation Phases: proposals/implementation-phases.md
       - Component Library Analysis: proposals/component-library-analysis.md
+      - Architecture Evaluation: proposals/architecture-evaluation.md
+      - Multi-Tenancy: proposals/multi-tenancy.md

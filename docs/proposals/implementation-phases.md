@@ -1,8 +1,10 @@
 # Pluggable Architecture Implementation Phases
 
-**Status:** Draft
-**Date:** 2026-01-27
-**Related:** [Pluggable Architecture Proposal](./pluggable-architecture.md)
+**Status:** Draft (Revised)
+**Date:** 2026-01-28
+**Related:** [Pluggable Architecture Proposal](./pluggable-architecture.md), [Component Library Analysis](./component-library-analysis.md)
+
+> **Revised Timeline:** Architecture discovery revealed that 13 extension points already exist as Go interfaces. The work is primarily **configuration and exposure**, not architecture redesign. Timeline reduced from 9 weeks to **6-7 weeks** (25% reduction).
 
 ## Overview
 
@@ -15,25 +17,27 @@ This document breaks the pluggable architecture proposal into manageable impleme
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                         IMPLEMENTATION ROADMAP                                │
+│                    REVISED IMPLEMENTATION ROADMAP (6-7 weeks)               │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                               │
-│   Phase 1 ─────► Phase 2 ─────► Phase 3 ─────► Phase 4 ─────► Phase 5       │
-│   CLI + Config   Transport     Tool Provider   Backend        Middleware     │
-│                  Abstraction   Registry        Registry       Chain          │
+│   Phase 1 ─────────► Phase 2 ─────────► Phase 3 ─────────► Phase 4          │
+│   CLI + Config       Transport          Public APIs        Backend           │
+│   (Expose 13 pts)    Abstraction        & Documentation    Integration       │
 │                                                                               │
-│   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐  │
-│   │ 2 weeks  │   │ 2 weeks  │   │ 1 week   │   │ 2 weeks  │   │ 2 weeks  │  │
-│   │          │   │          │   │          │   │          │   │          │  │
-│   │ Cobra    │   │ Transport│   │ Provider │   │ Backend  │   │ Logging  │  │
-│   │ Koanf    │   │ Interface│   │ Interface│   │ Interface│   │ Auth     │  │
-│   │ YAML cfg │   │ Stdio    │   │ Registry │   │ Local    │   │ RateLimit│  │
-│   │          │   │ SSE      │   │ Migration│   │ MCP      │   │ Metrics  │  │
-│   │          │   │          │   │          │   │ HTTP     │   │          │  │
-│   └──────────┘   └──────────┘   └──────────┘   └──────────┘   └──────────┘  │
+│   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐ │
+│   │   2 weeks    │   │  1-2 weeks   │   │   1 week     │   │   2 weeks    │ │
+│   │              │   │              │   │              │   │              │ │
+│   │ Cobra CLI    │   │ Transport    │   │ Export       │   │ Docker/WASM  │ │
+│   │ Koanf config │   │ Interface    │   │ internal pkg │   │ integration  │ │
+│   │ 13 ext points│   │ Stdio + SSE  │   │ 13 ext docs  │   │ Backend reg  │ │
+│   │ config schema│   │              │   │ Examples     │   │ config       │ │
+│   └──────────────┘   └──────────────┘   └──────────────┘   └──────────────┘ │
 │                                                                               │
-│   MVP ◄──────────────────────────────────────────────────────────────────►   │
-│   (Phases 1-2)                                                               │
+│   MVP ◄───────────────────────────────► │                                    │
+│   (Phases 1-2: ~3-4 weeks)              │                                    │
+│                                                                               │
+│   Note: Original Phase 5 (Middleware) deferred - 13 extension points        │
+│         already provide middleware integration via ExecutionHook             │
 │                                                                               │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
