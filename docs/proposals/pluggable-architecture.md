@@ -28,6 +28,8 @@ The design leverages Go's interface-based composition, build-tag gating, and con
    - [Tool Provider Registry](#3-tool-provider-registry)
    - [Backend Registry](#4-backend-registry)
    - [Middleware Chain](#5-middleware-chain)
+   - [Cache Layer](#6-cache-layer)
+   - [Additional Cross-Cutting Concerns](#7-additional-cross-cutting-concerns)
 5. [Multi-Backend Architecture](#multi-backend-architecture)
 6. [Configuration Design](#configuration-design)
 7. [Implementation Approach](#implementation-approach)
@@ -1385,6 +1387,892 @@ chain := []Middleware{
     OnlyForTools([]string{"execute_code"}, StrictRateLimitMiddleware),
 }
 ```
+
+---
+
+### 6. Cache Layer
+
+The cache layer provides pluggable caching across multiple components with support for different backends and layered caching strategies.
+
+#### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           CACHE LAYER                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│   ┌─────────────────────────────────────────────────────────────────────────┐│
+│   │                      CACHE CONSUMERS                                     ││
+│   │                                                                          ││
+│   │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐ ││
+│   │  │toolindex │  │tooldocs  │  │toolsearch│  │tooladapter│  │ toolrun  │ ││
+│   │  │ (lookup) │  │ (docs)   │  │ (search) │  │ (convert) │  │ (result) │ ││
+│   │  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘ ││
+│   │       │             │             │             │             │        ││
+│   │       └─────────────┴──────┬──────┴─────────────┴─────────────┘        ││
+│   │                            │                                            ││
+│   └────────────────────────────┼────────────────────────────────────────────┘│
+│                                │                                              │
+│                                ▼                                              │
+│   ┌─────────────────────────────────────────────────────────────────────────┐│
+│   │                      toolcache.Cache INTERFACE                           ││
+│   │                                                                          ││
+│   │   Get(ctx, key) → (value, bool, error)                                  ││
+│   │   Set(ctx, key, value, ttl) → error                                     ││
+│   │   Delete(ctx, key) → error                                               ││
+│   │   Clear(ctx, pattern) → error                                            ││
+│   │   Stats() → CacheStats                                                   ││
+│   │                                                                          ││
+│   └────────────────────────────┬────────────────────────────────────────────┘│
+│                                │                                              │
+│                                ▼                                              │
+│   ┌─────────────────────────────────────────────────────────────────────────┐│
+│   │                      LAYERED CACHE (L1 + L2)                             ││
+│   │                                                                          ││
+│   │   ┌─────────────────────────────────────────────────────────────────┐   ││
+│   │   │ L1: In-Memory (hot data, microsecond access)                    │   ││
+│   │   │     - LRU eviction                                               │   ││
+│   │   │     - Size-bounded                                               │   ││
+│   │   │     - Process-local                                              │   ││
+│   │   └─────────────────────────────────────────────────────────────────┘   ││
+│   │                            │ miss                                        ││
+│   │                            ▼                                             ││
+│   │   ┌─────────────────────────────────────────────────────────────────┐   ││
+│   │   │ L2: Distributed (warm data, millisecond access)                 │   ││
+│   │   │     - Redis, Memcached, DynamoDB                                │   ││
+│   │   │     - Shared across instances                                    │   ││
+│   │   │     - TTL-based expiration                                       │   ││
+│   │   └─────────────────────────────────────────────────────────────────┘   ││
+│   │                                                                          ││
+│   └─────────────────────────────────────────────────────────────────────────┘│
+│                                                                               │
+│   ┌─────────────────────────────────────────────────────────────────────────┐│
+│   │                      CACHE BACKENDS                                      ││
+│   │                                                                          ││
+│   │   ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐      ││
+│   │   │In-Memory│  │  Redis  │  │Memcached│  │ SQLite  │  │ Custom  │      ││
+│   │   └─────────┘  └─────────┘  └─────────┘  └─────────┘  └─────────┘      ││
+│   │                                                                          ││
+│   └─────────────────────────────────────────────────────────────────────────┘│
+│                                                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Cache Interface
+
+```go
+// toolcache/cache.go
+
+// Cache defines the pluggable cache interface
+type Cache interface {
+    // Get retrieves a value, returns (value, found, error)
+    Get(ctx context.Context, key string) ([]byte, bool, error)
+
+    // Set stores a value with TTL (0 = no expiration)
+    Set(ctx context.Context, key string, value []byte, ttl time.Duration) error
+
+    // Delete removes a key
+    Delete(ctx context.Context, key string) error
+
+    // Clear removes keys matching pattern (e.g., "toolindex:*")
+    Clear(ctx context.Context, pattern string) error
+
+    // Stats returns cache statistics
+    Stats() CacheStats
+
+    // Close releases resources
+    Close() error
+}
+
+// CacheStats provides observability
+type CacheStats struct {
+    Hits       int64
+    Misses     int64
+    Size       int64
+    Evictions  int64
+    HitRate    float64
+}
+
+// TypedCache provides type-safe caching with serialization
+type TypedCache[T any] interface {
+    Get(ctx context.Context, key string) (T, bool, error)
+    Set(ctx context.Context, key string, value T, ttl time.Duration) error
+    GetOrCompute(ctx context.Context, key string, compute func() (T, error), ttl time.Duration) (T, error)
+}
+```
+
+#### Cache Backends
+
+```go
+// toolcache/memory.go - In-memory LRU cache
+type MemoryCache struct {
+    maxSize    int64
+    lru        *lru.Cache[string, []byte]
+    stats      CacheStats
+    mu         sync.RWMutex
+}
+
+func NewMemoryCache(opts MemoryCacheOptions) *MemoryCache {
+    return &MemoryCache{
+        maxSize: opts.MaxSize,
+        lru:     lru.New[string, []byte](opts.MaxItems),
+    }
+}
+
+// toolcache/redis.go - Redis-backed cache
+type RedisCache struct {
+    client  *redis.Client
+    prefix  string
+    stats   CacheStats
+}
+
+func NewRedisCache(opts RedisCacheOptions) (*RedisCache, error) {
+    client := redis.NewClient(&redis.Options{
+        Addr:     opts.Addr,
+        Password: opts.Password,
+        DB:       opts.DB,
+    })
+    return &RedisCache{
+        client: client,
+        prefix: opts.Prefix,
+    }, nil
+}
+
+// toolcache/sqlite.go - SQLite-backed persistent cache
+type SQLiteCache struct {
+    db     *sql.DB
+    stats  CacheStats
+}
+
+// toolcache/layered.go - L1 + L2 layered cache
+type LayeredCache struct {
+    l1      Cache  // Fast, local (memory)
+    l2      Cache  // Slower, shared (Redis)
+    l1TTL   time.Duration
+}
+
+func NewLayeredCache(l1, l2 Cache, l1TTL time.Duration) *LayeredCache {
+    return &LayeredCache{l1: l1, l2: l2, l1TTL: l1TTL}
+}
+
+func (c *LayeredCache) Get(ctx context.Context, key string) ([]byte, bool, error) {
+    // Try L1 first
+    if val, ok, _ := c.l1.Get(ctx, key); ok {
+        return val, true, nil
+    }
+
+    // Fall back to L2
+    val, ok, err := c.l2.Get(ctx, key)
+    if err != nil || !ok {
+        return nil, false, err
+    }
+
+    // Promote to L1
+    _ = c.l1.Set(ctx, key, val, c.l1TTL)
+    return val, true, nil
+}
+```
+
+#### Cache Points in the Architecture
+
+| Component | Cache Key Pattern | TTL | Purpose |
+|-----------|------------------|-----|---------|
+| **toolindex** | `index:tool:{id}` | 1h | Tool metadata lookups |
+| **toolindex** | `index:namespace:{ns}` | 30m | Namespace listings |
+| **tooldocs** | `docs:{id}:{level}` | 1h | Documentation at each detail level |
+| **toolsearch** | `search:{hash(query)}` | 5m | Search result caching |
+| **toolsearch** | `search:index` | 10m | BM25 index caching |
+| **tooladapter** | `schema:{format}:{id}` | 24h | Schema conversion results |
+| **toolrun** | `result:{tool}:{hash(input)}` | varies | Idempotent tool results |
+| **toolsemantic** | `embed:{hash(text)}` | 24h | Vector embeddings |
+
+#### Integration with Existing Libraries
+
+```go
+// toolindex integration
+type CachedIndex struct {
+    inner toolindex.Index
+    cache toolcache.Cache
+    ttl   time.Duration
+}
+
+func (c *CachedIndex) Get(ctx context.Context, id string) (*toolmodel.Tool, error) {
+    key := fmt.Sprintf("index:tool:%s", id)
+
+    // Try cache first
+    if data, ok, _ := c.cache.Get(ctx, key); ok {
+        var tool toolmodel.Tool
+        if err := json.Unmarshal(data, &tool); err == nil {
+            return &tool, nil
+        }
+    }
+
+    // Cache miss - fetch from index
+    tool, err := c.inner.Get(ctx, id)
+    if err != nil {
+        return nil, err
+    }
+
+    // Store in cache
+    if data, err := json.Marshal(tool); err == nil {
+        _ = c.cache.Set(ctx, key, data, c.ttl)
+    }
+
+    return tool, nil
+}
+
+// toolsearch integration
+type CachedSearcher struct {
+    inner toolsearch.Searcher
+    cache toolcache.Cache
+    ttl   time.Duration
+}
+
+func (c *CachedSearcher) Search(ctx context.Context, query string, limit int) ([]toolsearch.Result, error) {
+    key := fmt.Sprintf("search:%x", sha256.Sum256([]byte(query)))
+
+    // Try cache
+    if data, ok, _ := c.cache.Get(ctx, key); ok {
+        var results []toolsearch.Result
+        if err := json.Unmarshal(data, &results); err == nil {
+            return results, nil
+        }
+    }
+
+    // Execute search
+    results, err := c.inner.Search(ctx, query, limit)
+    if err != nil {
+        return nil, err
+    }
+
+    // Cache results
+    if data, err := json.Marshal(results); err == nil {
+        _ = c.cache.Set(ctx, key, data, c.ttl)
+    }
+
+    return results, nil
+}
+```
+
+#### Cache Configuration
+
+```yaml
+# metatools.yaml
+cache:
+  # Default backend for all caches
+  backend: layered
+
+  # Backend configurations
+  backends:
+    memory:
+      max_size: 100MB
+      max_items: 10000
+
+    redis:
+      addr: localhost:6379
+      password: ${REDIS_PASSWORD}
+      db: 0
+      prefix: metatools
+
+    sqlite:
+      path: /var/cache/metatools/cache.db
+
+    layered:
+      l1: memory
+      l2: redis
+      l1_ttl: 1m
+
+  # Per-component cache settings
+  components:
+    toolindex:
+      enabled: true
+      ttl: 1h
+      backend: layered
+
+    tooldocs:
+      enabled: true
+      ttl: 1h
+      backend: memory  # Docs are static, memory is fine
+
+    toolsearch:
+      enabled: true
+      ttl: 5m
+      backend: redis  # Shared across instances
+
+    tooladapter:
+      enabled: true
+      ttl: 24h
+      backend: sqlite  # Persistent, conversions are expensive
+
+    toolrun:
+      enabled: true
+      ttl: 0  # Per-tool configuration
+      backend: redis
+      # Only cache idempotent tools
+      tools:
+        - describe_tool
+        - list_namespaces
+        - search_tools
+
+  # Cache invalidation
+  invalidation:
+    on_tool_register: true    # Clear index caches
+    on_doc_update: true       # Clear docs caches
+    webhook_endpoint: /cache/invalidate
+```
+
+#### Cache Invalidation Strategies
+
+```go
+// toolcache/invalidation.go
+
+// InvalidationStrategy defines how cache entries are invalidated
+type InvalidationStrategy interface {
+    OnToolRegistered(ctx context.Context, tool *toolmodel.Tool) error
+    OnToolUnregistered(ctx context.Context, toolID string) error
+    OnDocUpdated(ctx context.Context, toolID string) error
+}
+
+// PatternInvalidation clears by key patterns
+type PatternInvalidation struct {
+    cache Cache
+}
+
+func (p *PatternInvalidation) OnToolRegistered(ctx context.Context, tool *toolmodel.Tool) error {
+    patterns := []string{
+        fmt.Sprintf("index:tool:%s", tool.ID()),
+        fmt.Sprintf("index:namespace:%s", tool.Namespace),
+        "search:*",  // All search results potentially affected
+    }
+    for _, pattern := range patterns {
+        if err := p.cache.Clear(ctx, pattern); err != nil {
+            return err
+        }
+    }
+    return nil
+}
+
+// TTLInvalidation relies on TTL expiration (simpler, eventually consistent)
+type TTLInvalidation struct{}
+
+func (t *TTLInvalidation) OnToolRegistered(ctx context.Context, tool *toolmodel.Tool) error {
+    // No-op: cache will expire naturally
+    return nil
+}
+```
+
+#### Proposed Library: `toolcache`
+
+```
+toolcache/
+├── cache.go           # Cache interface
+├── memory.go          # In-memory LRU implementation
+├── redis.go           # Redis implementation
+├── sqlite.go          # SQLite implementation
+├── layered.go         # L1+L2 layered cache
+├── stats.go           # Statistics and metrics
+├── invalidation.go    # Invalidation strategies
+├── typed.go           # Type-safe generic wrapper
+├── config.go          # Configuration parsing
+└── wrappers/
+    ├── index.go       # toolindex.Index wrapper
+    ├── docs.go        # tooldocs.Store wrapper
+    ├── search.go      # toolsearch.Searcher wrapper
+    └── adapter.go     # tooladapter.Adapter wrapper
+```
+
+---
+
+### 7. Additional Cross-Cutting Concerns
+
+Beyond the core extension points, production deployments require additional pluggable concerns for resilience, security, and operations.
+
+#### 7.1 Resilience Patterns
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       RESILIENCE LAYER                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│  ┌─────────────────────────────────────────────────────────────────────────┐ │
+│  │ CIRCUIT BREAKER                                                          │ │
+│  ├─────────────────────────────────────────────────────────────────────────┤ │
+│  │ States: CLOSED → OPEN → HALF-OPEN → CLOSED                              │ │
+│  │ - Monitors failure rate per backend/tool                                 │ │
+│  │ - Opens circuit after threshold (e.g., 50% failures in 10s window)      │ │
+│  │ - Allows probe requests in half-open state                               │ │
+│  │ - Prevents cascading failures across backends                            │ │
+│  └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                               │
+│  ┌─────────────────────────────────────────────────────────────────────────┐ │
+│  │ RETRY POLICY                                                             │ │
+│  ├─────────────────────────────────────────────────────────────────────────┤ │
+│  │ - Exponential backoff with jitter (prevents retry storms)               │ │
+│  │ - Per-tool retry configuration (idempotent ops only)                    │ │
+│  │ - Retry budgets (max retries per time window)                           │ │
+│  │ - Non-retryable error classification                                     │ │
+│  └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                               │
+│  ┌─────────────────────────────────────────────────────────────────────────┐ │
+│  │ BULKHEAD                                                                 │ │
+│  ├─────────────────────────────────────────────────────────────────────────┤ │
+│  │ - Isolated resource pools per backend                                    │ │
+│  │ - Semaphore-based concurrency limits                                     │ │
+│  │ - Prevents resource exhaustion from single backend                      │ │
+│  │ - Configurable queue depth and timeout                                   │ │
+│  └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                               │
+│  ┌─────────────────────────────────────────────────────────────────────────┐ │
+│  │ TIMEOUT MANAGEMENT                                                       │ │
+│  ├─────────────────────────────────────────────────────────────────────────┤ │
+│  │ - Per-tool timeout configuration                                         │ │
+│  │ - Cascading timeouts (request → backend → tool)                         │ │
+│  │ - Context deadline propagation                                           │ │
+│  │ - Graceful timeout handling with partial results                        │ │
+│  └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+```go
+// toolresilience/circuit_breaker.go
+
+type CircuitBreaker interface {
+    Execute(ctx context.Context, fn func() error) error
+    State() CircuitState
+    Reset()
+}
+
+type CircuitState int
+
+const (
+    StateClosed CircuitState = iota
+    StateOpen
+    StateHalfOpen
+)
+
+type CircuitBreakerConfig struct {
+    FailureThreshold    int           // failures before opening
+    SuccessThreshold    int           // successes in half-open before closing
+    Timeout             time.Duration // time in open state before half-open
+    WindowSize          time.Duration // sliding window for failure counting
+}
+
+// toolresilience/retry.go
+
+type RetryPolicy interface {
+    Execute(ctx context.Context, fn func() error) error
+    ShouldRetry(err error, attempt int) bool
+}
+
+type RetryConfig struct {
+    MaxAttempts     int
+    InitialBackoff  time.Duration
+    MaxBackoff      time.Duration
+    BackoffFactor   float64
+    Jitter          float64       // 0-1, randomization factor
+    RetryBudget     *RetryBudget  // optional rate limiting
+    NonRetryable    []error       // errors that should not be retried
+}
+
+// toolresilience/bulkhead.go
+
+type Bulkhead interface {
+    Acquire(ctx context.Context) error
+    Release()
+    Available() int
+}
+
+type BulkheadConfig struct {
+    MaxConcurrent int
+    MaxWait       time.Duration
+    QueueDepth    int
+}
+```
+
+#### 7.2 Health Checks
+
+```go
+// toolhealth/health.go
+
+type HealthChecker interface {
+    Check(ctx context.Context) HealthStatus
+    Name() string
+}
+
+type HealthStatus struct {
+    Status    Status            // healthy, degraded, unhealthy
+    Details   map[string]any
+    Timestamp time.Time
+}
+
+type Status string
+
+const (
+    StatusHealthy   Status = "healthy"
+    StatusDegraded  Status = "degraded"
+    StatusUnhealthy Status = "unhealthy"
+)
+
+// Composite health aggregates multiple checkers
+type CompositeHealth struct {
+    checkers []HealthChecker
+}
+
+func (c *CompositeHealth) Check(ctx context.Context) HealthStatus {
+    results := make(map[string]HealthStatus)
+    overall := StatusHealthy
+
+    for _, checker := range c.checkers {
+        status := checker.Check(ctx)
+        results[checker.Name()] = status
+
+        if status.Status == StatusUnhealthy {
+            overall = StatusUnhealthy
+        } else if status.Status == StatusDegraded && overall != StatusUnhealthy {
+            overall = StatusDegraded
+        }
+    }
+
+    return HealthStatus{
+        Status:    overall,
+        Details:   map[string]any{"components": results},
+        Timestamp: time.Now(),
+    }
+}
+
+// Built-in health checkers
+type BackendHealthChecker struct{ registry BackendRegistry }
+type CacheHealthChecker struct{ cache Cache }
+type SearchHealthChecker struct{ index Index }
+```
+
+#### 7.3 Secrets Management
+
+```go
+// toolsecrets/secrets.go
+
+type SecretsManager interface {
+    Get(ctx context.Context, key string) (string, error)
+    GetWithMetadata(ctx context.Context, key string) (*Secret, error)
+    Watch(ctx context.Context, key string, callback func(*Secret)) error
+    Close() error
+}
+
+type Secret struct {
+    Value     string
+    Version   int
+    ExpiresAt time.Time
+    Metadata  map[string]string
+}
+
+// Implementations
+type VaultSecretsManager struct {
+    client       *vault.Client
+    secretPath   string
+    cacheTTL     time.Duration
+    rotationChan chan string
+}
+
+type AWSSecretsManager struct {
+    client *secretsmanager.Client
+    region string
+}
+
+type EnvSecretsManager struct {
+    prefix string  // e.g., "METATOOLS_SECRET_"
+}
+```
+
+```yaml
+# metatools.yaml
+secrets:
+  provider: vault  # vault, aws, env, file
+
+  vault:
+    addr: ${VAULT_ADDR}
+    auth_method: kubernetes  # token, kubernetes, approle
+    secret_path: secret/data/metatools
+    cache_ttl: 5m
+
+  # Backend credentials resolved from secrets
+  backends:
+    openai:
+      api_key: "{{ secrets.openai_api_key }}"
+    github:
+      token: "{{ secrets.github_token }}"
+```
+
+#### 7.4 Configuration Hot-Reload
+
+```go
+// toolconfig/watcher.go
+
+type ConfigWatcher interface {
+    Watch(ctx context.Context, path string, callback func(Config)) error
+    Stop() error
+}
+
+type FSConfigWatcher struct {
+    watcher *fsnotify.Watcher
+    parser  ConfigParser
+}
+
+func (w *FSConfigWatcher) Watch(ctx context.Context, path string, callback func(Config)) error {
+    if err := w.watcher.Add(path); err != nil {
+        return err
+    }
+
+    go func() {
+        for {
+            select {
+            case event := <-w.watcher.Events:
+                if event.Op&fsnotify.Write == fsnotify.Write {
+                    if cfg, err := w.parser.Parse(path); err == nil {
+                        callback(cfg)
+                    }
+                }
+            case <-ctx.Done():
+                return
+            }
+        }
+    }()
+
+    return nil
+}
+
+// Hot-reloadable components
+type HotReloadable interface {
+    Reload(cfg Config) error
+}
+
+// Registry tracks reloadable components
+type ReloadRegistry struct {
+    components map[string]HotReloadable
+}
+
+func (r *ReloadRegistry) ReloadAll(cfg Config) error {
+    for name, component := range r.components {
+        if err := component.Reload(cfg); err != nil {
+            return fmt.Errorf("reload %s: %w", name, err)
+        }
+    }
+    return nil
+}
+```
+
+#### 7.5 Feature Flags
+
+```go
+// toolflags/flags.go
+
+type FeatureFlags interface {
+    IsEnabled(ctx context.Context, flag string) bool
+    GetVariant(ctx context.Context, flag string) string
+    AllFlags(ctx context.Context) map[string]bool
+}
+
+// Local file-based flags (simple deployments)
+type LocalFeatureFlags struct {
+    flags map[string]bool
+    mu    sync.RWMutex
+}
+
+// LaunchDarkly integration (enterprise)
+type LaunchDarklyFlags struct {
+    client *ld.LDClient
+    user   func(ctx context.Context) ld.User
+}
+
+// Use case: Gradual tool rollout
+func (h *Handler) RunTool(ctx context.Context, req Request) (Response, error) {
+    if h.flags.IsEnabled(ctx, "new_execution_engine") {
+        return h.newRunner.Run(ctx, req)
+    }
+    return h.legacyRunner.Run(ctx, req)
+}
+```
+
+```yaml
+# metatools.yaml
+feature_flags:
+  provider: local  # local, launchdarkly, unleash
+
+  local:
+    path: /etc/metatools/flags.yaml
+    reload_interval: 30s
+
+  flags:
+    new_execution_engine: false
+    semantic_search: true
+    multi_tenant_mode: false
+    streaming_responses: true
+```
+
+#### 7.6 Audit Trail / Event Sourcing
+
+```go
+// toolaudit/audit.go
+
+type AuditLogger interface {
+    Log(ctx context.Context, event AuditEvent) error
+    Query(ctx context.Context, filter AuditFilter) ([]AuditEvent, error)
+}
+
+type AuditEvent struct {
+    ID          string
+    Timestamp   time.Time
+    EventType   EventType
+    Actor       Actor
+    Resource    Resource
+    Action      string
+    Outcome     Outcome
+    Details     map[string]any
+    RequestID   string
+    SessionID   string
+}
+
+type EventType string
+
+const (
+    EventToolExecution   EventType = "tool.execution"
+    EventToolDiscovery   EventType = "tool.discovery"
+    EventConfigChange    EventType = "config.change"
+    EventAuthAttempt     EventType = "auth.attempt"
+    EventBackendError    EventType = "backend.error"
+)
+
+// Implementations
+type FileAuditLogger struct{ path string }
+type DatabaseAuditLogger struct{ db *sql.DB }
+type CloudWatchAuditLogger struct{ client *cloudwatchlogs.Client }
+
+// Compliance-ready: immutable append-only log
+type ImmutableAuditLogger struct {
+    inner  AuditLogger
+    signer crypto.Signer  // Signs each entry
+}
+```
+
+#### 7.7 Backpressure / Load Shedding
+
+```go
+// toolpressure/backpressure.go
+
+type LoadShedder interface {
+    ShouldShed(ctx context.Context) bool
+    CurrentLoad() float64
+}
+
+type AdaptiveLoadShedder struct {
+    targetLatency time.Duration
+    maxLoad       float64
+
+    // Metrics
+    currentLatency atomic.Value
+    activeRequests atomic.Int64
+}
+
+func (s *AdaptiveLoadShedder) ShouldShed(ctx context.Context) bool {
+    // Little's Law: if latency > target and load > threshold, shed
+    latency := s.currentLatency.Load().(time.Duration)
+    load := float64(s.activeRequests.Load()) / s.maxLoad
+
+    return latency > s.targetLatency && load > 0.8
+}
+
+// Priority-based shedding
+type PriorityLoadShedder struct {
+    inner      LoadShedder
+    priorities map[string]int  // tool -> priority (higher = more important)
+}
+
+func (s *PriorityLoadShedder) ShouldShed(ctx context.Context, tool string) bool {
+    if !s.inner.ShouldShed(ctx) {
+        return false
+    }
+
+    // Don't shed high-priority tools
+    priority := s.priorities[tool]
+    return priority < 5  // Only shed low-priority requests
+}
+```
+
+#### Configuration for All Concerns
+
+```yaml
+# metatools.yaml - Cross-Cutting Concerns
+resilience:
+  circuit_breaker:
+    enabled: true
+    failure_threshold: 5
+    success_threshold: 2
+    timeout: 30s
+    window_size: 10s
+
+  retry:
+    enabled: true
+    max_attempts: 3
+    initial_backoff: 100ms
+    max_backoff: 5s
+    jitter: 0.2
+
+  bulkhead:
+    enabled: true
+    default_concurrent: 100
+    per_backend:
+      openai: 50    # Rate-limited API
+      github: 200
+      local: 500
+
+  timeout:
+    default: 30s
+    per_tool:
+      execute_code: 120s
+      search_tools: 5s
+
+health:
+  endpoint: /health
+  detailed_endpoint: /health/detailed
+  check_interval: 10s
+  components:
+    - backends
+    - cache
+    - search_index
+
+backpressure:
+  enabled: true
+  target_latency: 500ms
+  max_concurrent: 1000
+  shed_priority_below: 5
+
+audit:
+  enabled: true
+  provider: file  # file, database, cloudwatch
+  path: /var/log/metatools/audit.log
+  events:
+    - tool.execution
+    - auth.attempt
+    - config.change
+  retention_days: 90
+```
+
+#### Summary: Cross-Cutting Concerns Catalog
+
+| Concern | Purpose | Priority | Proposed Library |
+|---------|---------|----------|-----------------|
+| **Cache** | Response/metadata caching | High | `toolcache` |
+| **Circuit Breaker** | Prevent cascading failures | High | `toolresilience` |
+| **Retry** | Handle transient failures | High | `toolresilience` |
+| **Bulkhead** | Resource isolation | Medium | `toolresilience` |
+| **Health Checks** | Monitoring/orchestration | High | `toolhealth` |
+| **Secrets** | Credential management | High | `toolsecrets` |
+| **Config Reload** | Zero-downtime updates | Medium | `toolconfig` |
+| **Feature Flags** | Gradual rollout | Medium | `toolflags` |
+| **Audit Trail** | Compliance/debugging | High | `toolaudit` |
+| **Backpressure** | Overload protection | Medium | `toolpressure` |
+| **Timeout** | Deadline management | High | Built-in (context) |
+| **Tracing** | Distributed observability | High | `toolobserve` |
 
 ---
 
@@ -3471,3 +4359,8 @@ customerSet, _ := toolset.NewBuilder("customer-acme").
 | 2026-01-28 | Identified 4 potential new libraries: toolobserve, toolsemantic, toolresource, toolgateway |
 | 2026-01-28 | Added Protocol-Agnostic Tools section with 2 new proposed libraries: tooladapter, toolset |
 | 2026-01-28 | Created comprehensive proposal for composable toolsets and protocol adapters (see [protocol-agnostic-tools.md](./protocol-agnostic-tools.md)) |
+| 2026-01-28 | Added Cache Layer as extension point #6 with pluggable backends (memory, Redis, SQLite, layered) |
+| 2026-01-28 | Proposed new library: `toolcache` for cross-component caching with invalidation strategies |
+| 2026-01-28 | Added section 7: Additional Cross-Cutting Concerns with comprehensive enterprise patterns |
+| 2026-01-28 | Documented 12 cross-cutting concerns: cache, circuit breaker, retry, bulkhead, health checks, secrets, config reload, feature flags, audit trail, backpressure, timeout, tracing |
+| 2026-01-28 | Proposed 6 new libraries for cross-cutting concerns: toolresilience, toolhealth, toolsecrets, toolflags, toolaudit, toolpressure |
