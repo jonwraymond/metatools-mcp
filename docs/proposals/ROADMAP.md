@@ -23,6 +23,17 @@
 - **Multi-tenant** with pluggable isolation strategies
 - **Agent skills** for higher-level capability composition
 
+### Scope Clarification
+
+| Milestone | Scope | Timeline | Document Reference |
+|-----------|-------|----------|-------------------|
+| **MVP** | CLI, Config, Transport, Provider Registry | 7 weeks | implementation-phases.md |
+| **Protocol** | + tooladapter, toolset, multi-transport | 14 weeks | protocol-agnostic-tools.md |
+| **Enterprise** | + toolsemantic, toolgateway, multi-tenancy | 17 weeks | multi-tenancy.md |
+| **Full** | + toolskill (Agent Skills) | 21 weeks | This document |
+
+> **Note:** implementation-phases.md covers MVP scope only (6-7 weeks). This master roadmap covers the full 21-week timeline.
+
 ### Timeline Overview
 ```
                     CORE EXPOSURE          ENTERPRISE FEATURES         AGENT SKILLS
@@ -68,13 +79,13 @@ Week 20-21                                                    ██████
 
 | Library | Version | Purpose | Extension Points | Changes Needed |
 |---------|---------|---------|------------------|----------------|
-| **toolmodel** | v0.1.2 | Core data models, schemas | SchemaValidator | Add Version field |
-| **toolindex** | v0.1.8 | Tool registry, discovery | Searcher, BackendSelector | Multi-backend events |
-| **tooldocs** | v0.1.10 | Progressive disclosure docs | Store, ToolResolver | Bulk registration |
-| **toolsearch** | v0.1.9 | BM25 search implementation | (via Searcher) | None |
-| **toolrun** | v0.1.9 | Execution orchestration | Runner, MCPExecutor, ProviderExecutor, LocalRegistry | HTTP/gRPC executors |
-| **toolcode** | v0.1.10 | Code execution | Engine, Logger | Engine registry |
-| **toolruntime** | v0.1.10 | Sandbox isolation (10 backends) | Backend, ToolGateway | None |
+| **toolmodel** | v0.1.3 | Core data models, schemas | SchemaValidator | Add Version field |
+| **toolindex** | v0.1.9 | Tool registry, discovery | Searcher, BackendSelector | Multi-backend events |
+| **tooldocs** | v0.1.11 | Progressive disclosure docs | Store, ToolResolver | Bulk registration |
+| **toolsearch** | v0.1.10 | BM25 search implementation | (via Searcher) | None |
+| **toolrun** | v0.1.10 | Execution orchestration | Runner, MCPExecutor, ProviderExecutor, LocalRegistry | HTTP/gRPC executors |
+| **toolcode** | v0.1.11 | Code execution | Engine, Logger | Engine registry |
+| **toolruntime** | v0.1.11 | Sandbox isolation (10 backends) | Backend, ToolGateway | None |
 
 ### Proposed Libraries (New)
 
@@ -94,7 +105,7 @@ Week 20-21                                                    ██████
 | **toolsemantic** | Enterprise | Hybrid search (BM25+vector), GraphRAG, reranking, ColBERT | High | 3w | toolindex, toolsearch |
 | **toolresource** | Enterprise | MCP Resources support | Medium | 2w | toolindex |
 | **toolgateway** | Enterprise | Auth, rate limit, analytics proxy | Medium | 3w | All |
-| **toolskill** | Skills | SKILL.md-compatible agent skills, workflows | Medium | 4w | toolset, toolrun |
+| **toolskill** | Skills | SKILL.md-compatible agent skills, workflows | Medium | 4w | toolset, toolrun, toolobserve (opt), toolversion |
 
 ---
 
@@ -277,6 +288,7 @@ Week 5:
 ```go
 // internal/transport/transport.go
 type Transport interface {
+    Name() string  // Transport identifier (e.g., "stdio", "sse", "http")
     Serve(ctx context.Context, handler RequestHandler) error
     Close() error
     Info() TransportInfo
@@ -2300,6 +2312,7 @@ This multi-language architecture is informed by:
 
 | Date | Change |
 |------|--------|
+| 2026-01-28 | Architecture Review: Added scope clarification table, fixed Transport interface (added Name()), updated toolskill dependencies |
 | 2026-01-28 | Added Section 8: Multi-Language Extensibility - gRPC, WASM, JSON-RPC plugin architectures with SDK generation |
 | 2026-01-28 | Added comprehensive D4 toolsemantic specification: hybrid search, GraphRAG, hierarchical chunking, agentic RAG, ColBERT, cross-encoder reranking |
 | 2026-01-28 | Added SKILL.md Open Standard support to toolskill (Claude Code, Codex, ChatGPT compatible) |

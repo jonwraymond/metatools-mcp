@@ -3,6 +3,7 @@
 **Status:** Draft
 **Last Updated:** 2026-01-28
 **Authors:** Architecture Team
+**Related:** [Master Roadmap](./ROADMAP.md) (Stream B: Protocol Layer), [Pluggable Architecture](./pluggable-architecture.md)
 
 ## Table of Contents
 

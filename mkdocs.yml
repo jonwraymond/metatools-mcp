@@ -8,6 +8,7 @@ nav:
   - Design Notes: design-notes.md
   - User Journey: user-journey.md
   - API Reference: api.md
+  - Plan of Record: plan-of-record.md
   - Proposals:
       - Pluggable Architecture: proposals/pluggable-architecture.md
       - Implementation Phases: proposals/implementation-phases.md
@@ -15,6 +16,7 @@ nav:
       - Architecture Evaluation: proposals/architecture-evaluation.md
       - Multi-Tenancy: proposals/multi-tenancy.md
       - Protocol-Agnostic Tools: proposals/protocol-agnostic-tools.md
+      - MCP Spec Alignment: proposals/mcp-spec-alignment.md
 
 theme:
   name: material
