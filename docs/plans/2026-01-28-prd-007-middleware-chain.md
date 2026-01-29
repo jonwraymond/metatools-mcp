@@ -1,5 +1,7 @@
 # PRD-007: Middleware Chain
 
+> **Implementation note:** In code, `MiddlewareConfig` is named `Config` and `MiddlewareEntry` is named `Entry` to avoid lint stutter.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Implement a Middleware Chain enabling cross-cutting concerns (logging, auth, rate limiting, metrics) to be applied to tool providers through composable, configuration-driven middleware functions.
