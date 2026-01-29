@@ -1,5 +1,7 @@
 # PRD-006: Backend Registry
 
+> **Implementation note:** In code, `BackendFactory` is named `Factory` and `BackendInfo` is named `Info` to avoid lint stutter.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Implement a Backend Registry enabling multi-source tool aggregation, where tools can be discovered and executed from local handlers, MCP servers, HTTP APIs, and other external sources through a unified interface.
