@@ -16,7 +16,7 @@ func TestBackendAdapter_GetTools(t *testing.T) {
 	localBackend.RegisterHandler("echo", local.ToolDef{
 		Name:        "echo",
 		Description: "Echo input",
-		Handler: func(ctx context.Context, args map[string]any) (any, error) {
+		Handler: func(_ context.Context, args map[string]any) (any, error) {
 			return args["message"], nil
 		},
 	})
@@ -37,7 +37,7 @@ func TestBackendAdapter_Execute(t *testing.T) {
 	localBackend.RegisterHandler("echo", local.ToolDef{
 		Name:        "echo",
 		Description: "Echo input",
-		Handler: func(ctx context.Context, args map[string]any) (any, error) {
+		Handler: func(_ context.Context, args map[string]any) (any, error) {
 			return args["message"], nil
 		},
 	})

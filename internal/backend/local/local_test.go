@@ -29,7 +29,7 @@ func TestLocalBackend_Name(t *testing.T) {
 func TestLocalBackend_RegisterHandler(t *testing.T) {
 	b := New("test")
 
-	handler := func(_ context.Context, args map[string]any) (any, error) {
+	handler := func(_ context.Context, _ map[string]any) (any, error) {
 		return "handled", nil
 	}
 

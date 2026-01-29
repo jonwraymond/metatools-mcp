@@ -50,7 +50,7 @@ func TestBackend_Methods(t *testing.T) {
 		tools: []toolmodel.Tool{
 			{Tool: mcp.Tool{Name: "test_tool", Description: "A test tool"}},
 		},
-		execFn: func(_ context.Context, tool string, args map[string]any) (any, error) {
+		execFn: func(_ context.Context, _ string, _ map[string]any) (any, error) {
 			return "executed", nil
 		},
 	}
