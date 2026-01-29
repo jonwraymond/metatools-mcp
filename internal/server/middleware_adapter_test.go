@@ -19,7 +19,7 @@ func (c *countProvider) Enabled() bool { return true }
 func (c *countProvider) Tool() mcp.Tool {
 	return mcp.Tool{Name: c.name, InputSchema: map[string]any{"type": "object"}}
 }
-func (c *countProvider) Handle(ctx context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
+func (c *countProvider) Handle(_ context.Context, _ *mcp.CallToolRequest, _ map[string]any) (*mcp.CallToolResult, any, error) {
 	*c.count++
 	return nil, "ok", nil
 }

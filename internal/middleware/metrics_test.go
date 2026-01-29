@@ -34,7 +34,7 @@ func TestMetricsMiddleware(t *testing.T) {
 		name:    "test_tool",
 		enabled: true,
 		tool:    mcp.Tool{Name: "test_tool", InputSchema: map[string]any{"type": "object"}},
-		handleFn: func(_ context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
+		handleFn: func(_ context.Context, _ *mcp.CallToolRequest, _ map[string]any) (*mcp.CallToolResult, any, error) {
 			time.Sleep(10 * time.Millisecond)
 			return nil, "result", nil
 		},
@@ -69,7 +69,7 @@ func TestMetricsMiddleware_Error(t *testing.T) {
 		name:    "failing_tool",
 		enabled: true,
 		tool:    mcp.Tool{Name: "failing_tool", InputSchema: map[string]any{"type": "object"}},
-		handleFn: func(_ context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
+		handleFn: func(_ context.Context, _ *mcp.CallToolRequest, _ map[string]any) (*mcp.CallToolResult, any, error) {
 			return nil, nil, errors.New("failed")
 		},
 	}
@@ -97,7 +97,7 @@ func TestMetricsMiddleware_ActiveRequests(t *testing.T) {
 		name:    "slow_tool",
 		enabled: true,
 		tool:    mcp.Tool{Name: "slow_tool", InputSchema: map[string]any{"type": "object"}},
-		handleFn: func(_ context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
+		handleFn: func(_ context.Context, _ *mcp.CallToolRequest, _ map[string]any) (*mcp.CallToolResult, any, error) {
 			close(started)
 			<-done
 			return nil, nil, nil
