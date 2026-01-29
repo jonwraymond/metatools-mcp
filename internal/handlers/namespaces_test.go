@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/jonwraymond/metatools-mcp/pkg/metatools"
+	"github.com/jonwraymond/toolindex"
+	"github.com/modelcontextprotocol/go-sdk/jsonrpc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -90,4 +92,21 @@ func TestListNamespaces_WithCursor(t *testing.T) {
 	result2, err := handler.Handle(context.Background(), metatools.ListNamespacesInput{Limit: &limit, Cursor: &cursor})
 	require.NoError(t, err)
 	assert.Equal(t, []string{"c"}, result2.Namespaces)
+}
+
+func TestListNamespaces_InvalidCursor(t *testing.T) {
+	idx := &mockNamespacesIndex{
+		listNamespacesFunc: func(_ context.Context, _ int, _ string) ([]string, string, error) {
+			return nil, "", toolindex.ErrInvalidCursor
+		},
+	}
+
+	handler := NewNamespacesHandler(idx)
+	cursor := "bad"
+	_, err := handler.Handle(context.Background(), metatools.ListNamespacesInput{Cursor: &cursor})
+	require.Error(t, err)
+
+	rpcErr, ok := err.(*jsonrpc.Error)
+	require.True(t, ok, "expected jsonrpc.Error")
+	assert.EqualValues(t, jsonrpc.CodeInvalidParams, rpcErr.Code)
 }

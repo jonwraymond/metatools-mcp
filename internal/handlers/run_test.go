@@ -247,7 +247,7 @@ func TestRunTool_ContextCancelled_ReturnsToolError(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, isError)
 	require.NotNil(t, result.Error)
-	assert.Equal(t, string(merrors.CodeInternal), result.Error.Code)
+	assert.Equal(t, string(merrors.CodeCancelled), result.Error.Code)
 }
 
 // Backend override

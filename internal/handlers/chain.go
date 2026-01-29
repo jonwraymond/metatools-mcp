@@ -23,6 +23,11 @@ func NewChainHandler(runner Runner) *ChainHandler {
 // - isError indicates if this is a tool error (isError: true in MCP)
 // - err is a protocol-level error
 func (h *ChainHandler) Handle(ctx context.Context, input metatools.RunChainInput) (*metatools.RunChainOutput, bool, error) {
+	return h.HandleWithProgress(ctx, input, nil)
+}
+
+// HandleWithProgress executes run_chain with optional progress callbacks.
+func (h *ChainHandler) HandleWithProgress(ctx context.Context, input metatools.RunChainInput, onProgress func(ProgressEvent)) (*metatools.RunChainOutput, bool, error) {
 	// Validate input
 	if err := input.Validate(); err != nil {
 		return nil, false, err
@@ -42,7 +47,24 @@ func (h *ChainHandler) Handle(ctx context.Context, input metatools.RunChainInput
 	}
 
 	// Execute the chain
-	finalResult, stepResults, chainErr := h.runner.RunChain(ctx, steps)
+	var finalResult RunResult
+	var stepResults []StepResult
+	var chainErr error
+	if onProgress != nil {
+		if progressRunner, ok := h.runner.(ProgressRunner); ok {
+			finalResult, stepResults, chainErr = progressRunner.RunChainWithProgress(ctx, steps, onProgress)
+		} else {
+			onProgress(ProgressEvent{Progress: 0, Total: float64(len(steps)), Message: "started"})
+			finalResult, stepResults, chainErr = h.runner.RunChain(ctx, steps)
+			msg := "completed"
+			if chainErr != nil {
+				msg = "error"
+			}
+			onProgress(ProgressEvent{Progress: float64(len(steps)), Total: float64(len(steps)), Message: msg})
+		}
+	} else {
+		finalResult, stepResults, chainErr = h.runner.RunChain(ctx, steps)
+	}
 
 	// Build step results output
 	results := make([]metatools.ChainStepResult, len(stepResults))

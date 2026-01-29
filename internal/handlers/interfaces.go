@@ -44,6 +44,13 @@ type ChainStep struct {
 	UsePrevious bool
 }
 
+// ProgressEvent represents a progress update during execution.
+type ProgressEvent struct {
+	Progress float64
+	Total    float64
+	Message  string
+}
+
 // StepResult represents a step result
 type StepResult struct {
 	ToolID     string
@@ -57,6 +64,12 @@ type StepResult struct {
 type Runner interface {
 	Run(ctx context.Context, toolID string, args map[string]any) (RunResult, error)
 	RunChain(ctx context.Context, steps []ChainStep) (RunResult, []StepResult, error)
+}
+
+// ProgressRunner is an optional interface for progress-aware runners.
+type ProgressRunner interface {
+	RunWithProgress(ctx context.Context, toolID string, args map[string]any, onProgress func(ProgressEvent)) (RunResult, error)
+	RunChainWithProgress(ctx context.Context, steps []ChainStep, onProgress func(ProgressEvent)) (RunResult, []StepResult, error)
 }
 
 // ExecuteParams represents code execution parameters

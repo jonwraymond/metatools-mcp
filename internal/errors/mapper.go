@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"context"
 	"errors"
 
 	"github.com/jonwraymond/toolrun"
@@ -20,6 +21,8 @@ const (
 	CodeStreamNotSupported     ErrorCode = "stream_not_supported"
 	CodeStreamFailed           ErrorCode = "stream_failed"
 	CodeChainStepFailed        ErrorCode = "chain_step_failed"
+	CodeCancelled              ErrorCode = "cancelled"
+	CodeTimeout                ErrorCode = "timeout"
 	CodeInternal               ErrorCode = "internal"
 )
 
@@ -132,6 +135,10 @@ func mapErrorToCode(err error) ErrorCode {
 		return CodeStreamNotSupported
 	case errors.Is(err, ErrExecution) || errors.Is(err, toolrun.ErrExecution):
 		return CodeExecutionFailed
+	case errors.Is(err, context.Canceled):
+		return CodeCancelled
+	case errors.Is(err, context.DeadlineExceeded):
+		return CodeTimeout
 	default:
 		return CodeInternal
 	}

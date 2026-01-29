@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -52,6 +53,20 @@ func TestMapToolError_ExecutionFailed(t *testing.T) {
 	assert.Equal(t, CodeExecutionFailed, result.Code)
 }
 
+func TestMapToolError_Cancelled(t *testing.T) {
+	result := MapToolError(context.Canceled, "test.tool", nil, -1)
+
+	require.NotNil(t, result)
+	assert.Equal(t, CodeCancelled, result.Code)
+}
+
+func TestMapToolError_Timeout(t *testing.T) {
+	result := MapToolError(context.DeadlineExceeded, "test.tool", nil, -1)
+
+	require.NotNil(t, result)
+	assert.Equal(t, CodeTimeout, result.Code)
+}
+
 func TestMapToolError_ChainStepFailed(t *testing.T) {
 	// Chain step errors should have step_index set
 	result := MapToolError(ErrExecution, "test.tool", nil, 2)
@@ -79,6 +94,8 @@ func TestMapToolError_SetsRetryable(t *testing.T) {
 	}{
 		{"execution_failed is retryable", ErrExecution, -1, true},
 		{"internal is retryable", errors.New("unknown"), -1, true},
+		{"cancelled is not retryable", context.Canceled, -1, false},
+		{"timeout is not retryable", context.DeadlineExceeded, -1, false},
 		{"tool_not_found is not retryable", ErrToolNotFound, -1, false},
 		{"no_backends is not retryable", ErrNoBackends, -1, false},
 		{"validation_input is not retryable", ErrValidationInput, -1, false},

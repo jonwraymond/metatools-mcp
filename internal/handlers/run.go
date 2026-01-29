@@ -24,6 +24,11 @@ func NewRunHandler(runner Runner) *RunHandler {
 // - isError indicates if this is a tool error (isError: true in MCP)
 // - err is a protocol-level error
 func (h *RunHandler) Handle(ctx context.Context, input metatools.RunToolInput) (*metatools.RunToolOutput, bool, error) {
+	return h.HandleWithProgress(ctx, input, nil)
+}
+
+// HandleWithProgress executes run_tool with optional progress callbacks.
+func (h *RunHandler) HandleWithProgress(ctx context.Context, input metatools.RunToolInput, onProgress func(ProgressEvent)) (*metatools.RunToolOutput, bool, error) {
 	// Validate input
 	if err := input.Validate(); err != nil {
 		return nil, false, err
@@ -60,7 +65,24 @@ func (h *RunHandler) Handle(ctx context.Context, input metatools.RunToolInput) (
 	}
 
 	// Execute the tool
-	result, err := h.runner.Run(ctx, input.ToolID, input.Args)
+	var result RunResult
+	var err error
+
+	if onProgress != nil {
+		if progressRunner, ok := h.runner.(ProgressRunner); ok {
+			result, err = progressRunner.RunWithProgress(ctx, input.ToolID, input.Args, onProgress)
+		} else {
+			onProgress(ProgressEvent{Progress: 0, Total: 1, Message: "started"})
+			result, err = h.runner.Run(ctx, input.ToolID, input.Args)
+			msg := "completed"
+			if err != nil {
+				msg = "error"
+			}
+			onProgress(ProgressEvent{Progress: 1, Total: 1, Message: msg})
+		}
+	} else {
+		result, err = h.runner.Run(ctx, input.ToolID, input.Args)
+	}
 	if err != nil {
 		return buildToolError(err)
 	}

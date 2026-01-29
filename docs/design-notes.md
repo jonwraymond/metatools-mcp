@@ -25,13 +25,14 @@ Key error behaviors:
 - `run_chain` stops on first error and returns partial results with an `ErrorObject`.
 - `describe_tool`/`list_tool_examples` return validation errors when required fields are missing.
 - Invalid cursors return JSON-RPC invalid params.
+- Cancellation and timeouts map to `cancelled` and `timeout` error codes.
 
 ## Extension points
 
 - **Search strategy:** enable BM25 via the `toolsearch` build tag and env vars.
 - **Tool execution:** swap `toolrun` runner implementation or configure different backends.
 - **Code execution:** plug in a different `toolcode.Engine` (e.g., toolruntime-backed).
-- **Progress:** progress notifications are not emitted yet for non-streaming calls (runner limitation).
+- **Progress:** when a progress token is provided, `run_tool`, `run_chain`, and `execute_code` emit progress notifications. If the runner supports progress callbacks, step-level updates are forwarded; otherwise a coarse start/end signal is sent.
 
 ## Operational guidance
 

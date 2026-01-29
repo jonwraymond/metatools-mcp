@@ -50,4 +50,6 @@ Metatools surfaces standardized error codes (strings), including:
 - `execution_failed`
 - `stream_not_supported`
 - `chain_step_failed`
+- `cancelled`
+- `timeout`
 - `internal`

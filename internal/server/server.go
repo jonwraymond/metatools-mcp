@@ -29,6 +29,8 @@ var errorCodes = []string{
 	"stream_not_supported",
 	"stream_failed",
 	"chain_step_failed",
+	"cancelled",
+	"timeout",
 	"internal",
 }
 
@@ -331,8 +333,9 @@ func (s *Server) registerTools() {
 			"additionalProperties": false,
 		},
 		OutputSchema: runToolOutputSchema(),
-	}, func(ctx context.Context, _ *mcp.CallToolRequest, input metatools.RunToolInput) (*mcp.CallToolResult, metatools.RunToolOutput, error) {
-		out, isError, err := s.handlers.Run.Handle(ctx, input)
+	}, func(ctx context.Context, req *mcp.CallToolRequest, input metatools.RunToolInput) (*mcp.CallToolResult, metatools.RunToolOutput, error) {
+		progress := progressNotifier(req, ctx)
+		out, isError, err := s.handlers.Run.HandleWithProgress(ctx, input, progress)
 		if err != nil {
 			return nil, metatools.RunToolOutput{}, err
 		}
@@ -369,8 +372,9 @@ func (s *Server) registerTools() {
 			"additionalProperties": false,
 		},
 		OutputSchema: runChainOutputSchema(),
-	}, func(ctx context.Context, _ *mcp.CallToolRequest, input metatools.RunChainInput) (*mcp.CallToolResult, metatools.RunChainOutput, error) {
-		out, isError, err := s.handlers.Chain.Handle(ctx, input)
+	}, func(ctx context.Context, req *mcp.CallToolRequest, input metatools.RunChainInput) (*mcp.CallToolResult, metatools.RunChainOutput, error) {
+		progress := progressNotifier(req, ctx)
+		out, isError, err := s.handlers.Chain.HandleWithProgress(ctx, input, progress)
 		if err != nil {
 			return nil, metatools.RunChainOutput{}, err
 		}
@@ -406,8 +410,19 @@ func (s *Server) registerTools() {
 				"required":             []string{"value"},
 				"additionalProperties": false,
 			},
-		}, func(ctx context.Context, _ *mcp.CallToolRequest, input metatools.ExecuteCodeInput) (*mcp.CallToolResult, metatools.ExecuteCodeOutput, error) {
+		}, func(ctx context.Context, req *mcp.CallToolRequest, input metatools.ExecuteCodeInput) (*mcp.CallToolResult, metatools.ExecuteCodeOutput, error) {
+			progress := progressNotifier(req, ctx)
+			if progress != nil {
+				progress(handlers.ProgressEvent{Progress: 0, Total: 1, Message: "started"})
+			}
 			out, err := s.handlers.Code.Handle(ctx, input)
+			if progress != nil {
+				msg := "completed"
+				if err != nil {
+					msg = "error"
+				}
+				progress(handlers.ProgressEvent{Progress: 1, Total: 1, Message: msg})
+			}
 			if err != nil {
 				return nil, metatools.ExecuteCodeOutput{}, err
 			}
@@ -425,6 +440,26 @@ func registerTool[In, Out any](s *Server, tool *mcp.Tool, handler mcp.ToolHandle
 	s.toolRegistrations = append(s.toolRegistrations, func() {
 		mcp.AddTool(s.mcp, tool, handler)
 	})
+}
+
+func progressNotifier(req *mcp.CallToolRequest, ctx context.Context) func(handlers.ProgressEvent) {
+	if req == nil || req.Session == nil || req.Params == nil {
+		return nil
+	}
+	token := req.Params.GetProgressToken()
+	if token == nil {
+		return nil
+	}
+
+	return func(ev handlers.ProgressEvent) {
+		params := &mcp.ProgressNotificationParams{
+			ProgressToken: token,
+			Progress:      ev.Progress,
+			Total:         ev.Total,
+			Message:       ev.Message,
+		}
+		_ = req.Session.NotifyProgress(ctx, params)
+	}
 }
 
 func (s *Server) registerToolListNotifications() {

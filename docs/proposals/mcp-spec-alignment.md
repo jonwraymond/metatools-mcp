@@ -23,7 +23,7 @@ The goal is to improve protocol completeness and operational correctness without
 - Tool schemas are derived from `toolmodel` and remain MCP-native, preserving compatibility end-to-end.
 - Tool registration is static at startup; runtime updates now emit `tools/list_changed` via toolindex change notifications (debounced and optionally disabled).
 - Resources and prompts are not yet part of the metatools surface.
-- Cancellation behavior now propagates via `context.Context`; progress notifications remain dependent on downstream runner support.
+- Cancellation behavior now propagates via `context.Context`; progress notifications are emitted when a progress token is supplied, with step-level updates when the runner supports them.
 
 ## MCP Spec Alignment Targets
 
@@ -51,7 +51,7 @@ MCP supports cancellation and progress notifications for long-running operations
 **Implementation idea:**
 - Use `ctx` cancellation to interrupt tool execution.
 - Surface progress events from toolruntime or toolrun (where available).
-- If progress events are unavailable, document that progress notifications are not emitted.
+- When progress events are unavailable, emit coarse start/end progress notifications.
 
 ### 4) Resources and prompts expansion (future PRD)
 

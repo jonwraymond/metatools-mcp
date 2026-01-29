@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/jonwraymond/metatools-mcp/pkg/metatools"
+	"github.com/jonwraymond/toolindex"
+	"github.com/modelcontextprotocol/go-sdk/jsonrpc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -172,4 +174,26 @@ func TestSearchTools_IndexError(t *testing.T) {
 
 	_, err := handler.Handle(context.Background(), input)
 	assert.Error(t, err)
+}
+
+func TestSearchTools_InvalidCursor(t *testing.T) {
+	idx := &mockIndex{
+		searchFunc: func(_ context.Context, _ string, _ int, _ string) ([]metatools.ToolSummary, string, error) {
+			return nil, "", toolindex.ErrInvalidCursor
+		},
+	}
+
+	handler := NewSearchHandler(idx)
+	input := metatools.SearchToolsInput{Query: "test", Cursor: strPtr("bad")}
+
+	_, err := handler.Handle(context.Background(), input)
+	require.Error(t, err)
+
+	rpcErr, ok := err.(*jsonrpc.Error)
+	require.True(t, ok, "expected jsonrpc.Error")
+	assert.EqualValues(t, jsonrpc.CodeInvalidParams, rpcErr.Code)
+}
+
+func strPtr(s string) *string {
+	return &s
 }

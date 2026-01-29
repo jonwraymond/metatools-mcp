@@ -39,9 +39,9 @@ METATOOLS_SEARCH_STRATEGY=bm25 ./metatools
 
 ## Progress notifications
 
-`metatools-mcp` does not emit progress notifications for `run_tool`, `run_chain`, or
-`execute_code` yet because the underlying runners do not expose progress events for
-non-streaming calls.
+When callers supply a progress token, `run_tool`, `run_chain`, and `execute_code`
+emit progress notifications. If the runner exposes progress callbacks, step-level
+updates are forwarded; otherwise a coarse start/end signal is emitted.
 
 ## Optional toolruntime support
 
