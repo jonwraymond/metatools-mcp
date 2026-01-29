@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -99,5 +100,79 @@ func TestServeCmd_EnvVars(t *testing.T) {
 	}
 	if config != "metatools.yaml" {
 		t.Errorf("config = %q, want %q from env", config, "metatools.yaml")
+	}
+}
+
+func TestServeCmd_ConfigFile(t *testing.T) {
+	clearServeEnv(t)
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, "metatools.yaml")
+
+	yaml := `
+transport:
+  type: sse
+  http:
+    port: 9999
+`
+	if err := os.WriteFile(configPath, []byte(yaml), 0644); err != nil {
+		t.Fatalf("WriteFile() error = %v", err)
+	}
+
+	cfg, err := loadServeConfig(configPath, &ServeConfig{})
+	if err != nil {
+		t.Fatalf("loadServeConfig() error = %v", err)
+	}
+
+	if cfg.Transport.Type != "sse" {
+		t.Errorf("Transport.Type = %q, want %q", cfg.Transport.Type, "sse")
+	}
+	if cfg.Transport.HTTP.Port != 9999 {
+		t.Errorf("Transport.HTTP.Port = %d, want %d", cfg.Transport.HTTP.Port, 9999)
+	}
+}
+
+func TestServeCmd_CLIOverridesConfig(t *testing.T) {
+	clearServeEnv(t)
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, "metatools.yaml")
+
+	yaml := `
+transport:
+  type: sse
+  http:
+    port: 9999
+`
+	if err := os.WriteFile(configPath, []byte(yaml), 0644); err != nil {
+		t.Fatalf("WriteFile() error = %v", err)
+	}
+
+	cliCfg := &ServeConfig{
+		Transport: "http",
+		Port:      3000,
+	}
+
+	cfg, err := loadServeConfig(configPath, cliCfg)
+	if err != nil {
+		t.Fatalf("loadServeConfig() error = %v", err)
+	}
+
+	if cfg.Transport.Type != "http" {
+		t.Errorf("Transport.Type = %q, want %q from CLI", cfg.Transport.Type, "http")
+	}
+	if cfg.Transport.HTTP.Port != 3000 {
+		t.Errorf("Transport.HTTP.Port = %d, want %d from CLI", cfg.Transport.HTTP.Port, 3000)
+	}
+}
+
+func clearServeEnv(t *testing.T) {
+	t.Helper()
+	vars := []string{
+		"METATOOLS_TRANSPORT",
+		"METATOOLS_TRANSPORT_TYPE",
+		"METATOOLS_TRANSPORT_HTTP_PORT",
+		"METATOOLS_TRANSPORT_HTTP_HOST",
+	}
+	for _, v := range vars {
+		_ = os.Unsetenv(v)
 	}
 }

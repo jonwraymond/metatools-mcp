@@ -3,8 +3,27 @@
 ## Build and run (stdio)
 
 ```bash
-go run ./cmd/metatools
+go run ./cmd/metatools serve
 ```
+
+## CLI overview
+
+```bash
+metatools serve --transport=stdio
+metatools serve --transport=sse --port=8080
+metatools version
+metatools config validate --config examples/metatools.yaml
+```
+
+## Configuration files (Koanf)
+
+Config precedence:
+1. Defaults
+2. Config file (`--config`)
+3. Environment variables (`METATOOLS_` prefix)
+4. CLI flags
+
+Example file: `examples/metatools.yaml`
 
 ## Enable BM25 search (build tag + env)
 

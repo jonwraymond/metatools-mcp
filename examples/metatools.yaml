@@ -1,0 +1,46 @@
+server:
+  name: metatools-mcp
+  version: "dev"
+
+transport:
+  type: stdio
+  http:
+    host: 0.0.0.0
+    port: 8080
+    tls:
+      enabled: false
+      cert: ""
+      key: ""
+
+search:
+  strategy: lexical
+  bm25:
+    name_boost: 3
+    namespace_boost: 2
+    tags_boost: 2
+    max_docs: 0
+    max_doctext_len: 0
+
+execution:
+  timeout: 30s
+  max_tool_calls: 64
+  max_chain_steps: 8
+
+providers:
+  search_tools:
+    enabled: true
+  describe_tool:
+    enabled: true
+  run_tool:
+    enabled: true
+  run_chain:
+    enabled: true
+  execute_code:
+    enabled: false
+    sandbox: dev
+
+backends:
+  local:
+    enabled: true
+    paths: []
+    watch: false

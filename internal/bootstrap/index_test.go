@@ -86,3 +86,38 @@ func TestNewIndexFromConfig_DefaultStrategyWorks(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, results, 1)
 }
+
+func TestNewIndexFromAppConfig_CreatesWorkingIndex(t *testing.T) {
+	cfg := config.DefaultAppConfig()
+	cfg.Search.Strategy = "lexical"
+
+	idx, err := NewIndexFromAppConfig(cfg)
+	require.NoError(t, err)
+	require.NotNil(t, idx)
+
+	tool := toolmodel.Tool{
+		Tool: mcp.Tool{
+			Name:        "app_tool",
+			Description: "Tool registered via app config",
+			InputSchema: map[string]any{
+				"type":       "object",
+				"properties": map[string]any{},
+			},
+		},
+		Namespace: "app",
+	}
+
+	backend := toolmodel.ToolBackend{
+		Kind: toolmodel.BackendKindLocal,
+		Local: &toolmodel.LocalBackend{
+			Name: "test_handler",
+		},
+	}
+
+	err = idx.RegisterTool(tool, backend)
+	require.NoError(t, err)
+
+	results, err := idx.Search("app", 10)
+	require.NoError(t, err)
+	assert.Len(t, results, 1)
+}

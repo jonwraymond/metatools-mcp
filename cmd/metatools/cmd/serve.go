@@ -101,7 +101,42 @@ func applyServeEnvDefaults(cmd *cobra.Command, cfg *ServeConfig) {
 	}
 }
 
+// loadServeConfig loads config with CLI overrides.
+func loadServeConfig(configPath string, cli *ServeConfig) (config.AppConfig, error) {
+	overrides := map[string]any{}
+
+	if cli.Transport != "" && cli.Transport != "stdio" {
+		overrides["transport.type"] = cli.Transport
+	}
+	if cli.Port != 0 && cli.Port != 8080 {
+		overrides["transport.http.port"] = cli.Port
+	}
+	if cli.Host != "" && cli.Host != "0.0.0.0" {
+		overrides["transport.http.host"] = cli.Host
+	}
+
+	return config.LoadWithOverrides(configPath, overrides)
+}
+
 func buildServerConfig(_ *ServeConfig) (config.Config, error) {
+	appCfg, err := config.Load("")
+	if err != nil {
+		return config.Config{}, fmt.Errorf("loading config: %w", err)
+	}
+	return buildServerConfigFromConfig(appCfg)
+}
+
+func buildServerConfigFromConfig(appCfg config.AppConfig) (config.Config, error) {
+	idx, err := bootstrap.NewIndexFromAppConfig(appCfg)
+	if err != nil {
+		return config.Config{}, fmt.Errorf("creating index: %w", err)
+	}
+	docs := tooldocs.NewInMemoryStore(tooldocs.StoreOptions{Index: idx})
+	runner := toolrun.NewRunner(toolrun.WithIndex(idx))
+
+	cfg := adapters.NewConfig(idx, docs, runner, nil)
+
+	// Preserve notify settings from env config for now.
 	envCfg, err := config.LoadEnv()
 	if err != nil {
 		return config.Config{}, fmt.Errorf("loading env config: %w", err)
@@ -109,22 +144,22 @@ func buildServerConfig(_ *ServeConfig) (config.Config, error) {
 	if err := envCfg.ValidateEnv(); err != nil {
 		return config.Config{}, fmt.Errorf("invalid config: %w", err)
 	}
+	cfg.NotifyToolListChanged = envCfg.NotifyToolListChanged
+	cfg.NotifyToolListChangedDebounceMs = envCfg.NotifyToolListChangedDebounceMs
 
-	idx, err := bootstrap.NewIndexFromConfig(envCfg)
-	if err != nil {
-		return config.Config{}, fmt.Errorf("creating index: %w", err)
-	}
-	docs := tooldocs.NewInMemoryStore(tooldocs.StoreOptions{Index: idx})
-	runner := toolrun.NewRunner(toolrun.WithIndex(idx))
-
-	return adapters.NewConfig(idx, docs, runner, nil), nil
+	return cfg, nil
 }
 
 func runServe(ctx context.Context, cfg *ServeConfig) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	serverCfg, err := buildServerConfig(cfg)
+	appCfg, err := loadServeConfig(cfg.Config, cfg)
+	if err != nil {
+		return fmt.Errorf("load config: %w", err)
+	}
+
+	serverCfg, err := buildServerConfigFromConfig(appCfg)
 	if err != nil {
 		return fmt.Errorf("build server config: %w", err)
 	}
@@ -135,16 +170,16 @@ func runServe(ctx context.Context, cfg *ServeConfig) error {
 	}
 
 	var transport mcp.Transport
-	switch cfg.Transport {
+	switch appCfg.Transport.Type {
 	case "stdio":
 		transport = &mcp.StdioTransport{}
 	case "sse", "http":
-		return fmt.Errorf("transport %q not yet implemented", cfg.Transport)
+		return fmt.Errorf("transport %q not yet implemented", appCfg.Transport.Type)
 	default:
-		return fmt.Errorf("unknown transport: %s", cfg.Transport)
+		return fmt.Errorf("unknown transport: %s", appCfg.Transport.Type)
 	}
 
-	fmt.Fprintf(os.Stderr, "Starting metatools server (transport=%s)\n", cfg.Transport)
+	fmt.Fprintf(os.Stderr, "Starting metatools server (transport=%s)\n", appCfg.Transport.Type)
 	return srv.Run(ctx, transport)
 }
 

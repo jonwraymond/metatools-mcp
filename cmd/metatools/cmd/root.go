@@ -27,6 +27,7 @@ Use subcommands to start the server or manage configuration.`,
 
 	rootCmd.AddCommand(newServeCmd())
 	rootCmd.AddCommand(newVersionCmd())
+	rootCmd.AddCommand(newConfigCmd())
 
 	return rootCmd
 }
