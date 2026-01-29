@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/jonwraymond/metatools-mcp/internal/handlers"
+	"github.com/jonwraymond/metatools-mcp/internal/provider"
 )
 
 // Config holds the server configuration with injected dependencies
@@ -12,6 +13,9 @@ type Config struct {
 	Docs     handlers.Store
 	Runner   handlers.Runner
 	Executor handlers.Executor // optional
+
+	Providers        ProvidersConfig
+	ProviderRegistry *provider.Registry // optional override
 
 	NotifyToolListChanged           bool
 	NotifyToolListChangedDebounceMs int

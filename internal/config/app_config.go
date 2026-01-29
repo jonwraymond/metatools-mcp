@@ -66,11 +66,13 @@ type ExecutionConfig struct {
 
 // ProvidersConfig holds tool provider settings.
 type ProvidersConfig struct {
-	SearchTools  ProviderEnabled   `koanf:"search_tools"`
-	DescribeTool ProviderEnabled   `koanf:"describe_tool"`
-	RunTool      ProviderEnabled   `koanf:"run_tool"`
-	RunChain     ProviderEnabled   `koanf:"run_chain"`
-	ExecuteCode  ExecuteCodeConfig `koanf:"execute_code"`
+	SearchTools      ProviderEnabled   `koanf:"search_tools"`
+	ListNamespaces   ProviderEnabled   `koanf:"list_namespaces"`
+	DescribeTool     ProviderEnabled   `koanf:"describe_tool"`
+	ListToolExamples ProviderEnabled   `koanf:"list_tool_examples"`
+	RunTool          ProviderEnabled   `koanf:"run_tool"`
+	RunChain         ProviderEnabled   `koanf:"run_chain"`
+	ExecuteCode      ExecuteCodeConfig `koanf:"execute_code"`
 }
 
 // ProviderEnabled is a simple on/off provider config.
@@ -138,11 +140,13 @@ func DefaultAppConfig() AppConfig {
 			MaxChainSteps: 8,
 		},
 		Providers: ProvidersConfig{
-			SearchTools:  ProviderEnabled{Enabled: true},
-			DescribeTool: ProviderEnabled{Enabled: true},
-			RunTool:      ProviderEnabled{Enabled: true},
-			RunChain:     ProviderEnabled{Enabled: true},
-			ExecuteCode:  ExecuteCodeConfig{Enabled: false, Sandbox: "dev"},
+			SearchTools:      ProviderEnabled{Enabled: true},
+			ListNamespaces:   ProviderEnabled{Enabled: true},
+			DescribeTool:     ProviderEnabled{Enabled: true},
+			ListToolExamples: ProviderEnabled{Enabled: true},
+			RunTool:          ProviderEnabled{Enabled: true},
+			RunChain:         ProviderEnabled{Enabled: true},
+			ExecuteCode:      ExecuteCodeConfig{Enabled: false, Sandbox: "dev"},
 		},
 		Backends: BackendsConfig{
 			Local: LocalBackendConfig{

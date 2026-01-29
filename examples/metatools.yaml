@@ -29,7 +29,11 @@ execution:
 providers:
   search_tools:
     enabled: true
+  list_namespaces:
+    enabled: true
   describe_tool:
+    enabled: true
+  list_tool_examples:
     enabled: true
   run_tool:
     enabled: true

@@ -51,6 +51,11 @@ func TestNewServer_RegistersAllTools(t *testing.T) {
 		Docs:     &mockStore{},
 		Runner:   &mockRunner{},
 		Executor: &mockExecutor{},
+		Providers: func() config.ProvidersConfig {
+			providers := config.DefaultAppConfig().Providers
+			providers.ExecuteCode.Enabled = true
+			return providers
+		}(),
 	}
 
 	srv, err := New(cfg)
@@ -82,6 +87,11 @@ func TestNewServer_ToolsListReturns7Tools(t *testing.T) {
 		Docs:     &mockStore{},
 		Runner:   &mockRunner{},
 		Executor: &mockExecutor{},
+		Providers: func() config.ProvidersConfig {
+			providers := config.DefaultAppConfig().Providers
+			providers.ExecuteCode.Enabled = true
+			return providers
+		}(),
 	}
 
 	srv, err := New(cfg)
@@ -97,6 +107,7 @@ func TestNewServer_WithoutExecutor(t *testing.T) {
 		Docs:   &mockStore{},
 		Runner: &mockRunner{},
 		// No executor
+		Providers: config.DefaultAppConfig().Providers,
 	}
 
 	srv, err := New(cfg)
@@ -119,6 +130,11 @@ func TestServer_DeclaresToolsCapability(t *testing.T) {
 		Docs:     &mockStore{},
 		Runner:   &mockRunner{},
 		Executor: &mockExecutor{},
+		Providers: func() config.ProvidersConfig {
+			providers := config.DefaultAppConfig().Providers
+			providers.ExecuteCode.Enabled = true
+			return providers
+		}(),
 	}
 
 	srv, err := New(cfg)

@@ -37,9 +37,10 @@ func (p *progressRunner) RunChainWithProgress(_ context.Context, _ []handlers.Ch
 
 func TestServer_ProgressNotifications_RunTool(t *testing.T) {
 	cfg := config.Config{
-		Index:  &mockIndex{},
-		Docs:   &mockStore{},
-		Runner: &progressRunner{},
+		Index:     &mockIndex{},
+		Docs:      &mockStore{},
+		Runner:    &progressRunner{},
+		Providers: config.DefaultAppConfig().Providers,
 	}
 
 	srv, err := New(cfg)

@@ -22,6 +22,7 @@ func newTestServerWithIndex(t *testing.T, idx toolindex.Index, notify bool, debo
 		Index:                           adapters.NewIndexAdapter(idx),
 		Docs:                            &mockStore{},
 		Runner:                          &mockRunner{},
+		Providers:                       config.DefaultAppConfig().Providers,
 		NotifyToolListChanged:           notify,
 		NotifyToolListChangedDebounceMs: debounceMs,
 	}

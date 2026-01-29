@@ -25,6 +25,12 @@ Config precedence:
 
 Example file: `examples/metatools.yaml`
 
+## Provider toggles
+
+Built-in metatools can be enabled/disabled via `providers.*.enabled` in the
+config file (see the `providers` block in `examples/metatools.yaml`). This
+controls which MCP tools are registered at startup.
+
 ## Enable BM25 search (build tag + env)
 
 ```bash
