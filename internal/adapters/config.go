@@ -16,6 +16,7 @@ func NewConfig(idx toolindex.Index, docs tooldocs.Store, runner toolrun.Runner, 
 		Index:                           NewIndexAdapter(idx),
 		Docs:                            NewDocsAdapter(docs),
 		Runner:                          NewRunnerAdapter(runner),
+		Providers:                       config.DefaultAppConfig().Providers,
 		NotifyToolListChanged:           true,
 		NotifyToolListChangedDebounceMs: int((150 * time.Millisecond) / time.Millisecond),
 	}
