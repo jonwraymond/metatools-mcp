@@ -59,7 +59,7 @@ func TestRunTool_ContextCancellationDuringExecution(t *testing.T) {
 
 func TestSearchHandler_ContextCancelled(t *testing.T) {
     index := &mockIndex{
-        searchFunc: func(ctx context.Context, query string, limit int, cursor string) ([]metatools.ToolSummary, string, error) {
+		searchFunc: func(_ context.Context, query string, limit int, cursor string) ([]metatools.ToolSummary, string, error) {
             return []metatools.ToolSummary{{Name: "test"}}, "", nil
         },
     }
@@ -77,7 +77,7 @@ func TestSearchHandler_ContextCancelled(t *testing.T) {
 
 func TestNamespacesHandler_ContextCancelled(t *testing.T) {
     index := &mockIndex{
-        listNamespacesFunc: func(ctx context.Context, limit int, cursor string) ([]string, string, error) {
+		listNamespacesFunc: func(_ context.Context, limit int, cursor string) ([]string, string, error) {
             return []string{"ns1"}, "", nil
         },
     }
@@ -95,7 +95,7 @@ func TestNamespacesHandler_ContextCancelled(t *testing.T) {
 
 func TestDescribeHandler_ContextCancelled(t *testing.T) {
     store := &mockStore{
-        describeToolFunc: func(ctx context.Context, id string, level string) (ToolDoc, error) {
+		describeToolFunc: func(_ context.Context, id string, level string) (ToolDoc, error) {
             return ToolDoc{}, nil
         },
     }
