@@ -135,6 +135,40 @@ func TestServer_ToolListChangedNotification_Debounce(t *testing.T) {
 	assert.Equal(t, int32(1), notifyCount.Load())
 }
 
+func TestServer_ToolListChangedNotification_SinglePerChange(t *testing.T) {
+	idx := toolindex.NewInMemoryIndex()
+	srv := newTestServerWithIndex(t, idx, true, 20)
+
+	ctx := context.Background()
+	serverTransport, clientTransport := mcp.NewInMemoryTransports()
+
+	serverSession, err := srv.MCPServer().Connect(ctx, serverTransport, nil)
+	require.NoError(t, err)
+	defer func() {
+		assert.NoError(t, serverSession.Close())
+	}()
+
+	var notifyCount atomic.Int32
+	client := mcp.NewClient(&mcp.Implementation{Name: "metatools-test-client"}, &mcp.ClientOptions{
+		ToolListChangedHandler: func(_ context.Context, _ *mcp.ToolListChangedRequest) {
+			notifyCount.Add(1)
+		},
+	})
+	clientSession, err := client.Connect(ctx, clientTransport, nil)
+	require.NoError(t, err)
+	defer func() {
+		assert.NoError(t, clientSession.Close())
+	}()
+
+	time.Sleep(50 * time.Millisecond)
+	notifyCount.Store(0)
+
+	registerIndexTool(t, idx, "alpha")
+
+	time.Sleep(200 * time.Millisecond)
+	assert.Equal(t, int32(1), notifyCount.Load())
+}
+
 func TestServer_ToolListChangedNotification_Disabled(t *testing.T) {
 	idx := toolindex.NewInMemoryIndex()
 	srv := newTestServerWithIndex(t, idx, false, 30)

@@ -29,6 +29,10 @@ progressive disclosure:
 - `run_chain`
 - `execute_code` (only when an executor is injected)
 
+## Changelog
+
+See `CHANGELOG.md` for release notes.
+
 ## Search Strategy
 
 By default, metatools-mcp uses lexical search. For BM25 ranking:

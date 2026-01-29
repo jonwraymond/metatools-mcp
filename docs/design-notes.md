@@ -10,7 +10,7 @@ This page documents the tradeoffs and error semantics behind `metatools-mcp`.
 - **Explicit limits.** Inputs such as `limit` and `max` are capped for safe defaults (e.g., search limit cap 100, examples cap 5).
 - **Opaque pagination.** Cursor tokens are opaque and validated against index mutations to prevent stale paging.
 - **Pluggable search.** BM25 is optional via build tags (`toolsearch`) and runtime config via env vars.
-- **Change notifications.** Tool list updates emit `notifications/tools/list_changed` with a debounce window and can be disabled.
+- **Change notifications.** Tool list updates emit `notifications/tools/list_changed` with a debounce window; notifications can be disabled and are emitted as a single list change per debounce window.
 
 ## Error semantics
 

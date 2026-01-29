@@ -9,6 +9,7 @@ nav:
   - User Journey: user-journey.md
   - API Reference: api.md
   - Plan of Record: plan-of-record.md
+  - Changelog: changelog.md
   - Proposals:
       - Pluggable Architecture: proposals/pluggable-architecture.md
       - Implementation Phases: proposals/implementation-phases.md

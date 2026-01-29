@@ -46,6 +46,9 @@ type Server struct {
 	handlers *Handlers
 
 	toolRegistrations []func()
+	toolListMu        sync.Mutex
+	toolListTimer     *time.Timer
+	toolListUnsub     func()
 }
 
 // Handlers holds all the metatool handlers.
@@ -437,23 +440,39 @@ func (s *Server) registerToolListNotifications() {
 		debounce = 150 * time.Millisecond
 	}
 
-	var mu sync.Mutex
-	var timer *time.Timer
-	changeNotifier.OnChange(func(_ toolindex.ChangeEvent) {
-		mu.Lock()
-		defer mu.Unlock()
-		if timer == nil {
-			timer = time.AfterFunc(debounce, s.reregisterTools)
+	s.toolListUnsub = changeNotifier.OnChange(func(_ toolindex.ChangeEvent) {
+		s.toolListMu.Lock()
+		defer s.toolListMu.Unlock()
+		if s.toolListTimer == nil {
+			s.toolListTimer = time.AfterFunc(debounce, s.reregisterTools)
 			return
 		}
-		timer.Reset(debounce)
+		s.toolListTimer.Reset(debounce)
 	})
 }
 
 func (s *Server) reregisterTools() {
-	for _, register := range s.toolRegistrations {
-		register()
+	if len(s.toolRegistrations) == 0 {
+		return
 	}
+	// Re-register a single tool to trigger one list_changed notification.
+	s.toolRegistrations[0]()
+}
+
+// Close releases resources associated with the server.
+func (s *Server) Close() error {
+	s.toolListMu.Lock()
+	if s.toolListTimer != nil {
+		s.toolListTimer.Stop()
+		s.toolListTimer = nil
+	}
+	s.toolListMu.Unlock()
+
+	if s.toolListUnsub != nil {
+		s.toolListUnsub()
+		s.toolListUnsub = nil
+	}
+	return nil
 }
 
 func errorSchema() map[string]any {

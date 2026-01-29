@@ -32,6 +32,11 @@ METATOOLS_SEARCH_STRATEGY=bm25 ./metatools
 - Responses include `nextCursor` when more results are available.
 - Cursor tokens are opaque and invalid cursors return JSON-RPC invalid params.
 
+## Tool list change notifications
+
+- `notifications/tools/list_changed` is emitted when the underlying toolindex changes.
+- Notifications are debounced to avoid client spam and can be disabled with `METATOOLS_NOTIFY_TOOL_LIST_CHANGED=false`.
+
 ## Progress notifications
 
 `metatools-mcp` does not emit progress notifications for `run_tool`, `run_chain`, or

@@ -21,9 +21,9 @@ The goal is to improve protocol completeness and operational correctness without
 
 - `metatools-mcp` exposes MCP tools via the official Go SDK and maps errors into MCP tool error payloads.
 - Tool schemas are derived from `toolmodel` and remain MCP-native, preserving compatibility end-to-end.
-- Tool registration is static at startup; runtime updates do not emit `tools/list_changed` yet.
+- Tool registration is static at startup; runtime updates now emit `tools/list_changed` via toolindex change notifications (debounced and optionally disabled).
 - Resources and prompts are not yet part of the metatools surface.
-- Cancellation/progress behavior depends on downstream runner behavior; it is not yet surfaced as a first-class contract.
+- Cancellation behavior now propagates via `context.Context`; progress notifications remain dependent on downstream runner support.
 
 ## MCP Spec Alignment Targets
 

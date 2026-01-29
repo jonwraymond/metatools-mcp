@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- Cursor-based pagination for `search_tools` and `list_namespaces` with opaque cursors.
+- `notifications/tools/list_changed` support with debounce and env toggle.
+- Tests for list-changed notifications and cancellation propagation.
+
+### Changed
+- `list_namespaces` input/output schemas now include `limit`, `cursor`, and `nextCursor`.
+- Cursor helpers marked deprecated in favor of toolindex tokens.
+
 ## [0.2.0](https://github.com/jonwraymond/metatools-mcp/compare/metatools-mcp-v0.1.12...metatools-mcp-v0.2.0) (2026-01-28)
 
 
