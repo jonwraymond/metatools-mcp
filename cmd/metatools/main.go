@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"os/signal"
 	"syscall"
 
+	cmdpkg "github.com/jonwraymond/metatools-mcp/cmd/metatools/cmd"
 	"github.com/jonwraymond/metatools-mcp/internal/adapters"
 	"github.com/jonwraymond/metatools-mcp/internal/bootstrap"
 	"github.com/jonwraymond/metatools-mcp/internal/config"
@@ -17,25 +19,12 @@ import (
 )
 
 func main() {
-	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer cancel()
-
-	srv, err := createServer()
-	if err != nil {
-		log.Fatalf("Failed to create server: %v", err)
+	if err := cmdpkg.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
-
-	tools := srv.ListTools()
-	log.Printf("metatools-mcp server starting with %d tools", len(tools))
-
-	transport := &mcp.StdioTransport{}
-	if err := srv.Run(ctx, transport); err != nil && ctx.Err() == nil {
-		log.Fatalf("Server error: %v", err)
-	}
-	log.Println("Server stopped")
 }
 
-// createServer creates a new metatools server with default dependencies
 func createServer() (*server.Server, error) {
 	envCfg, err := config.LoadEnv()
 	if err != nil {
@@ -61,4 +50,25 @@ func createServer() (*server.Server, error) {
 	cfg.NotifyToolListChanged = envCfg.NotifyToolListChanged
 	cfg.NotifyToolListChangedDebounceMs = envCfg.NotifyToolListChangedDebounceMs
 	return server.New(cfg)
+}
+
+// runLegacy is retained for compatibility testing of the stdio server.
+func runLegacy() error {
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer cancel()
+
+	srv, err := createServer()
+	if err != nil {
+		return fmt.Errorf("create server: %w", err)
+	}
+
+	tools := srv.ListTools()
+	log.Printf("metatools-mcp server starting with %d tools", len(tools))
+
+	transport := &mcp.StdioTransport{}
+	if err := srv.Run(ctx, transport); err != nil && ctx.Err() == nil {
+		return fmt.Errorf("server error: %w", err)
+	}
+	log.Println("Server stopped")
+	return nil
 }
