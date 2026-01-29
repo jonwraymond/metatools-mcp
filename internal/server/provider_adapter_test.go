@@ -19,7 +19,7 @@ func (s *stubProvider) Enabled() bool { return true }
 func (s *stubProvider) Tool() mcp.Tool {
 	return s.tool
 }
-func (s *stubProvider) Handle(ctx context.Context, _ *mcp.CallToolRequest, _ map[string]any) (*mcp.CallToolResult, any, error) {
+func (s *stubProvider) Handle(_ context.Context, _ *mcp.CallToolRequest, _ map[string]any) (*mcp.CallToolResult, any, error) {
 	return nil, map[string]any{"ok": true}, nil
 }
 

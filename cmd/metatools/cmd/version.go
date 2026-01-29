@@ -23,7 +23,7 @@ func newVersionCmd() *cobra.Command {
 		Use:   "version",
 		Short: "Print version information",
 		Long:  "Print the version, git commit, build date, and Go version.",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			info := versionInfo{
 				Version:   Version,
 				GitCommit: GitCommit,

@@ -40,11 +40,11 @@ type StreamingProvider interface {
 	HandleStream(ctx context.Context, req *mcp.CallToolRequest, args map[string]any) (<-chan any, error)
 }
 
-// ProviderFactory creates provider instances.
-type ProviderFactory func() ToolProvider
+// Factory creates provider instances.
+type Factory func() ToolProvider
 
-// ProviderInfo contains metadata about a provider.
-type ProviderInfo struct {
+// Info contains metadata about a provider.
+type Info struct {
 	Name        string
 	Description string
 	Version     string
@@ -52,9 +52,9 @@ type ProviderInfo struct {
 	Streaming   bool
 }
 
-// GetInfo returns provider metadata if available.
-func GetInfo(p ToolProvider) ProviderInfo {
-	info := ProviderInfo{
+// InfoOf returns provider metadata if available.
+func InfoOf(p ToolProvider) Info {
+	info := Info{
 		Name: p.Name(),
 	}
 

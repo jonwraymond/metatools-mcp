@@ -1,12 +1,8 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"log"
 	"os"
-	"os/signal"
-	"syscall"
 
 	cmdpkg "github.com/jonwraymond/metatools-mcp/cmd/metatools/cmd"
 	"github.com/jonwraymond/metatools-mcp/internal/adapters"
@@ -15,7 +11,6 @@ import (
 	"github.com/jonwraymond/metatools-mcp/internal/server"
 	"github.com/jonwraymond/tooldocs"
 	"github.com/jonwraymond/toolrun"
-	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 func main() {
@@ -53,22 +48,3 @@ func createServer() (*server.Server, error) {
 }
 
 // runLegacy is retained for compatibility testing of the stdio server.
-func runLegacy() error {
-	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer cancel()
-
-	srv, err := createServer()
-	if err != nil {
-		return fmt.Errorf("create server: %w", err)
-	}
-
-	tools := srv.ListTools()
-	log.Printf("metatools-mcp server starting with %d tools", len(tools))
-
-	transport := &mcp.StdioTransport{}
-	if err := srv.Run(ctx, transport); err != nil && ctx.Err() == nil {
-		return fmt.Errorf("server error: %w", err)
-	}
-	log.Println("Server stopped")
-	return nil
-}

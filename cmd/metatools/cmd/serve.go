@@ -55,10 +55,10 @@ Examples:
   metatools serve                           # stdio mode (default)
   metatools serve --transport=sse --port=8080
   metatools serve --config=metatools.yaml`,
-		PreRunE: func(cmd *cobra.Command, args []string) error {
+		PreRunE: func(_ *cobra.Command, _ []string) error {
 			return validateTransport(cfg.Transport)
 		},
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			return runServe(cmd.Context(), cfg)
 		},
 	}
