@@ -12,6 +12,7 @@ import (
 	"github.com/jonwraymond/metatools-mcp/internal/bootstrap"
 	"github.com/jonwraymond/metatools-mcp/internal/config"
 	"github.com/jonwraymond/metatools-mcp/internal/server"
+	transportpkg "github.com/jonwraymond/metatools-mcp/internal/transport"
 	"github.com/jonwraymond/tooldocs"
 	"github.com/jonwraymond/toolrun"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -169,18 +170,24 @@ func runServe(ctx context.Context, cfg *ServeConfig) error {
 		return fmt.Errorf("create server: %w", err)
 	}
 
-	var transport mcp.Transport
+	var transport transportpkg.Transport
 	switch appCfg.Transport.Type {
 	case "stdio":
-		transport = &mcp.StdioTransport{}
-	case "sse", "http":
+		transport = &transportpkg.StdioTransport{}
+	case "sse":
+		transport = &transportpkg.SSETransport{Config: transportpkg.SSEConfig{
+			Host: appCfg.Transport.HTTP.Host,
+			Port: appCfg.Transport.HTTP.Port,
+			Path: "/mcp",
+		}}
+	case "http":
 		return fmt.Errorf("transport %q not yet implemented", appCfg.Transport.Type)
 	default:
 		return fmt.Errorf("unknown transport: %s", appCfg.Transport.Type)
 	}
 
 	fmt.Fprintf(os.Stderr, "Starting metatools server (transport=%s)\n", appCfg.Transport.Type)
-	return srv.Run(ctx, transport)
+	return transport.Serve(ctx, srv)
 }
 
 // Ensure compile-time interface usage for default transport.
