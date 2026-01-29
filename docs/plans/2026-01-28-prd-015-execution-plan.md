@@ -207,12 +207,12 @@ For every task:
 
 ## Verification Checklist (end of Phase 0)
 
-- [ ] All tests pass in `toolrun`, `toolruntime` (if touched), `toolindex`, `metatools-mcp`
-- [ ] MCP `tools/list_changed` notifications observed under test
-- [ ] Cursor paging deterministic and opaque
-- [ ] Cancellation honored for all tool execution paths
-- [ ] Progress forwarding documented and conditional
-- [ ] Docs updated and consistent
+- [x] All tests pass in `toolrun`, `toolruntime` (if touched), `toolindex`, `metatools-mcp`
+- [x] MCP `tools/list_changed` notifications observed under test
+- [x] Cursor paging deterministic and opaque
+- [x] Cancellation honored for all tool execution paths
+- [x] Progress forwarding documented and conditional
+- [x] Docs updated and consistent
 
 ---
 
