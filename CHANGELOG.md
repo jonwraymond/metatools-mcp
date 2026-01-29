@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.4.0](https://github.com/jonwraymond/metatools-mcp/compare/metatools-mcp-v0.3.0...metatools-mcp-v0.4.0) (2026-01-29)
+
+
+### Features
+
+* **backend:** add registry, local backend, and adapter ([cd0f8a1](https://github.com/jonwraymond/metatools-mcp/commit/cd0f8a1204b6e55d6564dc182148a4bd4c4a9b87))
+* **cli:** add Cobra foundation ([bc492ad](https://github.com/jonwraymond/metatools-mcp/commit/bc492adea64eb1c14daf4f26497a83339fac7f1f))
+* **config:** add Koanf config layer (PRD-003) ([7fa2403](https://github.com/jonwraymond/metatools-mcp/commit/7fa2403c6b77a23442c2a4929c779d78d6a157d0))
+* **middleware:** add middleware chain and config ([4f70bd2](https://github.com/jonwraymond/metatools-mcp/commit/4f70bd2d6579f1aaeb841c36c6ff8ce161ee0e5a))
+* **server:** add provider registry and built-in providers ([3c8124f](https://github.com/jonwraymond/metatools-mcp/commit/3c8124f65b9ed388b6ddaff3827beda46ce1d721))
+* **transport:** add SSE transport abstraction (PRD-004) ([aa42715](https://github.com/jonwraymond/metatools-mcp/commit/aa4271596d49014f397e230c75663d06a3f60d6f))
+
+
+### Bug Fixes
+
+* **backend:** address lint issues ([550ebb2](https://github.com/jonwraymond/metatools-mcp/commit/550ebb2a26b527463b0d673b0b6c93bb1084a89c))
+* **backend:** silence revive unused params ([70698eb](https://github.com/jonwraymond/metatools-mcp/commit/70698ebc56e165a63583eba546ec8cae912355b5))
+* **middleware:** resolve lint in tests and config ([a306e51](https://github.com/jonwraymond/metatools-mcp/commit/a306e51cf3edc59fa53e5875f50791c2ac016228))
+* **middleware:** resolve revive unused params ([f87f926](https://github.com/jonwraymond/metatools-mcp/commit/f87f92600bcff0fc82eb2c0e2b4554df70e7e8e6))
+
 ## [0.3.0](https://github.com/jonwraymond/metatools-mcp/compare/metatools-mcp-v0.2.0...metatools-mcp-v0.3.0) (2026-01-29)
 
 
