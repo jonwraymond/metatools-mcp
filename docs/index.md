@@ -7,8 +7,8 @@ toolrun, and optionally toolcode/toolruntime.
 [![Docs](https://img.shields.io/badge/docs-ai--tools--stack-blue)](https://jonwraymond.github.io/ai-tools-stack/)
 
 ## Deep dives
-- Design Notes: `design-notes.md`
-- User Journey: `user-journey.md`
+- Design Notes: [design-notes.md](design-notes.md)
+- User Journey: [user-journey.md](user-journey.md)
 
 ## Motivation
 
@@ -51,8 +51,8 @@ _ = server.Run(context.Background(), &mcp.StdioTransport{})
 - Ordered execution plan: `plan-of-record.md`
 - Configuration and env vars: `usage.md`
 - Examples: `examples.md`
-- Design Notes: `design-notes.md`
-- User Journey: `user-journey.md`
+- Design Notes: [design-notes.md](design-notes.md)
+- User Journey: [user-journey.md](user-journey.md)
 
 ## Proposals
 
