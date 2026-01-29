@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.0](https://github.com/jonwraymond/metatools-mcp/compare/metatools-mcp-v0.2.0...metatools-mcp-v0.3.0) (2026-01-29)
+
+
+### Features
+
+* **mcp:** implement spec alignment per PRD-015 ([037326f](https://github.com/jonwraymond/metatools-mcp/commit/037326fbcc932e16dc761f773feea50fd63773fb))
+* **mcp:** implement spec alignment per PRD-015 ([bae429c](https://github.com/jonwraymond/metatools-mcp/commit/bae429cb5c43ea8f785f1e67a3b870943bf9d01f))
+* **mcp:** stabilize list_changed and add changelog ([7f191e8](https://github.com/jonwraymond/metatools-mcp/commit/7f191e8ceebed1a178f540912df51771293a54cc))
+* progress notifications and cancellation codes ([dc1d9a2](https://github.com/jonwraymond/metatools-mcp/commit/dc1d9a2874938518c615de6064489ff0573d8447))
+
+
+### Bug Fixes
+
+* satisfy revive context parameter order ([c1fefe6](https://github.com/jonwraymond/metatools-mcp/commit/c1fefe6d9431a2cb0eff31c90e8f35a17c3764ec))
+
 ## [Unreleased]
 
 ### Added
