@@ -38,6 +38,7 @@ func (m *mockBackend) Start(_ context.Context) error { return nil }
 func (m *mockBackend) Stop() error                   { return nil }
 
 func TestBackend_Interface(t *testing.T) {
+	t.Helper()
 	var _ Backend = (*mockBackend)(nil)
 }
 
@@ -49,7 +50,7 @@ func TestBackend_Methods(t *testing.T) {
 		tools: []toolmodel.Tool{
 			{Tool: mcp.Tool{Name: "test_tool", Description: "A test tool"}},
 		},
-		execFn: func(ctx context.Context, tool string, args map[string]any) (any, error) {
+		execFn: func(_ context.Context, tool string, args map[string]any) (any, error) {
 			return "executed", nil
 		},
 	}

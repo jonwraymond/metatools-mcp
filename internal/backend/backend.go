@@ -54,11 +54,11 @@ type StreamingBackend interface {
 	ExecuteStream(ctx context.Context, tool string, args map[string]any) (<-chan any, error)
 }
 
-// BackendFactory creates backend instances.
-type BackendFactory func(name string) (Backend, error)
+// Factory creates backend instances.
+type Factory func(name string) (Backend, error)
 
-// BackendInfo contains metadata about a backend.
-type BackendInfo struct {
+// Info contains metadata about a backend.
+type Info struct {
 	Kind        string
 	Name        string
 	Enabled     bool

@@ -58,7 +58,7 @@ func TestAggregator_Execute(t *testing.T) {
 		kind:    "local",
 		name:    "local",
 		enabled: true,
-		execFn: func(ctx context.Context, tool string, args map[string]any) (any, error) {
+		execFn: func(_ context.Context, tool string, args map[string]any) (any, error) {
 			if tool == "echo" {
 				return args["msg"], nil
 			}

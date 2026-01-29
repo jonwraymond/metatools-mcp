@@ -15,19 +15,19 @@ var ErrBackendExists = errors.New("backend already registered")
 type Registry struct {
 	mu        sync.RWMutex
 	backends  map[string]Backend
-	factories map[string]BackendFactory
+	factories map[string]Factory
 }
 
 // NewRegistry creates a new backend registry.
 func NewRegistry() *Registry {
 	return &Registry{
 		backends:  make(map[string]Backend),
-		factories: make(map[string]BackendFactory),
+		factories: make(map[string]Factory),
 	}
 }
 
 // RegisterFactory registers a factory for a backend kind.
-func (r *Registry) RegisterFactory(kind string, factory BackendFactory) {
+func (r *Registry) RegisterFactory(kind string, factory Factory) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if kind == "" || factory == nil {

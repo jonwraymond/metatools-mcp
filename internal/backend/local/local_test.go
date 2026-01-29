@@ -8,6 +8,7 @@ import (
 )
 
 func TestLocalBackend_Interface(t *testing.T) {
+	t.Helper()
 	var _ backend.Backend = (*Backend)(nil)
 }
 
@@ -28,7 +29,7 @@ func TestLocalBackend_Name(t *testing.T) {
 func TestLocalBackend_RegisterHandler(t *testing.T) {
 	b := New("test")
 
-	handler := func(ctx context.Context, args map[string]any) (any, error) {
+	handler := func(_ context.Context, args map[string]any) (any, error) {
 		return "handled", nil
 	}
 
@@ -58,7 +59,7 @@ func TestLocalBackend_Execute(t *testing.T) {
 	b.RegisterHandler("echo", ToolDef{
 		Name:        "echo",
 		Description: "Echo input",
-		Handler: func(ctx context.Context, args map[string]any) (any, error) {
+		Handler: func(_ context.Context, args map[string]any) (any, error) {
 			return args["message"], nil
 		},
 	})
