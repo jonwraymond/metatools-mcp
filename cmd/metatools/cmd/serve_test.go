@@ -82,7 +82,9 @@ func TestServeCmd_EnvVars(t *testing.T) {
 	os.Setenv("METATOOLS_CONFIG", "metatools.yaml")
 
 	cmd := newServeCmd()
-	cmd.ParseFlags([]string{})
+	if err := cmd.ParseFlags([]string{}); err != nil {
+		t.Fatalf("ParseFlags() error = %v", err)
+	}
 
 	transport, _ := cmd.Flags().GetString("transport")
 	port, _ := cmd.Flags().GetInt("port")

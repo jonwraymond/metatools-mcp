@@ -35,7 +35,7 @@ func (t *SSETransport) Name() string {
 }
 
 // Info returns descriptive information about the transport.
-func (t *SSETransport) Info() TransportInfo {
+func (t *SSETransport) Info() Info {
 	path := t.Config.Path
 	if path == "" {
 		path = "/mcp"
@@ -50,7 +50,7 @@ func (t *SSETransport) Info() TransportInfo {
 		}
 		addr = fmt.Sprintf("%s:%d", host, t.Config.Port)
 	}
-	return TransportInfo{Name: "sse", Addr: addr, Path: path}
+	return Info{Name: "sse", Addr: addr, Path: path}
 }
 
 // Serve starts the SSE transport and blocks until the context is cancelled.

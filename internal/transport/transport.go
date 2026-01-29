@@ -12,8 +12,8 @@ type Server interface {
 	MCPServer() *mcp.Server
 }
 
-// TransportInfo describes a transport instance.
-type TransportInfo struct {
+// Info describes a transport instance.
+type Info struct {
 	Name string
 	Addr string
 	Path string
@@ -22,7 +22,7 @@ type TransportInfo struct {
 // Transport defines the interface for MCP protocol transports.
 type Transport interface {
 	Name() string
-	Info() TransportInfo
+	Info() Info
 	Serve(ctx context.Context, server Server) error
 	Close() error
 }

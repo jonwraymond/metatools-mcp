@@ -2,7 +2,7 @@ package transport
 
 import "testing"
 
-func TestTransportInterface(t *testing.T) {
+func TestTransportInterface(_ *testing.T) {
 	var _ Transport = (*StdioTransport)(nil)
 	var _ Transport = (*SSETransport)(nil)
 }
