@@ -18,15 +18,25 @@
 ## [Unreleased]
 
 ### Added
-- Cursor-based pagination for `search_tools` and `list_namespaces` with opaque cursors.
-- `notifications/tools/list_changed` support with debounce and env toggle.
-- Tests for list-changed notifications and cancellation propagation.
-- Progress notifications for `run_tool`, `run_chain`, and `execute_code` when a progress token is provided.
-- Cancellation and timeout error codes (`cancelled`, `timeout`) for tool failures.
+- _TBD_
 
 ### Changed
-- `list_namespaces` input/output schemas now include `limit`, `cursor`, and `nextCursor`.
-- Cursor helpers marked deprecated in favor of toolindex tokens.
+- _TBD_
+
+## [0.4.0](https://github.com/jonwraymond/metatools-mcp/compare/metatools-mcp-v0.3.0...metatools-mcp-v0.4.0) (2026-01-29)
+
+### Features
+
+- CLI foundation (Cobra) with serve/config/version commands.
+- Koanf-based configuration loading with YAML/env support and defaults.
+- Transport layer wiring (stdio + SSE) with config-driven selection.
+- Provider registry with built-in MCP tools for search/docs/run/execute.
+- Backend registry scaffolding with local backend support and adapters.
+- Middleware chain scaffolding with logging/metrics middleware.
+
+### Docs
+
+- Added implementation notes for backend and middleware naming.
 
 ## [0.2.0](https://github.com/jonwraymond/metatools-mcp/compare/metatools-mcp-v0.1.12...metatools-mcp-v0.2.0) (2026-01-28)
 
