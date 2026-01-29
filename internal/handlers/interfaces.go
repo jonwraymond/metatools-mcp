@@ -8,8 +8,8 @@ import (
 
 // Index provides tool search and discovery
 type Index interface {
-	Search(ctx context.Context, query string, limit int) ([]metatools.ToolSummary, error)
-	ListNamespaces(ctx context.Context) ([]string, error)
+	SearchPage(ctx context.Context, query string, limit int, cursor string) ([]metatools.ToolSummary, string, error)
+	ListNamespacesPage(ctx context.Context, limit int, cursor string) ([]string, string, error)
 }
 
 // ToolDoc represents a tool documentation result

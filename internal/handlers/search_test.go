@@ -11,32 +11,32 @@ import (
 )
 
 type mockIndex struct {
-	searchFunc         func(_ context.Context, query string, limit int) ([]metatools.ToolSummary, error)
-	listNamespacesFunc func(_ context.Context) ([]string, error)
+	searchFunc         func(_ context.Context, query string, limit int, cursor string) ([]metatools.ToolSummary, string, error)
+	listNamespacesFunc func(_ context.Context, limit int, cursor string) ([]string, string, error)
 }
 
-func (m *mockIndex) Search(ctx context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
+func (m *mockIndex) SearchPage(ctx context.Context, query string, limit int, cursor string) ([]metatools.ToolSummary, string, error) {
 	if m.searchFunc != nil {
-		return m.searchFunc(ctx, query, limit)
+		return m.searchFunc(ctx, query, limit, cursor)
 	}
-	return []metatools.ToolSummary{}, nil
+	return []metatools.ToolSummary{}, "", nil
 }
 
-func (m *mockIndex) ListNamespaces(ctx context.Context) ([]string, error) {
+func (m *mockIndex) ListNamespacesPage(ctx context.Context, limit int, cursor string) ([]string, string, error) {
 	if m.listNamespacesFunc != nil {
-		return m.listNamespacesFunc(ctx)
+		return m.listNamespacesFunc(ctx, limit, cursor)
 	}
-	return []string{}, nil
+	return []string{}, "", nil
 }
 
 func TestSearchTools_EmptyQuery(t *testing.T) {
 	idx := &mockIndex{
-		searchFunc: func(_ context.Context, _ string, _ int) ([]metatools.ToolSummary, error) {
+		searchFunc: func(_ context.Context, _ string, _ int, _ string) ([]metatools.ToolSummary, string, error) {
 			// Empty query should still work, returns all tools
 			return []metatools.ToolSummary{
 				{ID: "test.tool1", Name: "tool1"},
 				{ID: "test.tool2", Name: "tool2"},
-			}, nil
+			}, "", nil
 		},
 	}
 
@@ -50,11 +50,11 @@ func TestSearchTools_EmptyQuery(t *testing.T) {
 
 func TestSearchTools_WithQuery(t *testing.T) {
 	idx := &mockIndex{
-		searchFunc: func(_ context.Context, query string, _ int) ([]metatools.ToolSummary, error) {
+		searchFunc: func(_ context.Context, query string, _ int, _ string) ([]metatools.ToolSummary, string, error) {
 			assert.Equal(t, "test query", query)
 			return []metatools.ToolSummary{
 				{ID: "test.matching", Name: "matching", ShortDescription: "test query match"},
-			}, nil
+			}, "", nil
 		},
 	}
 
@@ -69,12 +69,12 @@ func TestSearchTools_WithQuery(t *testing.T) {
 
 func TestSearchTools_WithLimit(t *testing.T) {
 	idx := &mockIndex{
-		searchFunc: func(_ context.Context, _ string, limit int) ([]metatools.ToolSummary, error) {
+		searchFunc: func(_ context.Context, _ string, limit int, _ string) ([]metatools.ToolSummary, string, error) {
 			// Verify limit is passed through
 			assert.Equal(t, 5, limit)
 			return []metatools.ToolSummary{
 				{ID: "a"}, {ID: "b"}, {ID: "c"}, {ID: "d"}, {ID: "e"},
-			}, nil
+			}, "", nil
 		},
 	}
 
@@ -88,13 +88,13 @@ func TestSearchTools_WithLimit(t *testing.T) {
 }
 
 func TestSearchTools_WithCursor(t *testing.T) {
-	allTools := []metatools.ToolSummary{
-		{ID: "a"}, {ID: "b"}, {ID: "c"}, {ID: "d"}, {ID: "e"},
-	}
-
 	idx := &mockIndex{
-		searchFunc: func(_ context.Context, _ string, _ int) ([]metatools.ToolSummary, error) {
-			return allTools, nil
+		searchFunc: func(_ context.Context, _ string, _ int, cursor string) ([]metatools.ToolSummary, string, error) {
+			if cursor == "" {
+				return []metatools.ToolSummary{{ID: "a"}, {ID: "b"}}, "cursor-2", nil
+			}
+			assert.Equal(t, "cursor-2", cursor)
+			return []metatools.ToolSummary{{ID: "c"}, {ID: "d"}}, "", nil
 		},
 	}
 
@@ -118,13 +118,9 @@ func TestSearchTools_WithCursor(t *testing.T) {
 }
 
 func TestSearchTools_ReturnsNextCursor(t *testing.T) {
-	allTools := []metatools.ToolSummary{
-		{ID: "a"}, {ID: "b"}, {ID: "c"},
-	}
-
 	idx := &mockIndex{
-		searchFunc: func(_ context.Context, _ string, _ int) ([]metatools.ToolSummary, error) {
-			return allTools, nil
+		searchFunc: func(_ context.Context, _ string, _ int, _ string) ([]metatools.ToolSummary, string, error) {
+			return []metatools.ToolSummary{{ID: "a"}, {ID: "b"}}, "cursor-2", nil
 		},
 	}
 
@@ -135,11 +131,12 @@ func TestSearchTools_ReturnsNextCursor(t *testing.T) {
 	result, err := handler.Handle(context.Background(), input)
 	require.NoError(t, err)
 	require.NotNil(t, result.NextCursor)
+	assert.Equal(t, "cursor-2", *result.NextCursor)
 }
 
 func TestSearchTools_ReturnsSummariesNotFullSchemas(t *testing.T) {
 	idx := &mockIndex{
-		searchFunc: func(_ context.Context, _ string, _ int) ([]metatools.ToolSummary, error) {
+		searchFunc: func(_ context.Context, _ string, _ int, _ string) ([]metatools.ToolSummary, string, error) {
 			return []metatools.ToolSummary{
 				{
 					ID:               "test.tool",
@@ -148,7 +145,7 @@ func TestSearchTools_ReturnsSummariesNotFullSchemas(t *testing.T) {
 					ShortDescription: "A test tool",
 					Tags:             []string{"test"},
 				},
-			}, nil
+			}, "", nil
 		},
 	}
 
@@ -165,8 +162,8 @@ func TestSearchTools_ReturnsSummariesNotFullSchemas(t *testing.T) {
 
 func TestSearchTools_IndexError(t *testing.T) {
 	idx := &mockIndex{
-		searchFunc: func(_ context.Context, _ string, _ int) ([]metatools.ToolSummary, error) {
-			return nil, errors.New("index error")
+		searchFunc: func(_ context.Context, _ string, _ int, _ string) ([]metatools.ToolSummary, string, error) {
+			return nil, "", errors.New("index error")
 		},
 	}
 

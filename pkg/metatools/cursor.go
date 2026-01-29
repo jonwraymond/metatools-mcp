@@ -31,8 +31,11 @@ func DecodeCursor(cursor string) (int, error) {
 	return offset, nil
 }
 
-// ApplyCursor applies cursor pagination to a slice of ToolSummary
-// Returns the paginated slice and an optional nextCursor
+// ApplyCursor applies cursor pagination to a slice of ToolSummary.
+// Returns the paginated slice and an optional nextCursor.
+//
+// Deprecated: this helper uses numeric offset cursors and is no longer used by
+// the server, which relies on opaque cursor tokens from toolindex.
 func ApplyCursor(items []ToolSummary, cursor string, limit int) ([]ToolSummary, *string) {
 	offset, err := DecodeCursor(cursor)
 	if err != nil {
@@ -61,4 +64,12 @@ func ApplyCursor(items []ToolSummary, cursor string, limit int) ([]ToolSummary, 
 	}
 
 	return items, nextCursor
+}
+
+// NullableCursor returns a pointer to cursor when non-empty.
+func NullableCursor(cursor string) *string {
+	if cursor == "" {
+		return nil
+	}
+	return &cursor
 }

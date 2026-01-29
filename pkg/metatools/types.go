@@ -65,11 +65,34 @@ type SearchToolsOutput struct {
 }
 
 // ListNamespacesInput is the input for list_namespaces
-type ListNamespacesInput struct{}
+type ListNamespacesInput struct {
+	Limit  *int    `json:"limit,omitempty"`
+	Cursor *string `json:"cursor,omitempty"`
+}
+
+// Validate checks that the input is valid
+func (l *ListNamespacesInput) Validate() error {
+	return nil
+}
+
+// GetLimit returns the effective limit, applying defaults and caps
+func (l *ListNamespacesInput) GetLimit() int {
+	if l.Limit == nil {
+		return 20
+	}
+	if *l.Limit > 100 {
+		return 100
+	}
+	if *l.Limit < 1 {
+		return 1
+	}
+	return *l.Limit
+}
 
 // ListNamespacesOutput is the output for list_namespaces
 type ListNamespacesOutput struct {
 	Namespaces []string `json:"namespaces"`
+	NextCursor *string  `json:"nextCursor,omitempty"`
 }
 
 // DescribeToolInput is the input for describe_tool

@@ -230,6 +230,26 @@ func TestRunTool_ExecutionFailed_ReturnsToolError(t *testing.T) {
 	assert.True(t, result.Error.Retryable)
 }
 
+func TestRunTool_ContextCancelled_ReturnsToolError(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	runner := &mockRunner{
+		runFunc: func(ctx context.Context, _ string, _ map[string]any) (RunResult, error) {
+			return RunResult{}, ctx.Err()
+		},
+	}
+
+	handler := NewRunHandler(runner)
+	input := metatools.RunToolInput{ToolID: "test.tool"}
+
+	result, isError, err := handler.Handle(ctx, input)
+	require.NoError(t, err)
+	assert.True(t, isError)
+	require.NotNil(t, result.Error)
+	assert.Equal(t, string(merrors.CodeInternal), result.Error.Code)
+}
+
 // Backend override
 
 func TestRunTool_BackendOverride_Valid(t *testing.T) {

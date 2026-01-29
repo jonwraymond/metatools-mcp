@@ -1,46 +1,53 @@
 package handlers
 
 import (
-	"context"
+        "context"
+        "errors"
 
-	"github.com/jonwraymond/metatools-mcp/pkg/metatools"
+        "github.com/jonwraymond/metatools-mcp/pkg/metatools"
+        "github.com/jonwraymond/toolindex"
+        "github.com/modelcontextprotocol/go-sdk/jsonrpc"
 )
 
 // SearchHandler handles the search_tools metatool
 type SearchHandler struct {
-	index Index
+        index Index
 }
 
 // NewSearchHandler creates a new search handler
 func NewSearchHandler(index Index) *SearchHandler {
-	return &SearchHandler{index: index}
+        return &SearchHandler{index: index}
 }
 
 // Handle executes the search_tools metatool
 func (h *SearchHandler) Handle(ctx context.Context, input metatools.SearchToolsInput) (*metatools.SearchToolsOutput, error) {
-	// Validate input
-	if err := input.Validate(); err != nil {
-		return nil, err
-	}
+        if err := ctx.Err(); err != nil {
+                return nil, err
+        }
 
-	limit := input.GetLimit()
+        // Validate input
+        if err := input.Validate(); err != nil {
+                return nil, err
+        }
 
-	// Search the index
-	tools, err := h.index.Search(ctx, input.Query, limit)
-	if err != nil {
-		return nil, err
-	}
+        limit := input.GetLimit()
 
-	// Apply cursor pagination
-	var cursorStr string
-	if input.Cursor != nil {
-		cursorStr = *input.Cursor
-	}
+        // Search the index with cursor pagination
+        var cursorStr string
+        if input.Cursor != nil {
+                cursorStr = *input.Cursor
+        }
 
-	paginatedTools, nextCursor := metatools.ApplyCursor(tools, cursorStr, limit)
+        tools, nextCursor, err := h.index.SearchPage(ctx, input.Query, limit, cursorStr)
+        if err != nil {
+                if errors.Is(err, toolindex.ErrInvalidCursor) {
+                        return nil, &jsonrpc.Error{Code: jsonrpc.CodeInvalidParams, Message: "invalid cursor"}
+                }
+                return nil, err
+        }
 
-	return &metatools.SearchToolsOutput{
-		Tools:      paginatedTools,
-		NextCursor: nextCursor,
-	}, nil
+        return &metatools.SearchToolsOutput{
+                Tools:      tools,
+                NextCursor: metatools.NullableCursor(nextCursor),
+        }, nil
 }

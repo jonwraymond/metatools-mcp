@@ -18,10 +18,10 @@ func TestRunChain_SingleStep(t *testing.T) {
 		runChainFunc: func(_ context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
 			assert.Len(t, steps, 1)
 			return RunResult{
-				Structured: map[string]any{"final": "result"},
-			}, []StepResult{
-				{ToolID: "test.tool", Structured: map[string]any{"step": "result"}},
-			}, nil
+					Structured: map[string]any{"final": "result"},
+				}, []StepResult{
+					{ToolID: "test.tool", Structured: map[string]any{"step": "result"}},
+				}, nil
 		},
 	}
 
@@ -42,12 +42,12 @@ func TestRunChain_MultipleSteps(t *testing.T) {
 		runChainFunc: func(_ context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
 			assert.Len(t, steps, 3)
 			return RunResult{
-				Structured: map[string]any{"final": "combined"},
-			}, []StepResult{
-				{ToolID: "step1", Structured: map[string]any{"s": 1}},
-				{ToolID: "step2", Structured: map[string]any{"s": 2}},
-				{ToolID: "step3", Structured: map[string]any{"s": 3}},
-			}, nil
+					Structured: map[string]any{"final": "combined"},
+				}, []StepResult{
+					{ToolID: "step1", Structured: map[string]any{"s": 1}},
+					{ToolID: "step2", Structured: map[string]any{"s": 2}},
+					{ToolID: "step3", Structured: map[string]any{"s": 3}},
+				}, nil
 		},
 	}
 
@@ -72,11 +72,11 @@ func TestRunChain_UsePrevious(t *testing.T) {
 			// Verify use_previous is passed through
 			assert.True(t, steps[1].UsePrevious)
 			return RunResult{
-				Structured: map[string]any{"final": "result"},
-			}, []StepResult{
-				{ToolID: "step1", Structured: map[string]any{"data": "from step1"}},
-				{ToolID: "step2", Structured: map[string]any{"data": "used previous"}},
-			}, nil
+					Structured: map[string]any{"final": "result"},
+				}, []StepResult{
+					{ToolID: "step1", Structured: map[string]any{"data": "from step1"}},
+					{ToolID: "step2", Structured: map[string]any{"data": "used previous"}},
+				}, nil
 		},
 	}
 
@@ -125,8 +125,8 @@ func TestRunChain_IncludeBackends(t *testing.T) {
 	runner := &mockRunner{
 		runChainFunc: func(_ context.Context, _ []ChainStep) (RunResult, []StepResult, error) {
 			return RunResult{
-				Structured: map[string]any{"final": "result"},
-			}, []StepResult{
+					Structured: map[string]any{"final": "result"},
+				}, []StepResult{
 					{
 						ToolID:     "step1",
 						Structured: map[string]any{"s": 1},
@@ -153,8 +153,8 @@ func TestRunChain_IncludeTools(t *testing.T) {
 	runner := &mockRunner{
 		runChainFunc: func(_ context.Context, _ []ChainStep) (RunResult, []StepResult, error) {
 			return RunResult{
-				Structured: map[string]any{"final": "result"},
-			}, []StepResult{
+					Structured: map[string]any{"final": "result"},
+				}, []StepResult{
 					{
 						ToolID:     "step1",
 						Structured: map[string]any{"s": 1},
@@ -229,6 +229,28 @@ func TestRunChain_PartialResultsOnError(t *testing.T) {
 	// Partial results should be preserved
 	assert.Len(t, result.Results, 2)
 	assert.NotNil(t, result.Results[0].Structured)
+}
+
+func TestRunChain_ContextCancelled_ReturnsToolError(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	runner := &mockRunner{
+		runChainFunc: func(ctx context.Context, _ []ChainStep) (RunResult, []StepResult, error) {
+			return RunResult{}, nil, ctx.Err()
+		},
+	}
+
+	handler := NewChainHandler(runner)
+	input := metatools.RunChainInput{
+		Steps: []metatools.ChainStep{{ToolID: "step1"}},
+	}
+
+	result, isError, err := handler.Handle(ctx, input)
+	require.NoError(t, err)
+	assert.True(t, isError)
+	require.NotNil(t, result.Error)
+	assert.Equal(t, string(merrors.CodeInternal), result.Error.Code)
 }
 
 func TestRunChain_ErrorHasStepIndex(t *testing.T) {

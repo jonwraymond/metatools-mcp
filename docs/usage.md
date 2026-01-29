@@ -23,6 +23,25 @@ METATOOLS_SEARCH_STRATEGY=bm25 ./metatools
 | `METATOOLS_SEARCH_BM25_TAGS_BOOST` | `2` | BM25 tags field boost |
 | `METATOOLS_SEARCH_BM25_MAX_DOCS` | `0` | Max docs to index (0=unlimited) |
 | `METATOOLS_SEARCH_BM25_MAX_DOCTEXT_LEN` | `0` | Max doc text length (0=unlimited) |
+| `METATOOLS_NOTIFY_TOOL_LIST_CHANGED` | `true` | Emit `notifications/tools/list_changed` on index updates |
+| `METATOOLS_NOTIFY_TOOL_LIST_CHANGED_DEBOUNCE_MS` | `150` | Debounce window for list change notifications |
+
+## Pagination and cursors
+
+- `search_tools` and `list_namespaces` accept `limit` (default 20, max 100) and `cursor`.
+- Responses include `nextCursor` when more results are available.
+- Cursor tokens are opaque and invalid cursors return JSON-RPC invalid params.
+
+## Tool list change notifications
+
+- `notifications/tools/list_changed` is emitted when the underlying toolindex changes.
+- Notifications are debounced to avoid client spam and can be disabled with `METATOOLS_NOTIFY_TOOL_LIST_CHANGED=false`.
+
+## Progress notifications
+
+`metatools-mcp` does not emit progress notifications for `run_tool`, `run_chain`, or
+`execute_code` yet because the underlying runners do not expose progress events for
+non-streaming calls.
 
 ## Optional toolruntime support
 

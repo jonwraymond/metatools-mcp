@@ -2,10 +2,13 @@ package server
 
 import (
 	"context"
+	"sync"
+	"time"
 
 	"github.com/jonwraymond/metatools-mcp/internal/config"
 	"github.com/jonwraymond/metatools-mcp/internal/handlers"
 	"github.com/jonwraymond/metatools-mcp/pkg/metatools"
+	"github.com/jonwraymond/toolindex"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -41,6 +44,11 @@ type Server struct {
 	mcp      *mcp.Server
 	tools    []*mcp.Tool
 	handlers *Handlers
+
+	toolRegistrations []func()
+	toolListMu        sync.Mutex
+	toolListTimer     *time.Timer
+	toolListUnsub     func()
 }
 
 // Handlers holds all the metatool handlers.
@@ -72,12 +80,20 @@ func New(cfg config.Config) (*Server, error) {
 		h.Code = handlers.NewCodeHandler(cfg.Executor)
 	}
 
+	serverOptions := &mcp.ServerOptions{
+		PageSize: defaultPageSize,
+	}
+	if !cfg.NotifyToolListChanged {
+		serverOptions.Capabilities = &mcp.ServerCapabilities{
+			Logging: &mcp.LoggingCapabilities{},
+			Tools:   &mcp.ToolCapabilities{},
+		}
+	}
+
 	mcpServer := mcp.NewServer(&mcp.Implementation{
 		Name:    implementationName,
 		Version: implementationVersion,
-	}, &mcp.ServerOptions{
-		PageSize: defaultPageSize,
-	})
+	}, serverOptions)
 
 	srv := &Server{
 		config:   cfg,
@@ -85,6 +101,7 @@ func New(cfg config.Config) (*Server, error) {
 		handlers: h,
 	}
 	srv.registerTools()
+	srv.registerToolListNotifications()
 	return srv, nil
 }
 
@@ -116,7 +133,7 @@ func (s *Server) Handlers() *Handlers {
 }
 
 func (s *Server) registerTools() {
-	addTool(s, &mcp.Tool{
+	registerTool(s, &mcp.Tool{
 		Name:        "search_tools",
 		Description: "Search for tools by query",
 		InputSchema: map[string]any{
@@ -166,12 +183,15 @@ func (s *Server) registerTools() {
 		return nil, *out, nil
 	})
 
-	addTool(s, &mcp.Tool{
+	registerTool(s, &mcp.Tool{
 		Name:        "list_namespaces",
 		Description: "List all tool namespaces",
 		InputSchema: map[string]any{
-			"type":                 "object",
-			"properties":           map[string]any{},
+			"type": "object",
+			"properties": map[string]any{
+				"limit":  map[string]any{"type": "integer", "minimum": 1, "maximum": 100},
+				"cursor": map[string]any{"type": "string"},
+			},
 			"additionalProperties": false,
 		},
 		OutputSchema: map[string]any{
@@ -181,12 +201,13 @@ func (s *Server) registerTools() {
 					"type":  "array",
 					"items": map[string]any{"type": "string"},
 				},
+				"nextCursor": map[string]any{"type": "string"},
 			},
 			"required":             []string{"namespaces"},
 			"additionalProperties": false,
 		},
-	}, func(ctx context.Context, _ *mcp.CallToolRequest, _ metatools.ListNamespacesInput) (*mcp.CallToolResult, metatools.ListNamespacesOutput, error) {
-		out, err := s.handlers.Namespaces.Handle(ctx)
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, input metatools.ListNamespacesInput) (*mcp.CallToolResult, metatools.ListNamespacesOutput, error) {
+		out, err := s.handlers.Namespaces.Handle(ctx, input)
 		if err != nil {
 			return nil, metatools.ListNamespacesOutput{}, err
 		}
@@ -196,7 +217,7 @@ func (s *Server) registerTools() {
 		return nil, *out, nil
 	})
 
-	addTool(s, &mcp.Tool{
+	registerTool(s, &mcp.Tool{
 		Name:        "describe_tool",
 		Description: "Get detailed documentation for a tool",
 		InputSchema: map[string]any{
@@ -236,7 +257,7 @@ func (s *Server) registerTools() {
 		return nil, *out, nil
 	})
 
-	addTool(s, &mcp.Tool{
+	registerTool(s, &mcp.Tool{
 		Name:        "list_tool_examples",
 		Description: "Get usage examples for a tool",
 		InputSchema: map[string]any{
@@ -281,7 +302,7 @@ func (s *Server) registerTools() {
 		return nil, *out, nil
 	})
 
-	addTool(s, &mcp.Tool{
+	registerTool(s, &mcp.Tool{
 		Name:        "run_tool",
 		Description: "Execute a tool by ID",
 		InputSchema: map[string]any{
@@ -321,7 +342,7 @@ func (s *Server) registerTools() {
 		return &mcp.CallToolResult{IsError: isError}, *out, nil
 	})
 
-	addTool(s, &mcp.Tool{
+	registerTool(s, &mcp.Tool{
 		Name:        "run_chain",
 		Description: "Execute multiple tools in sequence",
 		InputSchema: map[string]any{
@@ -360,7 +381,7 @@ func (s *Server) registerTools() {
 	})
 
 	if s.handlers.Code != nil {
-		addTool(s, &mcp.Tool{
+		registerTool(s, &mcp.Tool{
 			Name:        "execute_code",
 			Description: "Execute code-based orchestration",
 			InputSchema: map[string]any{
@@ -398,9 +419,60 @@ func (s *Server) registerTools() {
 	}
 }
 
-func addTool[In, Out any](s *Server, tool *mcp.Tool, handler mcp.ToolHandlerFor[In, Out]) {
+func registerTool[In, Out any](s *Server, tool *mcp.Tool, handler mcp.ToolHandlerFor[In, Out]) {
 	mcp.AddTool(s.mcp, tool, handler)
 	s.tools = append(s.tools, tool)
+	s.toolRegistrations = append(s.toolRegistrations, func() {
+		mcp.AddTool(s.mcp, tool, handler)
+	})
+}
+
+func (s *Server) registerToolListNotifications() {
+	if !s.config.NotifyToolListChanged {
+		return
+	}
+	changeNotifier, ok := s.config.Index.(toolindex.ChangeNotifier)
+	if !ok {
+		return
+	}
+	debounce := time.Duration(s.config.NotifyToolListChangedDebounceMs) * time.Millisecond
+	if debounce <= 0 {
+		debounce = 150 * time.Millisecond
+	}
+
+	s.toolListUnsub = changeNotifier.OnChange(func(_ toolindex.ChangeEvent) {
+		s.toolListMu.Lock()
+		defer s.toolListMu.Unlock()
+		if s.toolListTimer == nil {
+			s.toolListTimer = time.AfterFunc(debounce, s.reregisterTools)
+			return
+		}
+		s.toolListTimer.Reset(debounce)
+	})
+}
+
+func (s *Server) reregisterTools() {
+	if len(s.toolRegistrations) == 0 {
+		return
+	}
+	// Re-register a single tool to trigger one list_changed notification.
+	s.toolRegistrations[0]()
+}
+
+// Close releases resources associated with the server.
+func (s *Server) Close() error {
+	s.toolListMu.Lock()
+	if s.toolListTimer != nil {
+		s.toolListTimer.Stop()
+		s.toolListTimer = nil
+	}
+	s.toolListMu.Unlock()
+
+	if s.toolListUnsub != nil {
+		s.toolListUnsub()
+		s.toolListUnsub = nil
+	}
+	return nil
 }
 
 func errorSchema() map[string]any {
