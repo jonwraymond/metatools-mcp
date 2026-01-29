@@ -334,7 +334,7 @@ func (s *Server) registerTools() {
 		},
 		OutputSchema: runToolOutputSchema(),
 	}, func(ctx context.Context, req *mcp.CallToolRequest, input metatools.RunToolInput) (*mcp.CallToolResult, metatools.RunToolOutput, error) {
-		progress := progressNotifier(req, ctx)
+		progress := progressNotifier(ctx, req)
 		out, isError, err := s.handlers.Run.HandleWithProgress(ctx, input, progress)
 		if err != nil {
 			return nil, metatools.RunToolOutput{}, err
@@ -373,7 +373,7 @@ func (s *Server) registerTools() {
 		},
 		OutputSchema: runChainOutputSchema(),
 	}, func(ctx context.Context, req *mcp.CallToolRequest, input metatools.RunChainInput) (*mcp.CallToolResult, metatools.RunChainOutput, error) {
-		progress := progressNotifier(req, ctx)
+		progress := progressNotifier(ctx, req)
 		out, isError, err := s.handlers.Chain.HandleWithProgress(ctx, input, progress)
 		if err != nil {
 			return nil, metatools.RunChainOutput{}, err
@@ -411,7 +411,7 @@ func (s *Server) registerTools() {
 				"additionalProperties": false,
 			},
 		}, func(ctx context.Context, req *mcp.CallToolRequest, input metatools.ExecuteCodeInput) (*mcp.CallToolResult, metatools.ExecuteCodeOutput, error) {
-			progress := progressNotifier(req, ctx)
+			progress := progressNotifier(ctx, req)
 			if progress != nil {
 				progress(handlers.ProgressEvent{Progress: 0, Total: 1, Message: "started"})
 			}
@@ -442,7 +442,7 @@ func registerTool[In, Out any](s *Server, tool *mcp.Tool, handler mcp.ToolHandle
 	})
 }
 
-func progressNotifier(req *mcp.CallToolRequest, ctx context.Context) func(handlers.ProgressEvent) {
+func progressNotifier(ctx context.Context, req *mcp.CallToolRequest) func(handlers.ProgressEvent) {
 	if req == nil || req.Session == nil || req.Params == nil {
 		return nil
 	}
