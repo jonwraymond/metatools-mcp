@@ -35,7 +35,7 @@ func TestToolProvider_Interface(t *testing.T) {
 			Name:        "test_tool",
 			Description: "Test tool",
 		},
-		handleFn: func(ctx context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
+		handleFn: func(_ context.Context, _ *mcp.CallToolRequest, _ map[string]any) (*mcp.CallToolResult, any, error) {
 			return nil, "result", nil
 		},
 	}
