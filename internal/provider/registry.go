@@ -1,12 +1,16 @@
 package provider
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 	"sync"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
+
+// ErrProviderNotFound is returned when unregistering a missing provider.
+var ErrProviderNotFound = errors.New("provider not found")
 
 // Registry stores tool providers by name.
 type Registry struct {
@@ -35,6 +39,17 @@ func (r *Registry) Register(p ToolProvider) error {
 		return fmt.Errorf("provider %q already registered", name)
 	}
 	r.providers[name] = p
+	return nil
+}
+
+// Unregister removes a provider by name.
+func (r *Registry) Unregister(name string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if _, ok := r.providers[name]; !ok {
+		return ErrProviderNotFound
+	}
+	delete(r.providers, name)
 	return nil
 }
 

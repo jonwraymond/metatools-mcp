@@ -48,3 +48,7 @@ backends:
     enabled: true
     paths: []
     watch: false
+
+middleware:
+  chain: []
+  configs: {}

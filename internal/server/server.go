@@ -102,6 +102,13 @@ func New(cfg config.Config) (*Server, error) {
 		}
 		registry = builtinRegistry
 	}
+	mwAdapter, err := NewMiddlewareAdapterFromConfig(&cfg.Middleware)
+	if err != nil {
+		return nil, err
+	}
+	if err := mwAdapter.ApplyToProviders(registry); err != nil {
+		return nil, err
+	}
 	adapter := NewProviderAdapter(registry)
 	if err := adapter.RegisterTools(srv); err != nil {
 		return nil, err

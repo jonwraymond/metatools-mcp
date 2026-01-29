@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/jonwraymond/metatools-mcp/internal/handlers"
+	"github.com/jonwraymond/metatools-mcp/internal/middleware"
 	"github.com/jonwraymond/metatools-mcp/internal/provider"
 )
 
@@ -16,6 +17,7 @@ type Config struct {
 
 	Providers        ProvidersConfig
 	ProviderRegistry *provider.Registry // optional override
+	Middleware       middleware.Config
 
 	NotifyToolListChanged           bool
 	NotifyToolListChangedDebounceMs int

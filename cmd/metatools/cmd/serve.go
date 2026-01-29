@@ -137,6 +137,7 @@ func buildServerConfigFromConfig(appCfg config.AppConfig) (config.Config, error)
 
 	cfg := adapters.NewConfig(idx, docs, runner, nil)
 	cfg.Providers = appCfg.Providers
+	cfg.Middleware = appCfg.Middleware
 
 	// Preserve notify settings from env config for now.
 	envCfg, err := config.LoadEnv()
