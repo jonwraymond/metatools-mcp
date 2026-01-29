@@ -8,10 +8,10 @@ require (
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/jonwraymond/toolcode v0.1.11
 	github.com/jonwraymond/tooldocs v0.1.11
-	github.com/jonwraymond/toolindex v0.2.1
+	github.com/jonwraymond/toolindex v0.2.2
 	github.com/jonwraymond/toolmodel v0.1.3
-	github.com/jonwraymond/toolrun v0.2.1
-	github.com/jonwraymond/toolruntime v0.1.11
+	github.com/jonwraymond/toolrun v0.2.2
+	github.com/jonwraymond/toolruntime v0.1.12
 	github.com/jonwraymond/toolsearch v0.1.10
 	github.com/modelcontextprotocol/go-sdk v1.2.0
 	github.com/stretchr/testify v1.10.0
