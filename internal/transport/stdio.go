@@ -15,8 +15,8 @@ func (t *StdioTransport) Name() string {
 }
 
 // Info returns descriptive information about the transport.
-func (t *StdioTransport) Info() TransportInfo {
-	return TransportInfo{Name: "stdio"}
+func (t *StdioTransport) Info() Info {
+	return Info{Name: "stdio"}
 }
 
 // Serve starts the transport and blocks until context is cancelled.

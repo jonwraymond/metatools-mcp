@@ -45,7 +45,9 @@ func loadConfig(path string, overrides map[string]any) (AppConfig, error) {
 	}
 
 	for key, value := range overrides {
-		k.Set(key, value)
+		if err := k.Set(key, value); err != nil {
+			return AppConfig{}, fmt.Errorf("apply override %q: %w", key, err)
+		}
 	}
 
 	var cfg AppConfig
