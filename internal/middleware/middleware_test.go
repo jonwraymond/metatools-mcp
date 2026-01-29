@@ -18,7 +18,7 @@ func (r *recordingProvider) Enabled() bool { return true }
 func (r *recordingProvider) Tool() mcp.Tool {
 	return mcp.Tool{Name: r.name, InputSchema: map[string]any{"type": "object"}}
 }
-func (r *recordingProvider) Handle(ctx context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
+func (r *recordingProvider) Handle(_ context.Context, _ *mcp.CallToolRequest, _ map[string]any) (*mcp.CallToolResult, any, error) {
 	*r.calls = append(*r.calls, "provider")
 	return nil, "ok", nil
 }

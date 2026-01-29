@@ -17,7 +17,7 @@ type Config struct {
 
 	Providers        ProvidersConfig
 	ProviderRegistry *provider.Registry // optional override
-	Middleware       middleware.MiddlewareConfig
+	Middleware       middleware.Config
 
 	NotifyToolListChanged           bool
 	NotifyToolListChangedDebounceMs int

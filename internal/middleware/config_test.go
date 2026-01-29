@@ -5,7 +5,7 @@ import "testing"
 func TestBuildChainFromConfig_Unknown(t *testing.T) {
 	registry := NewRegistry()
 
-	cfg := &MiddlewareConfig{
+	cfg := &Config{
 		Chain: []string{"missing"},
 	}
 
@@ -18,9 +18,9 @@ func TestBuildChainFromConfig_Success(t *testing.T) {
 	registry := NewRegistry()
 	_ = registry.Register("logging", LoggingMiddlewareFactory)
 
-	cfg := &MiddlewareConfig{
+	cfg := &Config{
 		Chain: []string{"logging"},
-		Configs: map[string]MiddlewareEntry{
+		Configs: map[string]Entry{
 			"logging": {Config: map[string]any{"include_args": true}},
 		},
 	}

@@ -53,7 +53,7 @@ func TestMiddlewareAdapter_ApplyToProviders(t *testing.T) {
 }
 
 func TestNewMiddlewareAdapterFromConfig(t *testing.T) {
-	cfg := &middleware.MiddlewareConfig{
+	cfg := &middleware.Config{
 		Chain: []string{},
 	}
 	adapter, err := NewMiddlewareAdapterFromConfig(cfg)

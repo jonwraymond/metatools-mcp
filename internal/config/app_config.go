@@ -10,13 +10,13 @@ import (
 
 // AppConfig holds all metatools-mcp configuration loaded from files/env/flags.
 type AppConfig struct {
-	Server     ServerConfig                `koanf:"server"`
-	Transport  TransportConfig             `koanf:"transport"`
-	Search     AppSearchConfig             `koanf:"search"`
-	Execution  ExecutionConfig             `koanf:"execution"`
-	Providers  ProvidersConfig             `koanf:"providers"`
-	Backends   BackendsConfig              `koanf:"backends"`
-	Middleware middleware.MiddlewareConfig `koanf:"middleware"`
+	Server     ServerConfig      `koanf:"server"`
+	Transport  TransportConfig   `koanf:"transport"`
+	Search     AppSearchConfig   `koanf:"search"`
+	Execution  ExecutionConfig   `koanf:"execution"`
+	Providers  ProvidersConfig   `koanf:"providers"`
+	Backends   BackendsConfig    `koanf:"backends"`
+	Middleware middleware.Config `koanf:"middleware"`
 }
 
 // ServerConfig holds server identity settings.
@@ -158,7 +158,7 @@ func DefaultAppConfig() AppConfig {
 				Watch:   false,
 			},
 		},
-		Middleware: middleware.MiddlewareConfig{},
+		Middleware: middleware.Config{},
 	}
 }
 

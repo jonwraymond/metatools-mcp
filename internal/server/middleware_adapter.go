@@ -23,7 +23,7 @@ func NewMiddlewareAdapter(chain *middleware.Chain) *MiddlewareAdapter {
 }
 
 // NewMiddlewareAdapterFromConfig builds a middleware chain from configuration.
-func NewMiddlewareAdapterFromConfig(cfg *middleware.MiddlewareConfig) (*MiddlewareAdapter, error) {
+func NewMiddlewareAdapterFromConfig(cfg *middleware.Config) (*MiddlewareAdapter, error) {
 	registry := middleware.DefaultRegistry()
 	chain, err := middleware.BuildChainFromConfig(registry, cfg)
 	if err != nil {

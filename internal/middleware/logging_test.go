@@ -39,7 +39,7 @@ func TestLoggingMiddleware(t *testing.T) {
 		name:    "test_tool",
 		enabled: true,
 		tool:    mcp.Tool{Name: "test_tool", InputSchema: map[string]any{"type": "object"}},
-		handleFn: func(ctx context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
+		handleFn: func(_ context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
 			return nil, "result", nil
 		},
 	}
@@ -68,7 +68,7 @@ func TestLoggingMiddleware_Error(t *testing.T) {
 		name:    "failing_tool",
 		enabled: true,
 		tool:    mcp.Tool{Name: "failing_tool", InputSchema: map[string]any{"type": "object"}},
-		handleFn: func(ctx context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
+		handleFn: func(_ context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
 			return nil, nil, errors.New("tool failed")
 		},
 	}

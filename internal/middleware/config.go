@@ -2,19 +2,19 @@ package middleware
 
 import "fmt"
 
-// MiddlewareConfig is the top-level middleware configuration.
-type MiddlewareConfig struct {
-	Chain   []string                   `koanf:"chain"`
-	Configs map[string]MiddlewareEntry `koanf:"configs"`
+// Config is the top-level middleware configuration.
+type Config struct {
+	Chain   []string         `koanf:"chain"`
+	Configs map[string]Entry `koanf:"configs"`
 }
 
-// MiddlewareEntry configures a single middleware.
-type MiddlewareEntry struct {
+// Entry configures a single middleware.
+type Entry struct {
 	Config map[string]any `koanf:"config"`
 }
 
 // BuildChainFromConfig creates a middleware chain from configuration.
-func BuildChainFromConfig(registry *Registry, cfg *MiddlewareConfig) (*Chain, error) {
+func BuildChainFromConfig(registry *Registry, cfg *Config) (*Chain, error) {
 	chain := NewChain()
 	if cfg == nil {
 		return chain, nil
