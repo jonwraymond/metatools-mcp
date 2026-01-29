@@ -31,6 +31,11 @@ Built-in metatools can be enabled/disabled via `providers.*.enabled` in the
 config file (see the `providers` block in `examples/metatools.yaml`). This
 controls which MCP tools are registered at startup.
 
+## Middleware chain
+
+Configure optional middleware in `middleware.chain` (ordered) with per-middleware
+settings under `middleware.configs`. Built-in middleware: `logging`, `metrics`.
+
 ## Enable BM25 search (build tag + env)
 
 ```bash

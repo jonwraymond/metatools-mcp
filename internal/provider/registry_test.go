@@ -55,3 +55,21 @@ func TestRegistry_List(t *testing.T) {
 		t.Errorf("ListEnabled() returned %d providers, want 2", len(enabled))
 	}
 }
+
+func TestRegistry_Unregister(t *testing.T) {
+	registry := NewRegistry()
+
+	_ = registry.Register(&mockProvider{name: "tool_a", enabled: true})
+
+	if err := registry.Unregister("tool_a"); err != nil {
+		t.Fatalf("Unregister() error = %v", err)
+	}
+
+	if _, ok := registry.Get("tool_a"); ok {
+		t.Error("Get() should return false after Unregister()")
+	}
+
+	if err := registry.Unregister("missing"); err == nil {
+		t.Error("Unregister() should fail for missing provider")
+	}
+}
