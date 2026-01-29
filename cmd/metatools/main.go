@@ -58,5 +58,7 @@ func createServer() (*server.Server, error) {
 	}
 
 	cfg := adapters.NewConfig(idx, docs, runner, exec)
+	cfg.NotifyToolListChanged = envCfg.NotifyToolListChanged
+	cfg.NotifyToolListChangedDebounceMs = envCfg.NotifyToolListChangedDebounceMs
 	return server.New(cfg)
 }

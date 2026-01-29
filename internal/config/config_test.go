@@ -12,11 +12,11 @@ import (
 // Mock implementations for testing
 type mockIndex struct{}
 
-func (m *mockIndex) Search(_ context.Context, _ string, _ int) ([]metatools.ToolSummary, error) {
-	return nil, nil
+func (m *mockIndex) SearchPage(_ context.Context, _ string, _ int, _ string) ([]metatools.ToolSummary, string, error) {
+	return nil, "", nil
 }
-func (m *mockIndex) ListNamespaces(_ context.Context) ([]string, error) {
-	return nil, nil
+func (m *mockIndex) ListNamespacesPage(_ context.Context, _ int, _ string) ([]string, string, error) {
+	return nil, "", nil
 }
 
 type mockStore struct{}

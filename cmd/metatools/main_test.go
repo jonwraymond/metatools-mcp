@@ -103,6 +103,8 @@ func clearSearchEnvVars(t *testing.T) {
 		"METATOOLS_SEARCH_BM25_TAGS_BOOST",
 		"METATOOLS_SEARCH_BM25_MAX_DOCS",
 		"METATOOLS_SEARCH_BM25_MAX_DOCTEXT_LEN",
+		"METATOOLS_NOTIFY_TOOL_LIST_CHANGED",
+		"METATOOLS_NOTIFY_TOOL_LIST_CHANGED_DEBOUNCE_MS",
 	}
 	for _, v := range vars {
 		if err := os.Unsetenv(v); err != nil {

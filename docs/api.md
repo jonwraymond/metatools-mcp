@@ -17,6 +17,9 @@ type Config struct {
   Docs     tooldocs.Store
   Runner   toolrun.Runner
   Executor toolcode.Executor // optional
+
+  NotifyToolListChanged           bool
+  NotifyToolListChangedDebounceMs int
 }
 ```
 
@@ -31,6 +34,10 @@ These are exported in `pkg/metatools`:
 - `RunToolInput` / `RunToolOutput`
 - `RunChainInput` / `RunChainOutput`
 - `ExecuteCodeInput` / `ExecuteCodeOutput`
+
+Notes:
+- `SearchToolsInput`/`ListNamespacesInput` accept `limit` + `cursor`.
+- `SearchToolsOutput`/`ListNamespacesOutput` return `nextCursor` when more data exists.
 
 ## Error codes
 

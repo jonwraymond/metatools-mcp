@@ -10,6 +10,9 @@ import (
 // EnvConfig holds configuration parsed from environment variables
 type EnvConfig struct {
 	Search SearchConfig `envPrefix:"METATOOLS_SEARCH_"`
+
+	NotifyToolListChanged           bool `env:"METATOOLS_NOTIFY_TOOL_LIST_CHANGED" envDefault:"true"`
+	NotifyToolListChangedDebounceMs int  `env:"METATOOLS_NOTIFY_TOOL_LIST_CHANGED_DEBOUNCE_MS" envDefault:"150"`
 }
 
 // SearchConfig holds search-related configuration
@@ -43,6 +46,9 @@ func LoadEnv() (EnvConfig, error) {
 func (c *EnvConfig) ValidateEnv() error {
 	if !validStrategies[c.Search.Strategy] {
 		return fmt.Errorf("unknown search strategy %q: valid strategies are lexical, bm25", c.Search.Strategy)
+	}
+	if c.NotifyToolListChangedDebounceMs <= 0 {
+		return fmt.Errorf("notify tool list debounce must be positive")
 	}
 	return nil
 }

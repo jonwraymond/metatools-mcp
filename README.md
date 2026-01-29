@@ -59,6 +59,8 @@ Notes:
 | `METATOOLS_SEARCH_BM25_TAGS_BOOST` | `2` | BM25 tags field boost |
 | `METATOOLS_SEARCH_BM25_MAX_DOCS` | `0` | Max docs to index (0=unlimited) |
 | `METATOOLS_SEARCH_BM25_MAX_DOCTEXT_LEN` | `0` | Max doc text length (0=unlimited) |
+| `METATOOLS_NOTIFY_TOOL_LIST_CHANGED` | `true` | Emit `notifications/tools/list_changed` on index updates |
+| `METATOOLS_NOTIFY_TOOL_LIST_CHANGED_DEBOUNCE_MS` | `150` | Debounce window for list change notifications |
 
 ## Optional toolruntime integration
 

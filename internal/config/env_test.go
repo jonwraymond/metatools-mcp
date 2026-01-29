@@ -21,6 +21,20 @@ func TestLoadEnv_Defaults(t *testing.T) {
 	assert.Equal(t, 2, cfg.Search.BM25TagsBoost)
 	assert.Equal(t, 0, cfg.Search.BM25MaxDocs)
 	assert.Equal(t, 0, cfg.Search.BM25MaxDocTextLen)
+	assert.True(t, cfg.NotifyToolListChanged)
+	assert.Equal(t, 150, cfg.NotifyToolListChangedDebounceMs)
+}
+
+func TestLoadEnv_NotifyToolListChanged(t *testing.T) {
+	clearSearchEnvVars(t)
+	t.Setenv("METATOOLS_NOTIFY_TOOL_LIST_CHANGED", "false")
+	t.Setenv("METATOOLS_NOTIFY_TOOL_LIST_CHANGED_DEBOUNCE_MS", "250")
+
+	cfg, err := LoadEnv()
+	require.NoError(t, err)
+
+	assert.False(t, cfg.NotifyToolListChanged)
+	assert.Equal(t, 250, cfg.NotifyToolListChangedDebounceMs)
 }
 
 func TestLoadEnv_LexicalStrategy(t *testing.T) {
@@ -84,7 +98,8 @@ func TestValidateEnv_ValidStrategies(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.strategy, func(t *testing.T) {
 			cfg := EnvConfig{
-				Search: SearchConfig{Strategy: tc.strategy},
+				Search:                          SearchConfig{Strategy: tc.strategy},
+				NotifyToolListChangedDebounceMs: 150,
 			}
 			err := cfg.ValidateEnv()
 			assert.NoError(t, err)
@@ -115,6 +130,17 @@ func TestValidateEnv_EmptyStrategy(t *testing.T) {
 	assert.Contains(t, err.Error(), "unknown search strategy")
 }
 
+func TestValidateEnv_InvalidNotifyDebounce(t *testing.T) {
+	cfg := EnvConfig{
+		Search:                          SearchConfig{Strategy: "lexical"},
+		NotifyToolListChangedDebounceMs: 0,
+	}
+
+	err := cfg.ValidateEnv()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "notify tool list debounce")
+}
+
 // clearSearchEnvVars unsets all METATOOLS_SEARCH_* env vars for test isolation
 func clearSearchEnvVars(t *testing.T) {
 	t.Helper()
@@ -125,6 +151,8 @@ func clearSearchEnvVars(t *testing.T) {
 		"METATOOLS_SEARCH_BM25_TAGS_BOOST",
 		"METATOOLS_SEARCH_BM25_MAX_DOCS",
 		"METATOOLS_SEARCH_BM25_MAX_DOCTEXT_LEN",
+		"METATOOLS_NOTIFY_TOOL_LIST_CHANGED",
+		"METATOOLS_NOTIFY_TOOL_LIST_CHANGED_DEBOUNCE_MS",
 	}
 	for _, v := range vars {
 		if err := os.Unsetenv(v); err != nil {

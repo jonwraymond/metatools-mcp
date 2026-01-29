@@ -62,3 +62,11 @@ func ApplyCursor(items []ToolSummary, cursor string, limit int) ([]ToolSummary, 
 
 	return items, nextCursor
 }
+
+// NullableCursor returns a pointer to cursor when non-empty.
+func NullableCursor(cursor string) *string {
+	if cursor == "" {
+		return nil
+	}
+	return &cursor
+}

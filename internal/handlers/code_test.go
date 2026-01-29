@@ -173,6 +173,26 @@ func TestExecuteCode_ExecutionError(t *testing.T) {
 	assert.Contains(t, err.Error(), "syntax error")
 }
 
+func TestExecuteCode_ContextCancelled(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	executor := &mockExecutor{
+		executeCodeFunc: func(ctx context.Context, _ ExecuteParams) (ExecuteResult, error) {
+			return ExecuteResult{}, ctx.Err()
+		},
+	}
+
+	handler := NewCodeHandler(executor)
+	input := metatools.ExecuteCodeInput{
+		Language: "javascript",
+		Code:     "console.log('cancel')",
+	}
+
+	_, err := handler.Handle(ctx, input)
+	assert.ErrorIs(t, err, context.Canceled)
+}
+
 func TestExecuteCode_MissingLanguage(t *testing.T) {
 	handler := NewCodeHandler(&mockExecutor{})
 	input := metatools.ExecuteCodeInput{

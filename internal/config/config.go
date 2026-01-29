@@ -12,6 +12,9 @@ type Config struct {
 	Docs     handlers.Store
 	Runner   handlers.Runner
 	Executor handlers.Executor // optional
+
+	NotifyToolListChanged           bool
+	NotifyToolListChangedDebounceMs int
 }
 
 // Validate checks that required dependencies are provided

@@ -34,7 +34,7 @@ When tool availability changes (new tools, removed tools, updated schemas), the 
 **Implementation idea:**
 - Subscribe to toolindex OnChange/Refresh hooks.
 - Emit `tools/list_changed` to all MCP sessions.
-- Expose a config flag to disable notifications for static deployments.
+- Expose a config flag + debounce window to disable or dampen notifications for static deployments.
 
 ### 2) Pagination and list contracts
 
@@ -42,7 +42,7 @@ The MCP spec defines `tools/list` pagination and page sizes. `metatools-mcp` alr
 
 **Implementation idea:**
 - Cap and validate list size consistently.
-- Use stable cursor generation (e.g., opaque tokens) for pagination of search results.
+- Use stable cursor generation (opaque tokens with validation) for pagination of search results and namespace listing.
 
 ### 3) Cancellation and progress signals
 
@@ -51,7 +51,7 @@ MCP supports cancellation and progress notifications for long-running operations
 **Implementation idea:**
 - Use `ctx` cancellation to interrupt tool execution.
 - Surface progress events from toolruntime or toolrun (where available).
-- Document supported behavior per tool type (local, provider, MCP).
+- If progress events are unavailable, document that progress notifications are not emitted.
 
 ### 4) Resources and prompts expansion (future PRD)
 
