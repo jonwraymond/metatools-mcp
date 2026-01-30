@@ -4,8 +4,6 @@ go 1.24.4
 
 replace github.com/jonwraymond/metatools-mcp => .
 
-replace github.com/jonwraymond/toolruntime => ../toolruntime
-
 require (
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/docker/docker v27.0.3+incompatible
@@ -15,7 +13,7 @@ require (
 	github.com/jonwraymond/toolindex v0.3.0
 	github.com/jonwraymond/toolmodel v0.2.0
 	github.com/jonwraymond/toolrun v0.3.0
-	github.com/jonwraymond/toolruntime v0.3.1
+	github.com/jonwraymond/toolruntime v0.4.0
 	github.com/jonwraymond/toolsearch v0.3.0
 	github.com/knadh/koanf/parsers/yaml v0.1.0
 	github.com/knadh/koanf/providers/env v0.1.0
@@ -25,6 +23,7 @@ require (
 	github.com/modelcontextprotocol/go-sdk v1.2.0
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.11.1
+	github.com/tetratelabs/wazero v1.11.0
 )
 
 require (

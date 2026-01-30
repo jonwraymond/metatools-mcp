@@ -119,6 +119,15 @@ These are consumed by `config.Load` via Koanf (file/env/flags precedence):
 | `METATOOLS_TRANSPORT_STREAMABLE_JSON_RESPONSE` | `false` | Prefer JSON over SSE streaming |
 | `METATOOLS_TRANSPORT_STREAMABLE_SESSION_TIMEOUT` | `30m` | Idle session cleanup duration |
 
+### Runtime Environment (toolruntime build tag)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `METATOOLS_RUNTIME_PROFILE` | `dev` | `dev` (unsafe) or `standard` (Docker/WASM) |
+| `METATOOLS_DOCKER_IMAGE` | `toolruntime-sandbox:latest` | Docker image for standard profile |
+| `METATOOLS_WASM_ENABLED` | `false` | Enable WASM backend (wazero) |
+| `METATOOLS_RUNTIME_BACKEND` | `docker` | Preferred standard backend: `docker` or `wasm` |
+
 ## Optional toolruntime integration
 
 `execute_code` is wired behind a build tag so the server stays minimal by
@@ -146,6 +155,8 @@ Notes:
   the hardened Docker backend.
 - Override the Docker image with `METATOOLS_DOCKER_IMAGE` (default:
   `toolruntime-sandbox:latest`).
+- Enable the WASM backend with `METATOOLS_WASM_ENABLED=true` and select it
+  with `METATOOLS_RUNTIME_BACKEND=wasm` (uses wazero).
 
 ## Quickstart (server wiring)
 

@@ -61,6 +61,11 @@ When built with the `toolruntime` tag, `execute_code` is backed by a runtime
 that selects between an unsafe dev backend and a Docker-backed standard
 backend. Docker is opt-in via `METATOOLS_RUNTIME_PROFILE=standard`.
 
+Standard isolation can also be provided by the WASM backend when enabled
+(`METATOOLS_WASM_ENABLED=true`, `METATOOLS_RUNTIME_BACKEND=wasm`). If Docker
+is unavailable and WASM is enabled, the server falls back to WASM for the
+standard profile.
+
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#2b6cb0'}}}%%
 flowchart LR

@@ -2,12 +2,14 @@ package docker
 
 import (
 	"context"
+	"io"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 	dockerbackend "github.com/jonwraymond/toolruntime/backend/docker"
 	"github.com/stretchr/testify/assert"
@@ -33,7 +35,33 @@ func requireDocker(t *testing.T) *client.Client {
 		t.Skipf("Docker daemon not running: %v", err)
 	}
 
+	if err := ensureImage(ctx, cli, "alpine:latest"); err != nil {
+		t.Skipf("Docker image unavailable: %v", err)
+	}
+
 	return cli
+}
+
+func ensureImage(ctx context.Context, cli *client.Client, imageRef string) error {
+	args := filters.NewArgs()
+	args.Add("reference", imageRef)
+
+	images, err := cli.ImageList(ctx, image.ListOptions{Filters: args})
+	if err != nil {
+		return err
+	}
+	if len(images) > 0 {
+		return nil
+	}
+
+	rc, err := cli.ImagePull(ctx, imageRef, image.PullOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() { _ = rc.Close() }()
+	_, _ = io.Copy(io.Discard, rc)
+
+	return nil
 }
 
 func TestClient_Run_Success(t *testing.T) {

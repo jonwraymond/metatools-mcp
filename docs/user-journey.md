@@ -181,7 +181,8 @@ flowchart TB
 
 > When built with `-tags toolruntime`, `execute_code` runs in a sandboxed runtime.
 > Default profile is `dev` (unsafe); set `METATOOLS_RUNTIME_PROFILE=standard`
-> to enable Docker when available.
+> to enable Docker when available. Set `METATOOLS_WASM_ENABLED=true` and
+> `METATOOLS_RUNTIME_BACKEND=wasm` to use the WASM backend instead.
 
 ## Example: full agent workflow
 
