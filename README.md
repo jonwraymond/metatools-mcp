@@ -136,7 +136,7 @@ default.
 Enable it locally with:
 
 ```bash
-go get github.com/jonwraymond/toolruntime@v0.3.1
+go get github.com/jonwraymond/toolruntime@v0.4.0
 go run -tags toolruntime ./cmd/metatools
 ```
 
