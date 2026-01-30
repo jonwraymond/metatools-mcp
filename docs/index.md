@@ -45,6 +45,18 @@ _ = server.Run(context.Background(), &mcp.StdioTransport{})
 - Outputs are structured and aligned to MCP schemas
 - Search and execution behaviors are deterministic by default
 
+## Runtime notes (execute_code)
+
+`execute_code` is optional and wired behind the `toolruntime` build tag.
+By default, the runtime uses the unsafe dev profile; when Docker is available,
+set `METATOOLS_RUNTIME_PROFILE=standard` to enable the hardened Docker backend.
+
+## Interface Contracts
+
+- **Transport**: thread-safe; `Serve` honors context; `Close` is idempotent.
+- **Backend**: thread-safe; `ListTools`/`Execute` honor context; streaming backends return non-nil channel when err is nil.
+- **ToolProvider**: thread-safe; `Handle` honors context; streaming providers return non-nil channel when err is nil.
+
 ## Next
 
 - Server architecture: `architecture.md`

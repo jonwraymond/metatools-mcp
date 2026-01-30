@@ -1,3 +1,5 @@
+//go:build !toolruntime
+
 package main
 
 import (

@@ -3,7 +3,7 @@ server:
   version: "dev"
 
 transport:
-  type: stdio
+  type: stdio  # stdio | streamable | sse
   http:
     host: 0.0.0.0
     port: 8080
@@ -11,6 +11,10 @@ transport:
       enabled: false
       cert: ""
       key: ""
+  streamable:
+    stateless: false        # Disable session management
+    json_response: false    # Prefer JSON over SSE streaming
+    session_timeout: 30m    # Idle session cleanup
 
 search:
   strategy: lexical

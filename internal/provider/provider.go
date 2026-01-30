@@ -8,6 +8,11 @@ import (
 
 // ToolProvider defines the interface for MCP tool providers.
 // A provider encapsulates a tool's definition and execution logic.
+//
+// Contract:
+// - Concurrency: implementations must be safe for concurrent use.
+// - Context: Handle must honor cancellation/deadlines.
+// - Errors: return structured *mcp.CallToolResult for protocol-level errors when possible.
 type ToolProvider interface {
 	// Name returns the unique identifier for this provider.
 	Name() string
@@ -24,6 +29,9 @@ type ToolProvider interface {
 }
 
 // ConfigurableProvider is a provider that can be configured at runtime.
+//
+// Contract:
+// - Configure must validate config and return error on invalid input.
 type ConfigurableProvider interface {
 	ToolProvider
 
@@ -32,6 +40,9 @@ type ConfigurableProvider interface {
 }
 
 // StreamingProvider is a provider that supports streaming responses.
+//
+// Contract:
+// - If HandleStream returns nil error, the channel must be non-nil.
 type StreamingProvider interface {
 	ToolProvider
 

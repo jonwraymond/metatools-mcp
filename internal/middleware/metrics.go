@@ -19,6 +19,10 @@ type ToolMetrics struct {
 }
 
 // MetricsCollector records tool execution metrics.
+//
+// Contract:
+// - Concurrency: implementations must be safe for concurrent use.
+// - Errors: Start/Finish must be best-effort and must not panic.
 type MetricsCollector interface {
 	Start(tool string)
 	Finish(tool string, err error, duration time.Duration)

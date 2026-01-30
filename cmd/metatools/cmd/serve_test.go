@@ -38,7 +38,7 @@ func TestServeCmd_TransportValidation(t *testing.T) {
 	}{
 		{"stdio", false},
 		{"sse", false},
-		{"http", false},
+		{"streamable", false},
 		{"invalid", true},
 	}
 
@@ -149,7 +149,7 @@ transport:
 	}
 
 	cliCfg := &ServeConfig{
-		Transport: "http",
+		Transport: "streamable",
 		Port:      3000,
 	}
 
@@ -158,11 +158,53 @@ transport:
 		t.Fatalf("loadServeConfig() error = %v", err)
 	}
 
-	if cfg.Transport.Type != "http" {
-		t.Errorf("Transport.Type = %q, want %q from CLI", cfg.Transport.Type, "http")
+	if cfg.Transport.Type != "streamable" {
+		t.Errorf("Transport.Type = %q, want %q from CLI", cfg.Transport.Type, "streamable")
 	}
 	if cfg.Transport.HTTP.Port != 3000 {
 		t.Errorf("Transport.HTTP.Port = %d, want %d from CLI", cfg.Transport.HTTP.Port, 3000)
+	}
+}
+
+func TestServeCmd_StreamableConfigFile(t *testing.T) {
+	clearServeEnv(t)
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, "metatools.yaml")
+
+	yaml := `
+transport:
+  type: streamable
+  http:
+    host: 127.0.0.1
+    port: 8080
+  streamable:
+    stateless: true
+    json_response: true
+    session_timeout: 15m
+`
+	if err := os.WriteFile(configPath, []byte(yaml), 0644); err != nil {
+		t.Fatalf("WriteFile() error = %v", err)
+	}
+
+	cfg, err := loadServeConfig(configPath, &ServeConfig{})
+	if err != nil {
+		t.Fatalf("loadServeConfig() error = %v", err)
+	}
+
+	if cfg.Transport.Type != "streamable" {
+		t.Errorf("Transport.Type = %q, want %q", cfg.Transport.Type, "streamable")
+	}
+	if cfg.Transport.HTTP.Host != "127.0.0.1" {
+		t.Errorf("Transport.HTTP.Host = %q, want %q", cfg.Transport.HTTP.Host, "127.0.0.1")
+	}
+	if cfg.Transport.HTTP.Port != 8080 {
+		t.Errorf("Transport.HTTP.Port = %d, want %d", cfg.Transport.HTTP.Port, 8080)
+	}
+	if !cfg.Transport.Streamable.Stateless {
+		t.Error("Transport.Streamable.Stateless = false, want true")
+	}
+	if !cfg.Transport.Streamable.JSONResponse {
+		t.Error("Transport.Streamable.JSONResponse = false, want true")
 	}
 }
 

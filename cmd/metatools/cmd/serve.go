@@ -27,7 +27,7 @@ type ServeConfig struct {
 	Config    string
 }
 
-var validTransports = []string{"stdio", "sse", "http"}
+var validTransports = []string{"stdio", "sse", "streamable"}
 
 func validateTransport(transport string) error {
 	for _, valid := range validTransports {
@@ -47,13 +47,13 @@ func newServeCmd() *cobra.Command {
 		Long: `Start the metatools MCP server with the specified transport.
 
 Transports:
-  stdio  - Standard input/output (default, for MCP clients like Claude Desktop)
-  sse    - Server-Sent Events over HTTP (for web clients)
-  http   - Simple HTTP request/response (for REST clients)
+  stdio      - Standard input/output (default, for MCP clients like Claude Desktop)
+  sse        - Server-Sent Events over HTTP (deprecated, for legacy web clients)
+  streamable - Streamable HTTP (MCP spec 2025-03-26, recommended for HTTP clients)
 
 Examples:
-  metatools serve                           # stdio mode (default)
-  metatools serve --transport=sse --port=8080
+  metatools serve                                    # stdio mode (default)
+  metatools serve --transport=streamable --port=8080 # HTTP mode
   metatools serve --config=metatools.yaml`,
 		PreRunE: func(_ *cobra.Command, _ []string) error {
 			return validateTransport(cfg.Transport)
@@ -63,7 +63,7 @@ Examples:
 		},
 	}
 
-	cmd.Flags().StringVarP(&cfg.Transport, "transport", "t", "stdio", "Transport type (stdio, sse, http)")
+	cmd.Flags().StringVarP(&cfg.Transport, "transport", "t", "stdio", "Transport type (stdio, sse, streamable)")
 	cmd.Flags().IntVarP(&cfg.Port, "port", "p", 8080, "Port for HTTP transports")
 	cmd.Flags().StringVar(&cfg.Host, "host", "0.0.0.0", "Host to bind for HTTP transports")
 	cmd.Flags().StringVarP(&cfg.Config, "config", "c", "", "Path to config file")
@@ -182,8 +182,20 @@ func runServe(ctx context.Context, cfg *ServeConfig) error {
 			Port: appCfg.Transport.HTTP.Port,
 			Path: "/mcp",
 		}}
-	case "http":
-		return fmt.Errorf("transport %q not yet implemented", appCfg.Transport.Type)
+	case "streamable":
+		transport = &transportpkg.StreamableHTTPTransport{Config: transportpkg.StreamableHTTPConfig{
+			Host:           appCfg.Transport.HTTP.Host,
+			Port:           appCfg.Transport.HTTP.Port,
+			Path:           "/mcp",
+			Stateless:      appCfg.Transport.Streamable.Stateless,
+			JSONResponse:   appCfg.Transport.Streamable.JSONResponse,
+			SessionTimeout: appCfg.Transport.Streamable.SessionTimeout,
+			TLS: transportpkg.TLSConfig{
+				Enabled:  appCfg.Transport.HTTP.TLS.Enabled,
+				CertFile: appCfg.Transport.HTTP.TLS.CertFile,
+				KeyFile:  appCfg.Transport.HTTP.TLS.KeyFile,
+			},
+		}}
 	default:
 		return fmt.Errorf("unknown transport: %s", appCfg.Transport.Type)
 	}

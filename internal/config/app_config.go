@@ -27,8 +27,16 @@ type ServerConfig struct {
 
 // TransportConfig holds transport layer settings.
 type TransportConfig struct {
-	Type string     `koanf:"type"`
-	HTTP HTTPConfig `koanf:"http"`
+	Type       string           `koanf:"type"`
+	HTTP       HTTPConfig       `koanf:"http"`
+	Streamable StreamableConfig `koanf:"streamable"`
+}
+
+// StreamableConfig holds Streamable HTTP transport settings.
+type StreamableConfig struct {
+	Stateless      bool          `koanf:"stateless"`
+	JSONResponse   bool          `koanf:"json_response"`
+	SessionTimeout time.Duration `koanf:"session_timeout"`
 }
 
 // HTTPConfig holds HTTP transport settings.
@@ -102,9 +110,9 @@ type LocalBackendConfig struct {
 }
 
 var validAppTransports = map[string]bool{
-	"stdio": true,
-	"sse":   true,
-	"http":  true,
+	"stdio":      true,
+	"sse":        true,
+	"streamable": true,
 }
 
 var validAppSearchStrategies = map[string]bool{
@@ -125,6 +133,11 @@ func DefaultAppConfig() AppConfig {
 			HTTP: HTTPConfig{
 				Host: "0.0.0.0",
 				Port: 8080,
+			},
+			Streamable: StreamableConfig{
+				Stateless:      false,
+				JSONResponse:   false,
+				SessionTimeout: 30 * time.Minute,
 			},
 		},
 		Search: AppSearchConfig{
@@ -165,7 +178,7 @@ func DefaultAppConfig() AppConfig {
 // Validate checks the configuration for errors.
 func (c *AppConfig) Validate() error {
 	if !validAppTransports[c.Transport.Type] {
-		return fmt.Errorf("invalid transport type %q, must be one of: stdio, sse, http", c.Transport.Type)
+		return fmt.Errorf("invalid transport type %q, must be one of: stdio, sse, streamable", c.Transport.Type)
 	}
 
 	if c.Transport.Type != "stdio" {

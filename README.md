@@ -33,6 +33,32 @@ progressive disclosure:
 
 See `CHANGELOG.md` for release notes.
 
+## Transport selection
+
+metatools-mcp supports multiple transports for different deployment scenarios:
+
+| Transport | Command | Use Case |
+|-----------|---------|----------|
+| `stdio` | `metatools serve` | Claude Desktop, local CLI (default) |
+| `streamable` | `metatools serve --transport=streamable --port=8080` | Web apps, remote clients (recommended for HTTP) |
+| `sse` | `metatools serve --transport=sse --port=8080` | Legacy web clients (deprecated) |
+
+**Streamable HTTP** implements MCP spec 2025-03-26 with session management via
+`Mcp-Session-Id` header, supporting both SSE streaming and JSON responses.
+
+```bash
+# Basic HTTP server
+metatools serve --transport=streamable --port=8080
+
+# With TLS
+metatools serve --transport=streamable --port=443 --tls --tls-cert=cert.pem --tls-key=key.pem
+
+# Stateless mode (serverless/FaaS)
+metatools serve --transport=streamable --port=8080 --stateless
+```
+
+See `docs/usage.md` for full configuration options.
+
 ## Search Strategy
 
 By default, metatools-mcp uses lexical search. For BM25 ranking:
@@ -66,6 +92,33 @@ Notes:
 | `METATOOLS_NOTIFY_TOOL_LIST_CHANGED` | `true` | Emit `notifications/tools/list_changed` on index updates |
 | `METATOOLS_NOTIFY_TOOL_LIST_CHANGED_DEBOUNCE_MS` | `150` | Debounce window for list change notifications |
 
+### Transport Environment (CLI defaults)
+
+These are applied by `metatools serve` when flags are not explicitly set:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `METATOOLS_TRANSPORT` | `stdio` | Transport type: `stdio`, `streamable`, `sse` |
+| `METATOOLS_PORT` | `8080` | HTTP port for `streamable`/`sse` |
+| `METATOOLS_HOST` | `0.0.0.0` | HTTP bind host |
+| `METATOOLS_CONFIG` | "" | Path to config file |
+
+### Transport Environment (Koanf config)
+
+These are consumed by `config.Load` via Koanf (file/env/flags precedence):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `METATOOLS_TRANSPORT_TYPE` | `stdio` | Transport type: `stdio`, `streamable`, `sse` |
+| `METATOOLS_TRANSPORT_HTTP_HOST` | `0.0.0.0` | HTTP bind host |
+| `METATOOLS_TRANSPORT_HTTP_PORT` | `8080` | HTTP port |
+| `METATOOLS_TRANSPORT_HTTP_TLS_ENABLED` | `false` | Enable TLS for HTTP transports |
+| `METATOOLS_TRANSPORT_HTTP_TLS_CERT` | "" | TLS certificate path |
+| `METATOOLS_TRANSPORT_HTTP_TLS_KEY` | "" | TLS key path |
+| `METATOOLS_TRANSPORT_STREAMABLE_STATELESS` | `false` | Disable session management |
+| `METATOOLS_TRANSPORT_STREAMABLE_JSON_RESPONSE` | `false` | Prefer JSON over SSE streaming |
+| `METATOOLS_TRANSPORT_STREAMABLE_SESSION_TIMEOUT` | `30m` | Idle session cleanup duration |
+
 ## Optional toolruntime integration
 
 `execute_code` is wired behind a build tag so the server stays minimal by
@@ -74,7 +127,7 @@ default.
 Enable it locally with:
 
 ```bash
-go get github.com/jonwraymond/toolruntime@v0.1.1
+go get github.com/jonwraymond/toolruntime@v0.3.1
 go run -tags toolruntime ./cmd/metatools
 ```
 
@@ -88,12 +141,15 @@ go run -tags toolruntime ./cmd/metatools
 Notes:
 
 - The build tag enables a `toolruntime`-backed `toolcode.Executor`.
-- The default profile is `dev` and uses the unsafe host backend.
-- This is intentionally dev-only until the runtime backends are hardened.
+- Default profile is `dev` (unsafe subprocess backend).
+- If Docker is available, set `METATOOLS_RUNTIME_PROFILE=standard` to enable
+  the hardened Docker backend.
+- Override the Docker image with `METATOOLS_DOCKER_IMAGE` (default:
+  `toolruntime-sandbox:latest`).
 
 ## Quickstart (server wiring)
 
-Minimal wiring uses the adapter layer plus the official MCP Go SDK transport:
+Minimal wiring uses the adapter layer plus the internal transport package:
 
 ```go
 package main
@@ -103,10 +159,10 @@ import (
 
   "github.com/jonwraymond/metatools-mcp/internal/adapters"
   "github.com/jonwraymond/metatools-mcp/internal/server"
+  "github.com/jonwraymond/metatools-mcp/internal/transport"
   "github.com/jonwraymond/tooldocs"
   "github.com/jonwraymond/toolindex"
   "github.com/jonwraymond/toolrun"
-  "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 func main() {
@@ -120,7 +176,15 @@ func main() {
     panic(err)
   }
 
-  _ = srv.Run(context.Background(), &mcp.StdioTransport{})
+  // Use stdio for local/CLI clients
+  tr := &transport.StdioTransport{}
+  _ = tr.Serve(context.Background(), srv)
+
+  // Or use streamable HTTP for web clients
+  // tr := &transport.StreamableHTTPTransport{
+  //   Config: transport.StreamableHTTPConfig{Port: 8080},
+  // }
+  // _ = tr.Serve(context.Background(), srv)
 }
 ```
 

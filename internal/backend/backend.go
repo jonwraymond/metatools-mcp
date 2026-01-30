@@ -17,6 +17,11 @@ var (
 
 // Backend defines a source of tools.
 // Backends can be local handlers, MCP servers, HTTP APIs, or custom implementations.
+//
+// Contract:
+// - Concurrency: implementations must be safe for concurrent use.
+// - Context: methods must honor cancellation/deadlines.
+// - Errors: use ErrBackendNotFound/ErrBackendDisabled/ErrToolNotFound/ErrBackendUnavailable where applicable.
 type Backend interface {
 	// Kind returns the backend type (e.g., "local", "mcp", "http").
 	Kind() string
@@ -41,6 +46,9 @@ type Backend interface {
 }
 
 // ConfigurableBackend can be configured from raw bytes (YAML/JSON).
+//
+// Contract:
+// - Configure must validate config and return error on invalid input.
 type ConfigurableBackend interface {
 	Backend
 
@@ -48,6 +56,9 @@ type ConfigurableBackend interface {
 }
 
 // StreamingBackend supports streaming responses.
+//
+// Contract:
+// - If ExecuteStream returns nil error, the channel must be non-nil.
 type StreamingBackend interface {
 	Backend
 

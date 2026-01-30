@@ -63,7 +63,7 @@ execution:
 }
 
 func TestLoad_EnvOverrides(t *testing.T) {
-	t.Setenv("METATOOLS_TRANSPORT_TYPE", "http")
+	t.Setenv("METATOOLS_TRANSPORT_TYPE", "streamable")
 	t.Setenv("METATOOLS_TRANSPORT_HTTP_PORT", "3000")
 
 	cfg, err := Load("")
@@ -71,8 +71,8 @@ func TestLoad_EnvOverrides(t *testing.T) {
 		t.Fatalf("Load() error = %v", err)
 	}
 
-	if cfg.Transport.Type != "http" {
-		t.Errorf("Transport.Type = %q, want %q from env", cfg.Transport.Type, "http")
+	if cfg.Transport.Type != "streamable" {
+		t.Errorf("Transport.Type = %q, want %q from env", cfg.Transport.Type, "streamable")
 	}
 	if cfg.Transport.HTTP.Port != 3000 {
 		t.Errorf("Transport.HTTP.Port = %d, want %d from env", cfg.Transport.HTTP.Port, 3000)

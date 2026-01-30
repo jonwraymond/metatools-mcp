@@ -2,6 +2,54 @@
 
 This journey shows the full end-to-end agent workflow via MCP metatools.
 
+## Transport selection
+
+Before tool discovery begins, clients establish a connection via one of the
+supported transports. The transport choice depends on the client environment:
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#2b6cb0'}}}%%
+flowchart LR
+    subgraph clients["Clients"]
+        Claude["🖥️ Claude Desktop"]
+        WebApp["🌐 Web Application"]
+        CLI["⌨️ CLI Tool"]
+    end
+
+    subgraph transports["Transport Layer"]
+        Stdio["📟 stdio<br/><small>stdin/stdout</small>"]
+        Streamable["🔄 streamable<br/><small>HTTP POST/GET/DELETE</small>"]
+        SSE["📡 sse<br/><small>deprecated</small>"]
+    end
+
+    subgraph server["metatools-mcp"]
+        MCP["🔷 MCP Server"]
+    end
+
+    Claude --> Stdio --> MCP
+    WebApp --> Streamable --> MCP
+    CLI --> Stdio --> MCP
+    WebApp -.-> SSE -.-> MCP
+
+    style clients fill:#4a5568,stroke:#2d3748
+    style transports fill:#805ad5,stroke:#6b46c1
+    style server fill:#2b6cb0,stroke:#2c5282
+    style SSE fill:#718096,stroke:#4a5568,stroke-dasharray: 5 5
+```
+
+| Transport | Client Type | Session | Protocol |
+|-----------|------------|---------|----------|
+| `stdio` | Local CLI, Claude Desktop | Implicit | stdin/stdout JSON-RPC |
+| `streamable` | Web apps, remote clients | Mcp-Session-Id header | HTTP (MCP 2025-03-26) |
+| `sse` | Legacy web clients | Cookie-based | HTTP + SSE (deprecated) |
+
+**Streamable HTTP session flow:**
+1. Client POSTs `initialize` request to `/mcp`
+2. Server returns `Mcp-Session-Id` header
+3. Client includes session ID in all subsequent requests
+4. Client may open GET stream for server notifications
+5. Client sends DELETE to terminate session
+
 ## End-to-end flow (agent view)
 
 ![Diagram](assets/diagrams/user-journey.svg)
@@ -12,11 +60,20 @@ sequenceDiagram
     autonumber
 
     participant Agent as 🤖 AI Agent
+    participant Transport as 🔄 Transport
     participant MCP as 🔷 metatools-mcp
     participant Index as 📇 toolindex
     participant Docs as 📚 tooldocs
     participant Run as ▶️ toolrun
     participant Code as 💻 toolcode
+
+    rect rgb(128, 90, 213, 0.1)
+        Note over Agent,MCP: Phase 0: Connection
+        Agent->>+Transport: Connect (stdio/streamable/sse)
+        Transport->>+MCP: initialize
+        MCP-->>-Transport: capabilities + session
+        Transport-->>-Agent: Ready
+    end
 
     rect rgb(43, 108, 176, 0.1)
         Note over Agent,Index: Phase 1: Discovery
@@ -60,8 +117,13 @@ flowchart TB
         Request["📥 MCP Request<br/><small>JSON-RPC</small>"]
     end
 
+    subgraph transport["Transport Layer"]
+        Stdio["📟 stdio"]
+        Streamable["🔄 streamable"]
+    end
+
     subgraph metatools["metatools-mcp"]
-        direction TB
+        Server["🔷 MCP Server"]
 
         subgraph discovery["Discovery Tools"]
             SearchTools["🔍 search_tools"]
@@ -90,15 +152,17 @@ flowchart TB
         Code["💻 toolcode"]
     end
 
-    Request --> SearchTools --> Index
-    Request --> ListNS --> Index
-    Request --> DescribeTool --> Docs2
-    Request --> ListExamples --> Docs2
-    Request --> RunTool --> Run
-    Request --> RunChain --> Run
-    Request --> ExecCode --> Code
+    Request --> Stdio & Streamable --> Server
+    Server --> SearchTools --> Index
+    Server --> ListNS --> Index
+    Server --> DescribeTool --> Docs2
+    Server --> ListExamples --> Docs2
+    Server --> RunTool --> Run
+    Server --> RunChain --> Run
+    Server --> ExecCode --> Code
 
     style agent fill:#4a5568,stroke:#2d3748
+    style transport fill:#805ad5,stroke:#6b46c1
     style metatools fill:#2b6cb0,stroke:#2c5282,stroke-width:2px
     style discovery fill:#3182ce,stroke:#2c5282
     style docs fill:#d69e2e,stroke:#b7791f
@@ -109,10 +173,15 @@ flowchart TB
 
 ## Step-by-step
 
+0. **Connect** via transport (stdio for local, streamable HTTP for remote).
 1. **Discover tools** with `search_tools` (summary-only results).
 2. **Inspect schema** using `describe_tool` (schema or full detail).
 3. **Execute** a single tool with `run_tool` or a sequence with `run_chain`.
 4. **Orchestrate** complex flows using `execute_code` (optional).
+
+> When built with `-tags toolruntime`, `execute_code` runs in a sandboxed runtime.
+> Default profile is `dev` (unsafe); set `METATOOLS_RUNTIME_PROFILE=standard`
+> to enable Docker when available.
 
 ## Example: full agent workflow
 
