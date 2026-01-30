@@ -1,43 +1,144 @@
+# metatools-mcp Component Wiring
+# Library dependencies and extensions
+
 direction: right
 
-style: {
-  font-size: 14
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 0
+  }
+  surface-fill: "#2b6cb0"
+  core-fill: "#3182ce"
+  optional-fill: "#805ad5"
 }
 
-metatools: "metatools-mcp" {
+classes: {
+  container: {
+    style: {
+      border-radius: 12
+      shadow: true
+      font-size: 14
+      bold: true
+    }
+  }
+  surface-node: {
+    style: {
+      fill: ${surface-fill}
+      stroke: "#1a365d"
+      stroke-width: 3
+      font-color: "#fff"
+    }
+  }
+  core-node: {
+    style: {
+      fill: ${core-fill}
+      stroke: "#2c5282"
+      stroke-width: 2
+      font-color: "#fff"
+    }
+  }
+  optional-node: {
+    style: {
+      fill: ${optional-fill}
+      stroke: "#6b46c1"
+      stroke-width: 2
+      font-color: "#fff"
+    }
+  }
+  core-flow: {
+    style: {
+      stroke: ${core-fill}
+      stroke-width: 2
+    }
+  }
+  optional-flow: {
+    style: {
+      stroke: ${optional-fill}
+      stroke-width: 2
+      stroke-dash: 3
+    }
+  }
+}
+
+# Title
+title: "metatools-mcp - Component Wiring" {
+  shape: text
+  near: top-center
+  style: {
+    font-size: 24
+    bold: true
+    font-color: "#1a365d"
+  }
+}
+
+# MCP Server
+metatools: "🔷 metatools-mcp\nMCP Server" {
   shape: hexagon
-  style: { shadow: true }
+  class: surface-node
 }
 
-core: {
-  label: "Core Tool Libraries"
+# Core Libraries
+core: "📦 Core Libraries" {
+  class: container
   style: {
-    border-radius: 8
-    shadow: true
-    stroke-width: 2
+    fill: "#ebf8ff"
+    stroke: ${core-fill}
   }
 
-  toolmodel: { shape: package }
-  toolindex: { shape: cylinder }
-  tooldocs: { shape: document }
-  toolrun: { shape: step }
+  toolmodel: "📋 toolmodel\nSchema" {
+    shape: package
+    class: core-node
+  }
+  toolindex: "🗂️ toolindex\nRegistry" {
+    shape: cylinder
+    class: core-node
+  }
+  tooldocs: "📚 tooldocs\nDocs" {
+    shape: document
+    class: core-node
+  }
+  toolrun: "▶️ toolrun\nExec" {
+    shape: step
+    class: core-node
+  }
 }
 
-optional: {
-  label: "Optional Extensions"
+# Optional Extensions
+optional: "🔌 Optional Extensions" {
+  class: container
   style: {
-    border-radius: 8
-    stroke-dash: 4
+    fill: "#faf5ff"
+    stroke: ${optional-fill}
+    stroke-dash: 3
   }
 
-  toolcode: { shape: page }
-  toolruntime: { shape: cloud }
-  toolsearch: { shape: diamond }
+  toolcode: "💻 toolcode\nOrchestration" {
+    shape: page
+    class: optional-node
+  }
+  toolruntime: "🔒 toolruntime\nSandbox" {
+    shape: cloud
+    class: optional-node
+  }
+  toolsearch: "🔍 toolsearch\nBM25" {
+    shape: diamond
+    class: optional-node
+  }
 }
 
-metatools -> core
-metatools -> optional
+# Connections
+metatools -> core: "requires" {
+  class: core-flow
+}
+metatools -> optional: "plugs in" {
+  class: optional-flow
+}
 
-toolindex -> toolsearch
+core.toolindex -> optional.toolsearch: "search strategy" {
+  class: optional-flow
+}
 
-toolcode -> toolruntime
+optional.toolcode -> optional.toolruntime: "sandboxes" {
+  class: optional-flow
+}

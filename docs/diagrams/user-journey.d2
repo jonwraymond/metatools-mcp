@@ -1,52 +1,198 @@
+# metatools-mcp User Journey
+# Complete MCP server workflow
+
 direction: down
 
-style: {
-  font-size: 14
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 0
+  }
+  surface-fill: "#2b6cb0"
+  discovery-fill: "#3182ce"
+  execution-fill: "#38a169"
+  composition-fill: "#805ad5"
+  actor-fill: "#e2e8f0"
 }
 
-agent: "Agent" {
-  shape: oval
+classes: {
+  actor: {
+    style: {
+      fill: ${actor-fill}
+      stroke: "#a0aec0"
+      stroke-width: 2
+      font-color: "#1a202c"
+      bold: true
+    }
+  }
+  surface: {
+    style: {
+      fill: ${surface-fill}
+      stroke: "#1a365d"
+      stroke-width: 2
+      font-color: "#fff"
+      shadow: true
+    }
+  }
+  discovery: {
+    style: {
+      fill: ${discovery-fill}
+      stroke: "#2c5282"
+      stroke-width: 2
+      font-color: "#fff"
+    }
+  }
+  execution: {
+    style: {
+      fill: ${execution-fill}
+      stroke: "#276749"
+      stroke-width: 2
+      font-color: "#fff"
+    }
+  }
+  composition: {
+    style: {
+      fill: ${composition-fill}
+      stroke: "#6b46c1"
+      stroke-width: 2
+      font-color: "#fff"
+    }
+  }
+  search-flow: {
+    style: {
+      stroke: ${discovery-fill}
+      stroke-width: 2
+    }
+  }
+  describe-flow: {
+    style: {
+      stroke: ${discovery-fill}
+      stroke-width: 2
+      stroke-dash: 3
+    }
+  }
+  run-flow: {
+    style: {
+      stroke: ${execution-fill}
+      stroke-width: 2
+    }
+  }
+  code-flow: {
+    style: {
+      stroke: ${composition-fill}
+      stroke-width: 2
+    }
+  }
+  result-flow: {
+    style: {
+      stroke: "#718096"
+      stroke-width: 2
+      stroke-dash: 3
+    }
+  }
 }
 
-mcp: "metatools-mcp" {
+# Title
+title: "metatools-mcp - MCP Server" {
+  shape: text
+  near: top-center
+  style: {
+    font-size: 24
+    bold: true
+    font-color: "#1a365d"
+  }
+}
+
+# Actors
+agent: "🤖 Agent" {
+  shape: person
+  class: actor
+}
+
+# Components
+mcp: "🔷 metatools-mcp\n7 MCP Tools" {
   shape: hexagon
-  style: { shadow: true }
+  class: surface
 }
 
-index: "toolindex" {
+index: "🗂️ toolindex\nRegistry" {
   shape: cylinder
+  class: discovery
 }
 
-docs: "tooldocs" {
+docs: "📚 tooldocs\nDocumentation" {
   shape: document
+  class: discovery
 }
 
-runner: "toolrun" {
+runner: "▶️ toolrun\nExecution" {
   shape: step
+  class: execution
 }
 
-code: "toolcode" {
+code: "💻 toolcode\nOrchestration" {
   shape: page
+  class: composition
 }
 
-agent -> mcp: "search_tools('create ticket')"
-mcp -> index: "Search"
-index -> mcp: "summaries"
-mcp -> agent: "tool summaries"
+# Search Flow
+agent -> mcp: "search_tools('create ticket')" {
+  class: search-flow
+}
+mcp -> index: "Search" {
+  class: search-flow
+}
+index -> mcp: "summaries" {
+  class: result-flow
+}
+mcp -> agent: "tool summaries" {
+  class: result-flow
+}
 
-agent -> mcp: "describe_tool(tool_id, schema)"
-mcp -> docs: "DescribeTool(schema)"
-docs -> mcp: "tool schema"
-mcp -> agent: "tool schema"
+# Describe Flow
+agent -> mcp: "describe_tool(tool_id, schema)" {
+  class: describe-flow
+}
+mcp -> docs: "DescribeTool(schema)" {
+  class: describe-flow
+}
+docs -> mcp: "tool schema" {
+  class: result-flow
+}
+mcp -> agent: "tool schema" {
+  class: result-flow
+}
 
-agent -> mcp: "run_tool(tool_id, args)"
-mcp -> runner: "Run"
-runner -> mcp: "result"
-mcp -> agent: "structured result"
+# Run Flow
+agent -> mcp: "run_tool(tool_id, args)" {
+  class: run-flow
+}
+mcp -> runner: "Run" {
+  class: run-flow
+}
+runner -> mcp: "result" {
+  class: result-flow
+}
+mcp -> agent: "structured result" {
+  class: result-flow
+}
 
-agent -> mcp: "execute_code(code)"
-mcp -> code: "ExecuteCode"
-code -> index: "SearchTools"
-code -> docs: "DescribeTool"
-code -> runner: "RunTool/RunChain"
-code -> mcp: "ExecuteResult"
+# Code Flow
+agent -> mcp: "execute_code(code)" {
+  class: code-flow
+}
+mcp -> code: "ExecuteCode" {
+  class: code-flow
+}
+code -> index: "SearchTools" {
+  class: code-flow
+}
+code -> docs: "DescribeTool" {
+  class: code-flow
+}
+code -> runner: "RunTool/RunChain" {
+  class: code-flow
+}
+code -> mcp: "ExecuteResult" {
+  class: result-flow
+}

@@ -1,47 +1,174 @@
+# metatools-mcp Tool Mapping
+# MCP tools to library delegation
+
 direction: right
 
-style: {
-  font-size: 14
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 0
+  }
+  surface-fill: "#2b6cb0"
+  discovery-fill: "#3182ce"
+  docs-fill: "#d69e2e"
+  execution-fill: "#38a169"
+  orchestration-fill: "#805ad5"
 }
 
-surface: {
-  label: "MCP Tool Surface"
+classes: {
+  container: {
+    style: {
+      border-radius: 12
+      shadow: true
+      font-size: 14
+      bold: true
+    }
+  }
+  surface-tool: {
+    style: {
+      fill: ${surface-fill}
+      stroke: "#1a365d"
+      stroke-width: 2
+      font-color: "#fff"
+    }
+  }
+  discovery-lib: {
+    style: {
+      fill: ${discovery-fill}
+      stroke: "#2c5282"
+      stroke-width: 2
+      font-color: "#fff"
+    }
+  }
+  docs-lib: {
+    style: {
+      fill: ${docs-fill}
+      stroke: "#b7791f"
+      stroke-width: 2
+      font-color: "#fff"
+    }
+  }
+  execution-lib: {
+    style: {
+      fill: ${execution-fill}
+      stroke: "#276749"
+      stroke-width: 2
+      font-color: "#fff"
+    }
+  }
+  orchestration-lib: {
+    style: {
+      fill: ${orchestration-fill}
+      stroke: "#6b46c1"
+      stroke-width: 2
+      font-color: "#fff"
+    }
+  }
+  data-flow: {
+    style: {
+      stroke: "#4a5568"
+      stroke-width: 2
+    }
+  }
+}
+
+# Title
+title: "metatools-mcp - Tool Mapping" {
+  shape: text
+  near: top-center
   style: {
-    border-radius: 8
-    shadow: true
+    font-size: 24
+    bold: true
+    font-color: "#1a365d"
+  }
+}
+
+# MCP Tool Surface
+surface: "🔷 MCP Tools" {
+  class: container
+  style: {
+    fill: "#ebf8ff"
+    stroke: ${surface-fill}
   }
 
-  search_tools: { shape: step }
-  list_namespaces: { shape: step }
-  describe_tool: { shape: step }
-  list_tool_examples: { shape: step }
-  run_tool: { shape: step }
-  run_chain: { shape: step }
-  execute_code: { shape: step }
+  search_tools: "search_tools" {
+    shape: step
+    class: surface-tool
+  }
+  list_namespaces: "list_namespaces" {
+    shape: step
+    class: surface-tool
+  }
+  describe_tool: "describe_tool" {
+    shape: step
+    class: surface-tool
+  }
+  list_tool_examples: "list_examples" {
+    shape: step
+    class: surface-tool
+  }
+  run_tool: "run_tool" {
+    shape: step
+    class: surface-tool
+  }
+  run_chain: "run_chain" {
+    shape: step
+    class: surface-tool
+  }
+  execute_code: "execute_code" {
+    shape: step
+    class: surface-tool
+  }
 }
 
-libs: {
-  label: "Library Wiring"
+# Library Wiring
+libs: "📦 Libraries" {
+  class: container
   style: {
-    border-radius: 8
-    stroke-width: 2
+    fill: "#f7fafc"
+    stroke: "#718096"
   }
 
-  toolindex: { shape: cylinder }
-  tooldocs: { shape: document }
-  toolrun: { shape: step }
-  toolcode: { shape: page }
+  toolindex: "🗂️ toolindex\nRegistry" {
+    shape: cylinder
+    class: discovery-lib
+  }
+  tooldocs: "📚 tooldocs\nDocs" {
+    shape: document
+    class: docs-lib
+  }
+  toolrun: "▶️ toolrun\nExec" {
+    shape: step
+    class: execution-lib
+  }
+  toolcode: "💻 toolcode\nOrch" {
+    shape: page
+    class: orchestration-lib
+  }
 }
 
-search_tools -> toolindex
-list_namespaces -> toolindex
+# Mappings
+surface.search_tools -> libs.toolindex: "Search()" {
+  class: data-flow
+}
+surface.list_namespaces -> libs.toolindex: "ListNamespaces()" {
+  class: data-flow
+}
 
-describe_tool -> tooldocs
-list_tool_examples -> tooldocs
+surface.describe_tool -> libs.tooldocs: "DescribeTool()" {
+  class: data-flow
+}
+surface.list_tool_examples -> libs.tooldocs: "ListExamples()" {
+  class: data-flow
+}
 
-run_tool -> toolrun
-run_chain -> toolrun
+surface.run_tool -> libs.toolrun: "Run()" {
+  class: data-flow
+}
+surface.run_chain -> libs.toolrun: "RunChain()" {
+  class: data-flow
+}
 
-execute_code -> toolcode
-
-surface -> libs
+surface.execute_code -> libs.toolcode: "Execute()" {
+  class: data-flow
+}

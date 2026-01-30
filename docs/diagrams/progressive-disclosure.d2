@@ -1,49 +1,208 @@
+# metatools-mcp Progressive Disclosure
+# 3-phase token-efficient workflow
+
 direction: right
 
-style: {
-  font-size: 14
-}
-
-agent: "Agent / Client" { shape: person }
-
-phase1: {
-  label: "Discover"
-  style: {
-    border-radius: 8
-    shadow: true
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 0
   }
-  search_tools: { shape: step }
-  toolindex: { shape: cylinder }
-  summary: "Summaries" { shape: document }
+  actor-fill: "#e2e8f0"
+  phase1-fill: "#3182ce"
+  phase2-fill: "#d69e2e"
+  phase3-fill: "#38a169"
 }
 
-phase2: {
-  label: "Inspect"
-  style: {
-    border-radius: 8
-    shadow: true
+classes: {
+  container: {
+    style: {
+      border-radius: 12
+      shadow: true
+      font-size: 14
+      bold: true
+    }
   }
-  describe_tool: { shape: step }
-  tooldocs: { shape: document }
-  schema: "Schemas" { shape: page }
-}
-
-phase3: {
-  label: "Execute"
-  style: {
-    border-radius: 8
-    shadow: true
+  actor: {
+    style: {
+      fill: ${actor-fill}
+      stroke: "#a0aec0"
+      stroke-width: 2
+      font-color: "#1a202c"
+      bold: true
+    }
   }
-  run_tool: { shape: step }
-  toolrun: { shape: step }
-  result: "Results" { shape: document }
+  phase1-node: {
+    style: {
+      fill: ${phase1-fill}
+      stroke: "#2c5282"
+      stroke-width: 2
+      font-color: "#fff"
+    }
+  }
+  phase2-node: {
+    style: {
+      fill: ${phase2-fill}
+      stroke: "#b7791f"
+      stroke-width: 2
+      font-color: "#fff"
+    }
+  }
+  phase3-node: {
+    style: {
+      fill: ${phase3-fill}
+      stroke: "#276749"
+      stroke-width: 2
+      font-color: "#fff"
+    }
+  }
+  phase-flow: {
+    style: {
+      stroke: "#4a5568"
+      stroke-width: 3
+    }
+  }
+  data-flow: {
+    style: {
+      stroke: "#718096"
+      stroke-width: 2
+    }
+  }
+  skip-flow: {
+    style: {
+      stroke: "#a0aec0"
+      stroke-width: 2
+      stroke-dash: 3
+    }
+  }
 }
 
-agent -> search_tools -> toolindex -> summary
-summary -> describe_tool -> tooldocs -> schema
-schema -> run_tool -> toolrun -> result
+# Title
+title: "Progressive Disclosure Workflow" {
+  shape: text
+  near: top-center
+  style: {
+    font-size: 24
+    bold: true
+    font-color: "#1a365d"
+  }
+}
 
-agent -> describe_tool
-agent -> run_tool
+# Actor
+agent: "🤖 Agent" {
+  shape: person
+  class: actor
+}
 
-phase1 -> phase2 -> phase3
+# Phase 1: Discover
+phase1: "🔍 Phase 1: Discover" {
+  class: container
+  style: {
+    fill: "#ebf8ff"
+    stroke: ${phase1-fill}
+  }
+
+  search_tools: "search_tools\n~50 tokens" {
+    shape: step
+    class: phase1-node
+  }
+  toolindex: "toolindex" {
+    shape: cylinder
+    class: phase1-node
+  }
+  summary: "📋 Summaries\nID + Name + Tags" {
+    shape: document
+    class: phase1-node
+  }
+}
+
+# Phase 2: Inspect
+phase2: "📖 Phase 2: Inspect" {
+  class: container
+  style: {
+    fill: "#fffff0"
+    stroke: ${phase2-fill}
+  }
+
+  describe_tool: "describe_tool\n~200 tokens" {
+    shape: step
+    class: phase2-node
+  }
+  tooldocs: "tooldocs" {
+    shape: document
+    class: phase2-node
+  }
+  schema: "📝 Schemas\nInput + Output" {
+    shape: page
+    class: phase2-node
+  }
+}
+
+# Phase 3: Execute
+phase3: "▶️ Phase 3: Execute" {
+  class: container
+  style: {
+    fill: "#f0fff4"
+    stroke: ${phase3-fill}
+  }
+
+  run_tool: "run_tool\nvariable" {
+    shape: step
+    class: phase3-node
+  }
+  toolrun: "toolrun" {
+    shape: step
+    class: phase3-node
+  }
+  result: "✅ Results\nStructured Data" {
+    shape: document
+    class: phase3-node
+  }
+}
+
+# Main flow
+agent -> phase1.search_tools: "query" {
+  class: data-flow
+}
+phase1.search_tools -> phase1.toolindex {
+  class: data-flow
+}
+phase1.toolindex -> phase1.summary {
+  class: data-flow
+}
+
+phase1.summary -> phase2.describe_tool: "tool_id" {
+  class: phase-flow
+}
+phase2.describe_tool -> phase2.tooldocs {
+  class: data-flow
+}
+phase2.tooldocs -> phase2.schema {
+  class: data-flow
+}
+
+phase2.schema -> phase3.run_tool: "args" {
+  class: phase-flow
+}
+phase3.run_tool -> phase3.toolrun {
+  class: data-flow
+}
+phase3.toolrun -> phase3.result {
+  class: data-flow
+}
+
+# Skip paths
+agent -> phase2.describe_tool: "known tool" {
+  class: skip-flow
+}
+agent -> phase3.run_tool: "cached schema" {
+  class: skip-flow
+}
+
+# Phase progression
+phase1 -> phase2: "need schema?" {
+  class: phase-flow
+}
+phase2 -> phase3: "ready to call" {
+  class: phase-flow
+}
