@@ -104,6 +104,8 @@ github.com/jonwraymond/toolmodel v0.2.0 h1:1Jne9cyTGeb3VTFxzVx+Rp8x5l3WkZT98a8lQ
 github.com/jonwraymond/toolmodel v0.2.0/go.mod h1:2S1YAIv2IGcwxqEaB0V4egvnY7opCdoTNknKJMg2pkE=
 github.com/jonwraymond/toolrun v0.3.0 h1:BNpkfHBjM12opv77iGyxtg6ENEI44stzTBr5dDm5xAc=
 github.com/jonwraymond/toolrun v0.3.0/go.mod h1:osEaTNLfjbCC9rupyzlOwz3nZONL1Nk+YL1fiE3y+ks=
+github.com/jonwraymond/toolruntime v0.4.0 h1:04zjqyVqZosSGgbyVxXITY4HioRrNWE44LJsSOQVkZY=
+github.com/jonwraymond/toolruntime v0.4.0/go.mod h1:TEOW8dU9lH+4q+nFZiVr0JgWTQInwugBULnMaapriOA=
 github.com/jonwraymond/toolsearch v0.3.0 h1:zF3XrLn1pJvU4vV2ZIie59jNSgfTIu7nfPKEQOYxxn8=
 github.com/jonwraymond/toolsearch v0.3.0/go.mod h1:o8nOuJayCzByEjoeicplaLZVhCmExJDNqRvAeRQT9uk=
 github.com/json-iterator/go v0.0.0-20171115153421-f7279a603ede h1:YrgBGwxMRK0Vq0WSCWFaZUnTsrA/PZE/xs1QZh+/edg=
