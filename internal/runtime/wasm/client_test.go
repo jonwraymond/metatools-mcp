@@ -50,9 +50,9 @@ func TestClient_Run_Success(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { _ = client.Close(context.Background()) }()
 
-	result, err := client.Run(context.Background(), wasmbackend.WasmSpec{
+	result, err := client.Run(context.Background(), wasmbackend.Spec{
 		Module: helloWasm,
-		Security: wasmbackend.WasmSecuritySpec{
+		Security: wasmbackend.SecuritySpec{
 			EnableWASI: true,
 		},
 	})
@@ -72,9 +72,9 @@ func TestClient_Run_NonZeroExit(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { _ = client.Close(context.Background()) }()
 
-	result, err := client.Run(context.Background(), wasmbackend.WasmSpec{
+	result, err := client.Run(context.Background(), wasmbackend.Spec{
 		Module: exitCodeWasm,
-		Security: wasmbackend.WasmSecuritySpec{
+		Security: wasmbackend.SecuritySpec{
 			EnableWASI: true,
 		},
 	})
@@ -91,9 +91,9 @@ func TestClient_Run_Stderr(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { _ = client.Close(context.Background()) }()
 
-	result, err := client.Run(context.Background(), wasmbackend.WasmSpec{
+	result, err := client.Run(context.Background(), wasmbackend.Spec{
 		Module: stderrWasm,
-		Security: wasmbackend.WasmSecuritySpec{
+		Security: wasmbackend.SecuritySpec{
 			EnableWASI: true,
 		},
 	})
@@ -111,10 +111,10 @@ func TestClient_Run_Timeout(t *testing.T) {
 	defer func() { _ = client.Close(context.Background()) }()
 
 	ctx := context.Background()
-	result, err := client.Run(ctx, wasmbackend.WasmSpec{
+	result, err := client.Run(ctx, wasmbackend.Spec{
 		Module:  infiniteLoopWasm,
 		Timeout: 100 * time.Millisecond,
-		Security: wasmbackend.WasmSecuritySpec{
+		Security: wasmbackend.SecuritySpec{
 			EnableWASI: true,
 		},
 	})
@@ -143,9 +143,9 @@ func TestClient_Run_ContextCancel(t *testing.T) {
 		cancel()
 	}()
 
-	_, err = client.Run(ctx, wasmbackend.WasmSpec{
+	_, err = client.Run(ctx, wasmbackend.Spec{
 		Module: infiniteLoopWasm,
-		Security: wasmbackend.WasmSecuritySpec{
+		Security: wasmbackend.SecuritySpec{
 			EnableWASI: true,
 		},
 	})
@@ -160,9 +160,9 @@ func TestClient_Run_InvalidModule(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { _ = client.Close(context.Background()) }()
 
-	_, err = client.Run(context.Background(), wasmbackend.WasmSpec{
+	_, err = client.Run(context.Background(), wasmbackend.Spec{
 		Module: []byte("not a valid wasm module"),
-		Security: wasmbackend.WasmSecuritySpec{
+		Security: wasmbackend.SecuritySpec{
 			EnableWASI: true,
 		},
 	})
@@ -181,9 +181,9 @@ func TestClient_Run_EmptyModule(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { _ = client.Close(context.Background()) }()
 
-	_, err = client.Run(context.Background(), wasmbackend.WasmSpec{
+	_, err = client.Run(context.Background(), wasmbackend.Spec{
 		Module: nil,
-		Security: wasmbackend.WasmSecuritySpec{
+		Security: wasmbackend.SecuritySpec{
 			EnableWASI: true,
 		},
 	})
@@ -199,10 +199,10 @@ func TestClient_Run_Args(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { _ = client.Close(context.Background()) }()
 
-	result, err := client.Run(context.Background(), wasmbackend.WasmSpec{
+	result, err := client.Run(context.Background(), wasmbackend.Spec{
 		Module: echoArgsWasm,
 		Args:   []string{"arg1", "arg2", "arg3"},
-		Security: wasmbackend.WasmSecuritySpec{
+		Security: wasmbackend.SecuritySpec{
 			EnableWASI: true,
 		},
 	})
@@ -221,10 +221,10 @@ func TestClient_Run_Env(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { _ = client.Close(context.Background()) }()
 
-	result, err := client.Run(context.Background(), wasmbackend.WasmSpec{
+	result, err := client.Run(context.Background(), wasmbackend.Spec{
 		Module: echoEnvWasm,
 		Env:    []string{"FOO=bar", "BAZ=qux"},
-		Security: wasmbackend.WasmSecuritySpec{
+		Security: wasmbackend.SecuritySpec{
 			EnableWASI: true,
 		},
 	})
@@ -242,10 +242,10 @@ func TestClient_Run_Stdin(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { _ = client.Close(context.Background()) }()
 
-	result, err := client.Run(context.Background(), wasmbackend.WasmSpec{
+	result, err := client.Run(context.Background(), wasmbackend.Spec{
 		Module: echoStdinWasm,
 		Stdin:  []byte("input data"),
-		Security: wasmbackend.WasmSecuritySpec{
+		Security: wasmbackend.SecuritySpec{
 			EnableWASI: true,
 		},
 	})
@@ -265,12 +265,12 @@ func TestClient_Run_MemoryLimit(t *testing.T) {
 	defer func() { _ = client.Close(context.Background()) }()
 
 	// The alloc_memory module tries to allocate more than 1MB
-	_, err = client.Run(context.Background(), wasmbackend.WasmSpec{
+	_, err = client.Run(context.Background(), wasmbackend.Spec{
 		Module: allocMemoryWasm,
-		Resources: wasmbackend.WasmResourceSpec{
+		Resources: wasmbackend.ResourceSpec{
 			MemoryPages: 16, // 1MB
 		},
-		Security: wasmbackend.WasmSecuritySpec{
+		Security: wasmbackend.SecuritySpec{
 			EnableWASI: true,
 		},
 	})
@@ -288,7 +288,7 @@ func TestClient_Close(t *testing.T) {
 	require.NoError(t, err)
 
 	// After close, running should fail
-	_, err = client.Run(context.Background(), wasmbackend.WasmSpec{
+	_, err = client.Run(context.Background(), wasmbackend.Spec{
 		Module: []byte{0x00, 0x61, 0x73, 0x6d}, // minimal invalid wasm
 	})
 	require.Error(t, err)
@@ -323,4 +323,4 @@ func TestClient_Run_NoWASI(t *testing.T) {
 }
 
 // Ensure interface compliance at compile time.
-var _ wasmbackend.WasmRunner = (*Client)(nil)
+var _ wasmbackend.Runner = (*Client)(nil)

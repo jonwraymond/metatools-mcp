@@ -13,7 +13,7 @@ import (
 )
 
 // StreamClient extends Client with streaming capabilities.
-// It implements both WasmRunner and StreamRunner interfaces.
+// It implements both Runner and StreamRunner interfaces.
 type StreamClient struct {
 	*Client
 }
@@ -29,7 +29,7 @@ func NewStreamClient(cfg ClientConfig) (*StreamClient, error) {
 
 // RunStream implements StreamRunner.RunStream with real-time output streaming.
 // It returns a channel that receives streaming events for stdout, stderr, and exit.
-func (c *StreamClient) RunStream(ctx context.Context, spec wasmbackend.WasmSpec) (<-chan wasmbackend.StreamEvent, error) {
+func (c *StreamClient) RunStream(ctx context.Context, spec wasmbackend.Spec) (<-chan wasmbackend.StreamEvent, error) {
 	if c.closed {
 		return nil, wasmbackend.ErrWASMRuntimeNotAvailable
 	}
@@ -41,7 +41,7 @@ func (c *StreamClient) RunStream(ctx context.Context, spec wasmbackend.WasmSpec)
 	return events, nil
 }
 
-func (c *StreamClient) runStreamInternal(ctx context.Context, spec wasmbackend.WasmSpec, events chan<- wasmbackend.StreamEvent) {
+func (c *StreamClient) runStreamInternal(ctx context.Context, spec wasmbackend.Spec, events chan<- wasmbackend.StreamEvent) {
 	defer close(events)
 
 	start := time.Now()

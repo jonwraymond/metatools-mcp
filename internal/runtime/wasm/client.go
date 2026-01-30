@@ -13,7 +13,7 @@ import (
 	wasmbackend "github.com/jonwraymond/toolruntime/backend/wasm"
 )
 
-// Client implements toolruntime's WasmRunner interface using wazero.
+// Client implements toolruntime's Runner interface using wazero.
 type Client struct {
 	runtime wazero.Runtime
 	config  ClientConfig
@@ -55,18 +55,18 @@ func NewClient(cfg ClientConfig) (*Client, error) {
 	}, nil
 }
 
-// Run implements WasmRunner.Run.
+// Run implements Runner.Run.
 // It compiles, instantiates, executes, and cleans up a WASM module atomically.
-func (c *Client) Run(ctx context.Context, spec wasmbackend.WasmSpec) (wasmbackend.WasmResult, error) {
+func (c *Client) Run(ctx context.Context, spec wasmbackend.Spec) (wasmbackend.Result, error) {
 	if c.closed {
-		return wasmbackend.WasmResult{}, fmt.Errorf("client is closed")
+		return wasmbackend.Result{}, fmt.Errorf("client is closed")
 	}
 
 	start := time.Now()
 
 	// Validate spec
 	if len(spec.Module) == 0 {
-		return wasmbackend.WasmResult{}, fmt.Errorf("module bytes required")
+		return wasmbackend.Result{}, fmt.Errorf("module bytes required")
 	}
 
 	// Apply timeout if specified
@@ -81,7 +81,7 @@ func (c *Client) Run(ctx context.Context, spec wasmbackend.WasmSpec) (wasmbacken
 		if _, err := wasi_snapshot_preview1.Instantiate(ctx, c.runtime); err != nil {
 			// If already instantiated, ignore the error
 			if !strings.Contains(err.Error(), "module[wasi_snapshot_preview1] has already been instantiated") {
-				return wasmbackend.WasmResult{}, fmt.Errorf("instantiate WASI: %w", err)
+				return wasmbackend.Result{}, fmt.Errorf("instantiate WASI: %w", err)
 			}
 		}
 	}
@@ -89,7 +89,7 @@ func (c *Client) Run(ctx context.Context, spec wasmbackend.WasmSpec) (wasmbacken
 	// Compile module
 	compiled, err := c.runtime.CompileModule(ctx, spec.Module)
 	if err != nil {
-		return wasmbackend.WasmResult{}, fmt.Errorf("compile module: %w", err)
+		return wasmbackend.Result{}, fmt.Errorf("compile module: %w", err)
 	}
 	defer func() { _ = compiled.Close(ctx) }()
 
@@ -138,7 +138,7 @@ func (c *Client) Run(ctx context.Context, spec wasmbackend.WasmSpec) (wasmbacken
 	if err != nil {
 		// Check if it's a context error
 		if ctx.Err() != nil {
-			return wasmbackend.WasmResult{
+			return wasmbackend.Result{
 				Stdout:   stdout.String(),
 				Stderr:   stderr.String(),
 				Duration: time.Since(start),
@@ -148,7 +148,7 @@ func (c *Client) Run(ctx context.Context, spec wasmbackend.WasmSpec) (wasmbacken
 		// Try to extract exit code from error
 		exitCode := extractExitCode(err)
 		if exitCode != 0 {
-			return wasmbackend.WasmResult{
+			return wasmbackend.Result{
 				ExitCode: exitCode,
 				Stdout:   stdout.String(),
 				Stderr:   stderr.String(),
@@ -156,7 +156,7 @@ func (c *Client) Run(ctx context.Context, spec wasmbackend.WasmSpec) (wasmbacken
 			}, nil
 		}
 
-		return wasmbackend.WasmResult{
+		return wasmbackend.Result{
 			ExitCode: 1,
 			Stdout:   stdout.String(),
 			Stderr:   stderr.String() + "\n" + err.Error(),
@@ -169,7 +169,7 @@ func (c *Client) Run(ctx context.Context, spec wasmbackend.WasmSpec) (wasmbacken
 		_ = mod.Close(ctx)
 	}
 
-	return wasmbackend.WasmResult{
+	return wasmbackend.Result{
 		ExitCode: 0,
 		Stdout:   stdout.String(),
 		Stderr:   stderr.String(),
@@ -226,4 +226,4 @@ func extractExitCode(err error) int {
 }
 
 // Ensure interface compliance at compile time.
-var _ wasmbackend.WasmRunner = (*Client)(nil)
+var _ wasmbackend.Runner = (*Client)(nil)

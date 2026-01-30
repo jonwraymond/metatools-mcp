@@ -1,7 +1,7 @@
 // Package wasm provides wazero SDK implementations of toolruntime's WASM interfaces.
 //
 // This package implements:
-//   - WasmRunner: executes code in WASM sandboxes with full lifecycle management
+//   - Runner: executes code in WASM sandboxes with full lifecycle management
 //   - ModuleLoader: compiles and caches WASM modules for reuse
 //   - HealthChecker: verifies wazero runtime availability
 //   - StreamRunner: provides real-time stdout/stderr streaming
@@ -38,7 +38,7 @@
 //
 // # Security
 //
-// The client enforces security settings from WasmSpec:
+// The client enforces security settings from Spec:
 //   - Memory limits (via MemoryPages)
 //   - WASI sandboxing (filesystem, environment isolation)
 //   - No network access by default

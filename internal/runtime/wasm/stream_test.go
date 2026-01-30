@@ -17,9 +17,9 @@ func TestStreamClient_RunStream_Success(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { _ = client.Close(context.Background()) }()
 
-	events, err := client.RunStream(context.Background(), wasmbackend.WasmSpec{
+	events, err := client.RunStream(context.Background(), wasmbackend.Spec{
 		Module: helloWasm,
-		Security: wasmbackend.WasmSecuritySpec{
+		Security: wasmbackend.SecuritySpec{
 			EnableWASI: true,
 		},
 	})
@@ -51,9 +51,9 @@ func TestStreamClient_RunStream_Stderr(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { _ = client.Close(context.Background()) }()
 
-	events, err := client.RunStream(context.Background(), wasmbackend.WasmSpec{
+	events, err := client.RunStream(context.Background(), wasmbackend.Spec{
 		Module: stderrWasm,
-		Security: wasmbackend.WasmSecuritySpec{
+		Security: wasmbackend.SecuritySpec{
 			EnableWASI: true,
 		},
 	})
@@ -83,9 +83,9 @@ func TestStreamClient_RunStream_ExitEvent(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { _ = client.Close(context.Background()) }()
 
-	events, err := client.RunStream(context.Background(), wasmbackend.WasmSpec{
+	events, err := client.RunStream(context.Background(), wasmbackend.Spec{
 		Module: exit42WasmBytes,
-		Security: wasmbackend.WasmSecuritySpec{
+		Security: wasmbackend.SecuritySpec{
 			EnableWASI: true,
 		},
 	})
@@ -110,9 +110,9 @@ func TestStreamClient_RunStream_ContextCancel(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	events, err := client.RunStream(ctx, wasmbackend.WasmSpec{
+	events, err := client.RunStream(ctx, wasmbackend.Spec{
 		Module: infiniteLoopWasm,
-		Security: wasmbackend.WasmSecuritySpec{
+		Security: wasmbackend.SecuritySpec{
 			EnableWASI: true,
 		},
 	})
@@ -140,9 +140,9 @@ func TestStreamClient_RunStream_InvalidModule(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { _ = client.Close(context.Background()) }()
 
-	events, err := client.RunStream(context.Background(), wasmbackend.WasmSpec{
+	events, err := client.RunStream(context.Background(), wasmbackend.Spec{
 		Module: []byte("invalid"),
-		Security: wasmbackend.WasmSecuritySpec{
+		Security: wasmbackend.SecuritySpec{
 			EnableWASI: true,
 		},
 	})
@@ -163,9 +163,9 @@ func TestStreamClient_RunStream_EmptyModule(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { _ = client.Close(context.Background()) }()
 
-	events, err := client.RunStream(context.Background(), wasmbackend.WasmSpec{
+	events, err := client.RunStream(context.Background(), wasmbackend.Spec{
 		Module: nil,
-		Security: wasmbackend.WasmSecuritySpec{
+		Security: wasmbackend.SecuritySpec{
 			EnableWASI: true,
 		},
 	})
@@ -189,7 +189,7 @@ func TestStreamClient_RunStream_ClosedClient(t *testing.T) {
 	err = client.Close(context.Background())
 	require.NoError(t, err)
 
-	_, err = client.RunStream(context.Background(), wasmbackend.WasmSpec{
+	_, err = client.RunStream(context.Background(), wasmbackend.Spec{
 		Module: helloWasm,
 	})
 	require.Error(t, err)
