@@ -166,7 +166,7 @@ func TestStreamableHTTPTransport_Close_AfterServe(t *testing.T) {
 	}
 }
 
-func TestStreamableHTTPTransport_Interface(t *testing.T) {
+func TestStreamableHTTPTransport_Interface(_ *testing.T) {
 	// Compile-time interface check
 	var _ Transport = (*StreamableHTTPTransport)(nil)
 }
