@@ -8,21 +8,21 @@ This directory contains Product Requirement Documents (PRDs) for incremental imp
 
 | PRD | Title | Priority | Status | Dependencies |
 |-----|-------|----------|--------|--------------|
-| [PRD-001](./2026-01-28-prd-001-toolruntime-docker-backend.md) | toolruntime Docker Backend | P0 | Ready | None |
-| [PRD-002](./2026-01-28-prd-002-cli-cobra-foundation.md) | CLI Foundation with Cobra | P0 | Ready | None |
-| [PRD-003](./2026-01-28-prd-003-koanf-config.md) | Configuration Layer with Koanf | P0 | Ready | PRD-002 |
-| [PRD-004](./2026-01-28-prd-004-transport-sse.md) | SSE Transport Layer | P1 | Ready | PRD-002, PRD-003 |
-| [PRD-005](./2026-01-28-prd-005-tool-provider-registry.md) | Tool Provider Registry | P0 | Ready | PRD-002, PRD-003 |
-| [PRD-006](./2026-01-28-prd-006-backend-registry.md) | Backend Registry | P1 | Ready | PRD-002, PRD-003, PRD-005 |
-| [PRD-007](./2026-01-28-prd-007-middleware-chain.md) | Middleware Chain | P2 | Ready | PRD-002, PRD-003, PRD-005 |
-| [PRD-015](./2026-01-28-prd-015-mcp-spec-alignment.md) | MCP Spec Alignment (Tools) | P1 | Ready | PRD-005 |
+| [PRD-001](./2026-01-28-prd-001-toolruntime-docker-backend.md) | toolruntime Docker Backend | P0 | Done | None |
+| [PRD-002](./2026-01-28-prd-002-cli-cobra-foundation.md) | CLI Foundation with Cobra | P0 | Done | None |
+| [PRD-003](./2026-01-28-prd-003-koanf-config.md) | Configuration Layer with Koanf | P0 | Done | PRD-002 |
+| [PRD-004](./2026-01-28-prd-004-transport-sse.md) | SSE Transport Layer | P1 | Done | PRD-002, PRD-003 |
+| [PRD-005](./2026-01-28-prd-005-tool-provider-registry.md) | Tool Provider Registry | P0 | Done | PRD-002, PRD-003 |
+| [PRD-006](./2026-01-28-prd-006-backend-registry.md) | Backend Registry | P1 | Done | PRD-002, PRD-003, PRD-005 |
+| [PRD-007](./2026-01-28-prd-007-middleware-chain.md) | Middleware Chain | P2 | Done | PRD-002, PRD-003, PRD-005 |
+| [PRD-015](./2026-01-28-prd-015-mcp-spec-alignment.md) | MCP Spec Alignment (Tools) | P1 | Done | PRD-005 |
 
 ### Stream B: Protocol Layer
 
 | PRD | Title | Priority | Status | Dependencies |
 |-----|-------|----------|--------|--------------|
-| [PRD-008](./2026-01-28-prd-008-tooladapter-library.md) | tooladapter Library | P1 | Ready | toolmodel |
-| [PRD-009](./2026-01-28-prd-009-toolset-composition.md) | toolset Composition | P1 | Ready | PRD-008, toolindex |
+| [PRD-008](./2026-01-28-prd-008-tooladapter-library.md) | tooladapter Library | P1 | Done | toolmodel |
+| [PRD-009](./2026-01-28-prd-009-toolset-composition.md) | toolset Composition | P1 | Done | PRD-008, toolindex |
 
 ### Stream C: Cross-Cutting Concerns
 
