@@ -85,9 +85,10 @@ When built with `-tags toolruntime`, `execute_code` is backed by a
 `toolruntime` runtime. The runtime selects a profile at startup:
 
 - `dev` profile: unsafe subprocess backend (default).
-- `standard` profile: Docker sandbox when `METATOOLS_RUNTIME_PROFILE=standard`
-  and the Docker daemon is healthy.
+- `standard` profile: Docker sandbox by default or WASM when selected.
 - `METATOOLS_DOCKER_IMAGE` overrides the sandbox image name.
+- `METATOOLS_WASM_ENABLED=true` enables the WASM backend (wazero).
+- `METATOOLS_RUNTIME_BACKEND=wasm` selects WASM for the standard profile.
 
 ## MCP tool I/O types
 

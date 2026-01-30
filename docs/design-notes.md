@@ -86,9 +86,12 @@ When built with `-tags toolruntime`, metatools-mcp wires `toolruntime` into
 `toolcode`:
 
 - **Dev profile (`dev`)** uses the unsafe subprocess backend for fast iteration.
-- **Standard profile (`standard`)** uses the Docker backend when available.
-- Set `METATOOLS_RUNTIME_PROFILE=standard` to opt into Docker when the daemon
-  is healthy; otherwise the server logs a warning and falls back to dev.
+- **Standard profile (`standard`)** uses Docker by default or WASM when selected.
+- Set `METATOOLS_RUNTIME_PROFILE=standard` to opt into standard isolation.
+- Use `METATOOLS_RUNTIME_BACKEND=wasm` with `METATOOLS_WASM_ENABLED=true` to
+  prefer the WASM backend (wazero) for standard profile.
+- If Docker is unavailable and WASM is enabled, the server falls back to WASM
+  for the standard profile.
 
 ## Operational guidance
 

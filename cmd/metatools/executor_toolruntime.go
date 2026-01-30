@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/jonwraymond/metatools-mcp/internal/runtime/docker"
+	"github.com/jonwraymond/metatools-mcp/internal/runtime/wasm"
 	"github.com/jonwraymond/toolcode"
 	"github.com/jonwraymond/tooldocs"
 	"github.com/jonwraymond/toolindex"
@@ -16,6 +17,7 @@ import (
 	"github.com/jonwraymond/toolruntime"
 	dockerbackend "github.com/jonwraymond/toolruntime/backend/docker"
 	"github.com/jonwraymond/toolruntime/backend/unsafe"
+	wasmbackend "github.com/jonwraymond/toolruntime/backend/wasm"
 	"github.com/jonwraymond/toolruntime/toolcodeengine"
 )
 
@@ -35,20 +37,21 @@ func maybeCreateExecutor(idx toolindex.Index, docs tooldocs.Store, runner toolru
 	defaultProfile := toolruntime.ProfileDev
 
 	// Try to create Docker backend for standard profile
+	var dockerBack toolruntime.Backend
 	dockerClient, err := docker.NewClient(docker.ClientConfig{})
 	if err != nil {
-		slog.Warn("Docker client unavailable, using unsafe-only mode", "error", err)
+		slog.Warn("Docker client unavailable", "error", err)
 	} else {
 		// Health check before proceeding
 		healthChecker := docker.NewHealthCheck(dockerClient.Docker())
 		if err := healthChecker.Ping(context.Background()); err != nil {
-			slog.Warn("Docker daemon not responding, using unsafe-only mode", "error", err)
+			slog.Warn("Docker daemon not responding", "error", err)
 			_ = dockerClient.Close()
 		} else {
 			// Create full Docker backend with all interfaces
 			imageResolver := docker.NewResolver(dockerClient.Docker())
 
-			dockerBack := dockerbackend.New(dockerbackend.Config{
+			dockerBack = dockerbackend.New(dockerbackend.Config{
 				ImageName:     getEnvOrDefault("METATOOLS_DOCKER_IMAGE", "toolruntime-sandbox:latest"),
 				Client:        dockerClient,
 				ImageResolver: imageResolver,
@@ -56,16 +59,82 @@ func maybeCreateExecutor(idx toolindex.Index, docs tooldocs.Store, runner toolru
 				Logger:        &slogAdapter{},
 			})
 
-			backends[toolruntime.ProfileStandard] = dockerBack
+			slog.Info("Docker backend available",
+				"image", getEnvOrDefault("METATOOLS_DOCKER_IMAGE", "toolruntime-sandbox:latest"))
+		}
+	}
 
-			// Use standard profile by default if Docker is available and configured
-			if os.Getenv("METATOOLS_RUNTIME_PROFILE") == "standard" {
-				defaultProfile = toolruntime.ProfileStandard
-				slog.Info("Docker backend enabled, using standard profile",
-					"image", getEnvOrDefault("METATOOLS_DOCKER_IMAGE", "toolruntime-sandbox:latest"))
+	// Try to create WASM backend for edge/lightweight profile
+	// WASM provides strong isolation without Docker dependencies
+	var wasmBack toolruntime.Backend
+	if os.Getenv("METATOOLS_WASM_ENABLED") == "true" {
+		wasmClient, err := wasm.NewClient(wasm.ClientConfig{
+			MaxMemoryPages:         256, // 16MB default
+			EnableCompilationCache: true,
+		})
+		if err != nil {
+			slog.Warn("WASM client unavailable", "error", err)
+		} else {
+			healthChecker := wasm.NewHealthCheck(wasmClient)
+			if err := healthChecker.Ping(context.Background()); err != nil {
+				slog.Warn("WASM runtime not responding", "error", err)
+				_ = wasmClient.Close(context.Background())
 			} else {
-				slog.Info("Docker backend available (use METATOOLS_RUNTIME_PROFILE=standard to enable)")
+				wasmBack = wasmbackend.New(wasmbackend.Config{
+					Runtime:        "wazero",
+					MaxMemoryPages: 256,
+					EnableWASI:     true,
+					Client:         wasmClient,
+					HealthChecker:  healthChecker,
+					Logger:         &slogAdapter{},
+				})
+
+				slog.Info("WASM backend available",
+					"runtime", "wazero",
+					"memoryPages", 256)
 			}
+		}
+	}
+
+	// Select standard backend preference (docker default, wasm optional)
+	standardBackend := ""
+	preferred := os.Getenv("METATOOLS_RUNTIME_BACKEND")
+	switch preferred {
+	case "wasm":
+		if wasmBack != nil {
+			backends[toolruntime.ProfileStandard] = wasmBack
+			standardBackend = "wasm"
+		} else {
+			slog.Warn("WASM backend requested but unavailable")
+		}
+	case "docker":
+		if dockerBack != nil {
+			backends[toolruntime.ProfileStandard] = dockerBack
+			standardBackend = "docker"
+		} else {
+			slog.Warn("Docker backend requested but unavailable")
+		}
+	default:
+		if dockerBack != nil {
+			backends[toolruntime.ProfileStandard] = dockerBack
+			standardBackend = "docker"
+		} else if wasmBack != nil {
+			backends[toolruntime.ProfileStandard] = wasmBack
+			standardBackend = "wasm"
+			slog.Info("Docker unavailable, using WASM for standard profile")
+		}
+	}
+
+	if standardBackend != "" {
+		slog.Info("Standard backend selected", "backend", standardBackend)
+	}
+
+	// Honor requested runtime profile
+	if os.Getenv("METATOOLS_RUNTIME_PROFILE") == "standard" {
+		if standardBackend != "" {
+			defaultProfile = toolruntime.ProfileStandard
+		} else {
+			slog.Warn("Standard profile requested but no standard backend available")
 		}
 	}
 

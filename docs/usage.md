@@ -127,6 +127,8 @@ These map to the config schema loaded by `config.Load`:
 |----------|---------|-------------|
 | `METATOOLS_RUNTIME_PROFILE` | `dev` | `dev` (unsafe) or `standard` (Docker) |
 | `METATOOLS_DOCKER_IMAGE` | `toolruntime-sandbox:latest` | Docker image for standard profile |
+| `METATOOLS_WASM_ENABLED` | `false` | Enable WASM backend (wazero) |
+| `METATOOLS_RUNTIME_BACKEND` | `docker` | Preferred standard backend: `docker` or `wasm` |
 
 ### Search configuration
 
@@ -167,4 +169,5 @@ go run -tags toolruntime ./cmd/metatools
 This enables `execute_code` backed by a `toolruntime` engine.
 By default it uses the `dev` (unsafe) profile; set
 `METATOOLS_RUNTIME_PROFILE=standard` to enable the Docker backend when
-available.
+available. To use WASM instead, set `METATOOLS_WASM_ENABLED=true` and
+`METATOOLS_RUNTIME_BACKEND=wasm`.

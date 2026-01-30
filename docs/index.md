@@ -50,6 +50,8 @@ _ = server.Run(context.Background(), &mcp.StdioTransport{})
 `execute_code` is optional and wired behind the `toolruntime` build tag.
 By default, the runtime uses the unsafe dev profile; when Docker is available,
 set `METATOOLS_RUNTIME_PROFILE=standard` to enable the hardened Docker backend.
+WASM can be enabled with `METATOOLS_WASM_ENABLED=true` and selected with
+`METATOOLS_RUNTIME_BACKEND=wasm`.
 
 ## Interface Contracts
 
