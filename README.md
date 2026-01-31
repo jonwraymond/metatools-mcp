@@ -2,15 +2,18 @@
 
 [![Docs](https://img.shields.io/badge/docs-ai--tools--stack-blue)](https://jonwraymond.github.io/ai-tools-stack/)
 
-MCP-first "metatools" server that composes the core tool libraries:
+MCP-first "metatools" server that composes the consolidated tool libraries:
 
-- `toolmodel`: canonical MCP-aligned tool definitions and IDs
-- `toolindex`: global registry + progressive discovery (search/namespaces)
-- `tooldocs`: progressive documentation tiers + examples
-- `toolrun`: backend-agnostic execution + chaining
-- `toolcode`: optional code-style orchestration (engine/runtime backed)
-- `toolruntime`: recommended sandbox/runtime boundary for any code execution
-- `toolsearch`: optional search strategies (for example, BM25)
+- `toolfoundation/model`: canonical MCP-aligned tool definitions and IDs
+- `toolfoundation/adapter`: protocol-agnostic format conversion
+- `tooldiscovery/index`: global registry + progressive discovery (search/namespaces)
+- `tooldiscovery/tooldoc`: progressive documentation tiers + examples
+- `tooldiscovery/search`: optional search strategies (e.g., BM25)
+- `toolexec/run`: backend-agnostic execution + chaining
+- `toolexec/code`: optional code-style orchestration (engine/runtime backed)
+- `toolexec/runtime`: recommended sandbox/runtime boundary for any code execution
+- `toolops/observe`: optional observability middleware
+- `toolops/cache`: optional caching middleware
 
 This server exposes a small, opinionated MCP tool surface that optimizes
 progressive disclosure:
@@ -128,7 +131,7 @@ These are consumed by `config.Load` via Koanf (file/env/flags precedence):
 | `METATOOLS_WASM_ENABLED` | `false` | Enable WASM backend (wazero) |
 | `METATOOLS_RUNTIME_BACKEND` | `docker` | Preferred standard backend: `docker` or `wasm` |
 
-## Optional toolruntime integration
+## Optional toolexec/runtime integration
 
 `execute_code` is wired behind a build tag so the server stays minimal by
 default.
@@ -136,20 +139,20 @@ default.
 Enable it locally with:
 
 ```bash
-go get github.com/jonwraymond/toolruntime@v0.4.0
+go get github.com/jonwraymond/toolexec@latest
 go run -tags toolruntime ./cmd/metatools
 ```
 
-If you are developing `toolruntime` locally:
+If you are developing `toolexec` locally:
 
 ```bash
-go mod edit -replace github.com/jonwraymond/toolruntime=../toolruntime
+go mod edit -replace github.com/jonwraymond/toolexec=../toolexec
 go run -tags toolruntime ./cmd/metatools
 ```
 
 Notes:
 
-- The build tag enables a `toolruntime`-backed `toolcode.Executor`.
+- The build tag enables a `toolexec/runtime`-backed `toolexec/code.Executor`.
 - Default profile is `dev` (unsafe subprocess backend).
 - If Docker is available, set `METATOOLS_RUNTIME_PROFILE=standard` to enable
   the hardened Docker backend.
@@ -171,15 +174,15 @@ import (
   "github.com/jonwraymond/metatools-mcp/internal/adapters"
   "github.com/jonwraymond/metatools-mcp/internal/server"
   "github.com/jonwraymond/metatools-mcp/internal/transport"
-  "github.com/jonwraymond/tooldocs"
-  "github.com/jonwraymond/toolindex"
-  "github.com/jonwraymond/toolrun"
+  "github.com/jonwraymond/tooldiscovery/index"
+  "github.com/jonwraymond/tooldiscovery/tooldoc"
+  "github.com/jonwraymond/toolexec/run"
 )
 
 func main() {
-  idx := toolindex.NewInMemoryIndex()
-  docs := tooldocs.NewInMemoryStore(tooldocs.StoreOptions{Index: idx})
-  runner := toolrun.NewRunner(toolrun.WithIndex(idx))
+  idx := index.NewInMemoryIndex()
+  docs := tooldoc.NewInMemoryStore(tooldoc.StoreOptions{Index: idx})
+  runner := run.NewRunner(run.WithIndex(idx))
 
   cfg := adapters.NewConfig(idx, docs, runner, nil) // executor optional
   srv, err := server.New(cfg)
@@ -209,10 +212,10 @@ See a full working example (including a local tool + docs registration) in
 - `internal/adapters` bridges the public tool libraries into handler-facing
   interfaces without leaking protocol details into the libraries.
 - The server does not bypass library policy:
-  - tool IDs come from `toolmodel.Tool.ToolID()`
-  - backend selection follows `toolindex.DefaultBackendSelector`
-  - docs caps and schema derivation come from `tooldocs`
-  - execution/chain semantics come from `toolrun`
+  - tool IDs come from `toolfoundation/model.Tool.ToolID()`
+  - backend selection follows `tooldiscovery/index.DefaultBackendSelector`
+  - docs caps and schema derivation come from `tooldiscovery/tooldoc`
+  - execution/chain semantics come from `toolexec/run`
 
 ## Documentation
 

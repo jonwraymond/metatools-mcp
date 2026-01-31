@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aperturestack.dev/schemas/tool.schema.json",
+  "title": "Tool",
+  "description": "Canonical tool definition for ApertureStack",
+  "type": "object",
+  "required": ["id", "name", "description"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]*$",
+      "description": "Unique tool identifier"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Human-readable tool name"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "description": "Tool description for discovery"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^v?\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9.]+)?$",
+      "description": "Semantic version"
+    },
+    "namespace": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]*$",
+      "description": "Tool namespace for grouping"
+    },
+    "inputSchema": {
+      "$ref": "https://json-schema.org/draft/2020-12/schema",
+      "description": "JSON Schema for tool input"
+    },
+    "outputSchema": {
+      "$ref": "https://json-schema.org/draft/2020-12/schema",
+      "description": "JSON Schema for tool output"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Arbitrary metadata"
+    },
+    "tags": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Searchable tags"
+    },
+    "capabilities": {
+      "$ref": "#/$defs/Capabilities"
+    }
+  },
+  "$defs": {
+    "Capabilities": {
+      "type": "object",
+      "properties": {
+        "streaming": {"type": "boolean", "default": false},
+        "batch": {"type": "boolean", "default": false},
+        "async": {"type": "boolean", "default": false},
+        "cacheable": {"type": "boolean", "default": true},
+        "idempotent": {"type": "boolean", "default": false}
+      }
+    }
+  }
+}

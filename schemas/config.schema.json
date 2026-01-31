@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aperturestack.dev/schemas/config.schema.json",
+  "title": "Config",
+  "description": "metatools-mcp configuration schema",
+  "type": "object",
+  "properties": {
+    "server": {
+      "type": "object",
+      "properties": {
+        "transport": {
+          "type": "string",
+          "enum": ["stdio", "sse", "websocket", "grpc"],
+          "default": "stdio"
+        },
+        "host": {"type": "string", "default": "localhost"},
+        "port": {"type": "integer", "minimum": 1, "maximum": 65535, "default": 8080},
+        "tls": {
+          "type": "object",
+          "properties": {
+            "enabled": {"type": "boolean", "default": false},
+            "certFile": {"type": "string"},
+            "keyFile": {"type": "string"}
+          }
+        }
+      }
+    },
+    "tools": {
+      "type": "object",
+      "properties": {
+        "directories": {
+          "type": "array",
+          "items": {"type": "string"},
+          "default": ["./tools"]
+        },
+        "providers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type", "url"],
+            "properties": {
+              "type": {"type": "string", "enum": ["http", "grpc", "mcp"]},
+              "url": {"type": "string", "format": "uri"},
+              "timeout": {"type": "string", "pattern": "^\\d+[smh]$"}
+            }
+          }
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "properties": {
+        "defaultBackend": {
+          "type": "string",
+          "enum": ["local", "docker", "wasm", "kubernetes"],
+          "default": "local"
+        },
+        "timeout": {"type": "string", "default": "30s"},
+        "maxConcurrent": {"type": "integer", "minimum": 1, "default": 10}
+      }
+    },
+    "cache": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean", "default": true},
+        "backend": {"type": "string", "enum": ["memory", "redis", "file"]},
+        "ttl": {"type": "string", "default": "5m"},
+        "maxSize": {"type": "string", "default": "100MB"}
+      }
+    },
+    "observability": {
+      "type": "object",
+      "properties": {
+        "tracing": {
+          "type": "object",
+          "properties": {
+            "enabled": {"type": "boolean", "default": false},
+            "exporter": {"type": "string", "enum": ["otlp", "jaeger", "zipkin"]},
+            "endpoint": {"type": "string", "format": "uri"}
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "enabled": {"type": "boolean", "default": true},
+            "port": {"type": "integer", "default": 9090}
+          }
+        },
+        "logging": {
+          "type": "object",
+          "properties": {
+            "level": {"type": "string", "enum": ["debug", "info", "warn", "error"]},
+            "format": {"type": "string", "enum": ["json", "text"]}
+          }
+        }
+      }
+    },
+    "auth": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean", "default": false},
+        "provider": {"type": "string", "enum": ["jwt", "apikey", "oauth2"]},
+        "config": {"type": "object"}
+      }
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aperturestack.dev/schemas/discovery.schema.json",
+  "title": "Discovery",
+  "description": "Tool discovery and search schemas",
+  "$defs": {
+    "SearchQuery": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Search query text"
+        },
+        "filters": {
+          "$ref": "#/$defs/SearchFilters"
+        },
+        "options": {
+          "$ref": "#/$defs/SearchOptions"
+        }
+      }
+    },
+    "SearchFilters": {
+      "type": "object",
+      "properties": {
+        "namespace": {"type": "string"},
+        "tags": {"type": "array", "items": {"type": "string"}},
+        "capabilities": {"type": "array", "items": {"type": "string"}},
+        "minVersion": {"type": "string"},
+        "maxVersion": {"type": "string"}
+      }
+    },
+    "SearchOptions": {
+      "type": "object",
+      "properties": {
+        "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 10},
+        "offset": {"type": "integer", "minimum": 0, "default": 0},
+        "sortBy": {"type": "string", "enum": ["relevance", "name", "updated"]},
+        "sortOrder": {"type": "string", "enum": ["asc", "desc"]},
+        "includeDeprecated": {"type": "boolean", "default": false},
+        "searchMode": {"type": "string", "enum": ["bm25", "semantic", "hybrid"]}
+      }
+    },
+    "SearchResult": {
+      "type": "object",
+      "required": ["tools", "total"],
+      "properties": {
+        "tools": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/SearchHit"}
+        },
+        "total": {"type": "integer", "minimum": 0},
+        "hasMore": {"type": "boolean"},
+        "searchTime": {"type": "integer", "description": "Search time in milliseconds"}
+      }
+    },
+    "SearchHit": {
+      "type": "object",
+      "required": ["tool", "score"],
+      "properties": {
+        "tool": {"$ref": "tool.schema.json"},
+        "score": {"type": "number", "minimum": 0, "maximum": 1},
+        "highlights": {
+          "type": "object",
+          "additionalProperties": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    }
+  }
+}

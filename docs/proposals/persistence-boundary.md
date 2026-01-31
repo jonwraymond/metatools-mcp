@@ -6,7 +6,9 @@
 
 ## Overview
 
-This document defines the boundary between **interface contracts** (in core libs) and **persistence implementations** (in optional libs). The principle: **core libraries define HOW to store, not WHERE to store**.
+This document defines the boundary between **interface contracts** (in core libs/packages) and **persistence implementations** (in metatools-mcp internal packages). The principle: **interfaces define HOW to store, implementations define WHERE to store**.
+
+Pluggability is achieved through **interfaces + dependency injection**, not library separation. Implementations live in `metatools-mcp/internal/` with build tags for optional backends.
 
 ---
 
@@ -17,40 +19,52 @@ This document defines the boundary between **interface contracts** (in core libs
 │                         PERSISTENCE BOUNDARY                                  │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                               │
-│   CORE LIBRARIES (interfaces only)          IMPLEMENTATION LIBRARIES         │
+│   CORE LIBS / PACKAGES (interfaces)         metatools-mcp/internal/          │
 │   ─────────────────────────────────         ───────────────────────────      │
 │                                                                               │
-│   toolindex                                 toolpersist                       │
-│     Index interface ──────────────────────→   PostgresIndex                  │
-│     Searcher interface                        SQLiteIndex                    │
-│                                               RedisIndex                     │
+│   toolindex                                 internal/persist/                 │
+│     Index interface ──────────────────────→   index_memory.go                │
+│     Searcher interface                        index_postgres.go (+build)     │
+│                                               index_sqlite.go (+build)       │
 │                                                                               │
 │   tooldocs                                                                   │
-│     Store interface ──────────────────────→   PostgresDocStore               │
-│                                               FileDocStore                   │
-│                                               S3DocStore                     │
-│                                                                               │
-│   toolcache (interfaces)                   toolcache (implementations)       │
-│     Cache interface ──────────────────────→   MemoryCache                    │
-│                                               RedisCache                     │
-│                                               DragonflyCache                 │
+│     Store interface ──────────────────────→   docs_memory.go                 │
+│                                               docs_postgres.go (+build)      │
+│                                               docs_file.go                   │
 │                                                                               │
 │   internal/auth                                                              │
-│     APIKeyStore interface ────────────────→   MemoryAPIKeyStore              │
-│     TokenStore interface                      RedisAPIKeyStore               │
-│     KeyProvider interface                     PostgresAPIKeyStore            │
+│     APIKeyStore interface ────────────────→   apikey_memory.go               │
+│     TokenStore interface                      apikey_redis.go (+build)       │
+│     KeyProvider interface                     apikey_postgres.go (+build)    │
 │                                                                               │
 │   internal/tenant                                                            │
-│     TenantStore interface ────────────────→   PostgresTenantStore            │
-│     QuotaStore interface                      RedisTenantStore               │
+│     TenantStore interface ────────────────→   tenant_memory.go               │
+│     QuotaStore interface                      tenant_postgres.go (+build)    │
+│     RateLimitStore interface                  ratelimit_redis.go (+build)    │
 │                                                                               │
-│   toolsemantic                                                               │
-│     VectorIndex interface ────────────────→   PgVectorIndex                  │
-│                                               QdrantIndex                    │
-│                                               ChromaIndex                    │
+│   internal/cache                                                             │
+│     Cache interface ──────────────────────→   cache_memory.go                │
+│                                               cache_redis.go (+build)        │
+│                                                                               │
+│   internal/vector (future)                                                   │
+│     VectorIndex interface ────────────────→   vector_pgvector.go (+build)    │
+│     Embedder interface                        vector_qdrant.go (+build)      │
 │                                                                               │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+## Why Not a Separate Library?
+
+A separate `toolpersist` library was considered but rejected:
+
+| Separate Library | Internal Packages |
+|------------------|-------------------|
+| Extra repo to maintain | Single codebase |
+| Complex versioning | Simple build tags |
+| Public API surface | Internal, hidden |
+| Overkill for single consumer | Right-sized |
+
+**Pluggability comes from interfaces, not library separation.**
 
 ---
 
@@ -314,56 +328,90 @@ type Reranker interface {
 
 ---
 
-## Implementation Libraries
+## Directory Structure
 
-### Option A: Single `toolpersist` Library
-
-All persistence implementations in one library with build tags:
+All implementations live in `metatools-mcp/internal/`:
 
 ```
-toolpersist/
-├── doc.go
-├── memory/           # In-memory implementations (always included)
-│   ├── index.go
-│   ├── docstore.go
-│   └── cache.go
-├── redis/            # Redis implementations
-│   ├── cache.go      # +build redis
-│   ├── apikey.go
-│   └── ratelimit.go
-├── postgres/         # PostgreSQL implementations
-│   ├── index.go      # +build postgres
-│   ├── docstore.go
-│   ├── tenant.go
-│   └── audit.go
-├── sqlite/           # SQLite implementations
-│   ├── index.go      # +build sqlite
-│   └── docstore.go
-└── vector/           # Vector store implementations
-    ├── pgvector.go   # +build pgvector
-    ├── qdrant.go     # +build qdrant
-    └── chroma.go     # +build chroma
+metatools-mcp/
+├── internal/
+│   ├── auth/
+│   │   ├── authenticator.go       # Authenticator interface
+│   │   ├── authorizer.go          # Authorizer interface
+│   │   ├── identity.go            # Identity types
+│   │   ├── jwt.go                 # JWT implementation
+│   │   ├── apikey.go              # APIKeyStore interface + memory impl
+│   │   ├── apikey_redis.go        # +build redis
+│   │   ├── apikey_postgres.go     # +build postgres
+│   │   └── rbac.go                # Simple RBAC authorizer
+│   │
+│   ├── tenant/
+│   │   ├── store.go               # TenantStore interface
+│   │   ├── store_memory.go        # Memory implementation
+│   │   ├── store_postgres.go      # +build postgres
+│   │   ├── quota.go               # QuotaStore interface
+│   │   ├── quota_memory.go        # Memory implementation
+│   │   ├── quota_redis.go         # +build redis
+│   │   ├── ratelimit.go           # RateLimitStore interface
+│   │   └── ratelimit_redis.go     # +build redis
+│   │
+│   ├── cache/
+│   │   ├── cache.go               # Cache interface
+│   │   ├── memory.go              # LRU memory cache
+│   │   └── redis.go               # +build redis
+│   │
+│   ├── persist/
+│   │   ├── index_memory.go        # toolindex.Index memory impl
+│   │   ├── index_postgres.go      # +build postgres
+│   │   ├── index_sqlite.go        # +build sqlite
+│   │   ├── docs_memory.go         # tooldocs.Store memory impl
+│   │   ├── docs_postgres.go       # +build postgres
+│   │   └── docs_file.go           # File-based implementation
+│   │
+│   └── vector/                    # Future: semantic search
+│       ├── index.go               # VectorIndex interface
+│       ├── embedder.go            # Embedder interface
+│       ├── pgvector.go            # +build pgvector
+│       └── qdrant.go              # +build qdrant
 ```
 
-### Option B: Separate Implementation Libraries
+## Build Tags
 
-Each persistence backend as separate library:
+Optional backends use Go build tags:
 
+```go
+//go:build redis
+
+package cache
+
+import "github.com/redis/go-redis/v9"
+
+type RedisCache struct {
+    client *redis.Client
+}
 ```
-toolpersist-memory/   # Always available, zero dependencies
-toolpersist-redis/    # Requires redis client
-toolpersist-postgres/ # Requires pgx
-toolpersist-sqlite/   # Requires sqlite3
-toolpersist-pgvector/ # Requires pgvector extension
-toolpersist-qdrant/   # Requires qdrant client
+
+**Build commands:**
+
+```bash
+# Default build (memory only)
+go build ./cmd/metatools
+
+# With Redis support
+go build -tags redis ./cmd/metatools
+
+# With PostgreSQL support
+go build -tags postgres ./cmd/metatools
+
+# Full build (all backends)
+go build -tags "redis,postgres,sqlite" ./cmd/metatools
 ```
 
-### Recommendation: Option A with Build Tags
-
-- Single import path simplifies dependency management
-- Build tags allow users to include only needed backends
-- Memory implementations always available for testing
-- Reduces repository sprawl
+**Benefits:**
+- Memory implementations always available (zero dependencies)
+- Optional backends don't bloat binary size
+- Clear opt-in for heavy dependencies (pgx, redis client)
+- Single codebase, no library sprawl
 
 ---
 
@@ -372,7 +420,9 @@ toolpersist-qdrant/   # Requires qdrant client
 ### Factory Registration
 
 ```go
-// toolpersist/registry.go
+// internal/persist/registry.go
+
+package persist
 
 // StoreType identifies a persistence backend
 type StoreType string
@@ -390,9 +440,6 @@ type Registry struct {
     index    map[StoreType]IndexFactory
     docs     map[StoreType]DocStoreFactory
     cache    map[StoreType]CacheFactory
-    apikey   map[StoreType]APIKeyStoreFactory
-    tenant   map[StoreType]TenantStoreFactory
-    vector   map[StoreType]VectorIndexFactory
 }
 
 // IndexFactory creates Index implementations
@@ -402,7 +449,7 @@ type IndexFactory func(cfg map[string]any) (toolindex.Index, error)
 type DocStoreFactory func(cfg map[string]any) (tooldocs.Store, error)
 
 // CacheFactory creates Cache implementations
-type CacheFactory func(cfg map[string]any) (toolcache.Cache, error)
+type CacheFactory func(cfg map[string]any) (Cache, error)
 
 // DefaultRegistry is the global factory registry
 var DefaultRegistry = NewRegistry()
@@ -412,6 +459,20 @@ func init() {
     DefaultRegistry.RegisterIndex(StoreMemory, NewMemoryIndex)
     DefaultRegistry.RegisterDocStore(StoreMemory, NewMemoryDocStore)
     DefaultRegistry.RegisterCache(StoreMemory, NewMemoryCache)
+}
+```
+
+Build-tagged files register their implementations:
+
+```go
+//go:build postgres
+
+// internal/persist/index_postgres.go
+package persist
+
+func init() {
+    DefaultRegistry.RegisterIndex(StorePostgres, NewPostgresIndex)
+    DefaultRegistry.RegisterDocStore(StorePostgres, NewPostgresDocStore)
 }
 ```
 
@@ -466,11 +527,19 @@ persistence:
 ```go
 // cmd/metatools/persistence.go
 
+package main
+
+import (
+    "github.com/jonwraymond/metatools-mcp/internal/persist"
+    "github.com/jonwraymond/metatools-mcp/internal/cache"
+    "github.com/jonwraymond/metatools-mcp/internal/auth"
+)
+
 func initPersistence(cfg *config.Config) (*PersistenceLayer, error) {
-    // Create index
-    indexFactory, ok := toolpersist.DefaultRegistry.GetIndex(cfg.Persistence.Index.Type)
+    // Create index (uses registry populated by build tags)
+    indexFactory, ok := persist.DefaultRegistry.GetIndex(persist.StoreType(cfg.Persistence.Index.Type))
     if !ok {
-        return nil, fmt.Errorf("unknown index type: %s", cfg.Persistence.Index.Type)
+        return nil, fmt.Errorf("unknown index type: %s (did you build with correct tags?)", cfg.Persistence.Index.Type)
     }
     idx, err := indexFactory(cfg.Persistence.Index.Config)
     if err != nil {
@@ -478,7 +547,7 @@ func initPersistence(cfg *config.Config) (*PersistenceLayer, error) {
     }
 
     // Create doc store
-    docsFactory, ok := toolpersist.DefaultRegistry.GetDocStore(cfg.Persistence.Docs.Type)
+    docsFactory, ok := persist.DefaultRegistry.GetDocStore(persist.StoreType(cfg.Persistence.Docs.Type))
     if !ok {
         return nil, fmt.Errorf("unknown docs type: %s", cfg.Persistence.Docs.Type)
     }
@@ -487,15 +556,16 @@ func initPersistence(cfg *config.Config) (*PersistenceLayer, error) {
         return nil, fmt.Errorf("create docs: %w", err)
     }
 
-    // ... similar for cache, api_keys, tenants, vectors
+    // Create cache
+    cacheImpl, err := cache.New(cfg.Cache.Type, cfg.Cache.Config)
+    if err != nil {
+        return nil, fmt.Errorf("create cache: %w", err)
+    }
 
     return &PersistenceLayer{
-        Index:   idx,
-        Docs:    docs,
-        Cache:   cache,
-        APIKeys: apiKeys,
-        Tenants: tenants,
-        Vectors: vectors,
+        Index: idx,
+        Docs:  docs,
+        Cache: cacheImpl,
     }, nil
 }
 ```
@@ -507,62 +577,74 @@ func initPersistence(cfg *config.Config) (*PersistenceLayer, error) {
 ### Phase 1: Define Interfaces (Current)
 
 1. Validate existing interfaces in toolindex, tooldocs
-2. Add Cache interface to toolcache (separate from implementations)
+2. Add Cache interface to internal/cache
 3. Add auth store interfaces to internal/auth
 4. Add tenant store interfaces to internal/tenant
 
-### Phase 2: Create toolpersist Library
+### Phase 2: Memory Implementations
 
-1. Create toolpersist with memory implementations
-2. Move existing in-memory implementations from core libs
+1. Create internal/persist/ with memory implementations
+2. Create internal/cache/ with LRU memory cache
 3. Add factory registry pattern
-4. Add build-tag support for optional backends
+4. Wire into existing handlers
 
-### Phase 3: Add Backend Implementations
+### Phase 3: Add Optional Backends (Build Tags)
 
-1. Redis implementations (cache, rate limit, api keys)
-2. PostgreSQL implementations (index, docs, tenants, audit)
-3. SQLite implementations (embedded deployments)
-4. Vector implementations (pgvector, qdrant)
+1. Redis implementations (cache, rate limit, api keys) - `+build redis`
+2. PostgreSQL implementations (index, docs, tenants) - `+build postgres`
+3. SQLite implementations (embedded deployments) - `+build sqlite`
 
-### Phase 4: Wire Into metatools-mcp
+### Phase 4: Configuration & CLI
 
-1. Add persistence configuration section
-2. Initialize via factory registry
-3. Pass implementations to handlers via dependency injection
+1. Add persistence configuration section to metatools.yaml
+2. Add CLI flags for common options (`--cache-type=redis`)
+3. Initialize via factory registry at startup
+4. Document build tag requirements
 
 ---
 
 ## Benefits
 
-1. **Core libs stay focused** - Pure business logic, no persistence coupling
-2. **Testability** - Memory implementations for unit tests
-3. **Flexibility** - Swap backends without code changes
-4. **Optional dependencies** - Build tags exclude unused backends
+1. **Single codebase** - No extra libraries to maintain
+2. **Testability** - Memory implementations always available
+3. **Flexibility** - Swap backends via config without code changes
+4. **Optional dependencies** - Build tags exclude heavy deps (pgx, redis)
 5. **Clear contracts** - Interfaces define exactly what's needed
-6. **Multi-deployment** - Same code, different persistence per environment
+6. **Right-sized binary** - Only compiled backends are included
+7. **Internal implementations** - Not part of public API surface
 
 ---
 
 ## Interface Location Summary
 
-| Interface | Core Library | Purpose |
-|-----------|--------------|---------|
+| Interface | Location | Purpose |
+|-----------|----------|---------|
 | `Index` | toolindex | Tool registration/lookup |
 | `Searcher` | toolindex | Pluggable search strategy |
 | `Store` (docs) | tooldocs | Documentation storage |
-| `Cache` | toolcache | Response caching |
+| `Cache` | internal/cache | Response caching |
 | `APIKeyStore` | internal/auth | API key persistence |
 | `TokenStore` | internal/auth | OAuth token caching |
 | `KeyProvider` | internal/auth | JWT key fetching |
-| `SessionStore` | internal/auth | Session management |
 | `TenantStore` | internal/tenant | Tenant configuration |
 | `QuotaStore` | internal/tenant | Quota tracking |
 | `RateLimitStore` | internal/tenant | Rate limit state |
-| `AuditLogger` | internal/tenant | Audit logging |
-| `VectorIndex` | toolsemantic | Vector embeddings |
-| `Embedder` | toolsemantic | Text→vector conversion |
-| `Reranker` | toolsemantic | Search reranking |
+| `AuditLogger` | internal/audit | Audit logging |
+| `VectorIndex` | internal/vector | Vector embeddings (future) |
+| `Embedder` | internal/vector | Text→vector (future) |
+
+## Implementation Location Summary
+
+| Implementation | Location | Build Tag |
+|----------------|----------|-----------|
+| MemoryIndex | internal/persist/index_memory.go | (none) |
+| PostgresIndex | internal/persist/index_postgres.go | `postgres` |
+| SQLiteIndex | internal/persist/index_sqlite.go | `sqlite` |
+| MemoryCache | internal/cache/memory.go | (none) |
+| RedisCache | internal/cache/redis.go | `redis` |
+| MemoryAPIKeyStore | internal/auth/apikey.go | (none) |
+| RedisAPIKeyStore | internal/auth/apikey_redis.go | `redis` |
+| PostgresAPIKeyStore | internal/auth/apikey_postgres.go | `postgres` |
 
 ---
 
@@ -571,3 +653,4 @@ func initPersistence(cfg *config.Config) (*PersistenceLayer, error) {
 | Date | Change |
 |------|--------|
 | 2026-01-30 | Initial persistence boundary architecture |
+| 2026-01-30 | Simplified: removed toolpersist library, use internal packages with build tags |

@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aperturestack.dev/schemas/execution.schema.json",
+  "title": "Execution",
+  "description": "Tool execution request and result schemas",
+  "$defs": {
+    "ExecutionRequest": {
+      "type": "object",
+      "required": ["toolId", "input"],
+      "properties": {
+        "toolId": {
+          "type": "string",
+          "description": "Tool to execute"
+        },
+        "input": {
+          "type": "object",
+          "description": "Tool input arguments"
+        },
+        "context": {
+          "$ref": "#/$defs/ExecutionContext"
+        },
+        "options": {
+          "$ref": "#/$defs/ExecutionOptions"
+        }
+      }
+    },
+    "ExecutionContext": {
+      "type": "object",
+      "properties": {
+        "requestId": {"type": "string", "format": "uuid"},
+        "traceId": {"type": "string"},
+        "spanId": {"type": "string"},
+        "userId": {"type": "string"},
+        "tenantId": {"type": "string"},
+        "metadata": {"type": "object"}
+      }
+    },
+    "ExecutionOptions": {
+      "type": "object",
+      "properties": {
+        "timeout": {"type": "string", "pattern": "^\\d+[smh]$"},
+        "backend": {"type": "string", "enum": ["local", "docker", "wasm", "remote"]},
+        "sandbox": {"type": "string", "enum": ["none", "basic", "strict"]},
+        "stream": {"type": "boolean", "default": false},
+        "cache": {"type": "boolean", "default": true}
+      }
+    },
+    "ExecutionResult": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["success", "error", "timeout", "cancelled"]
+        },
+        "output": {
+          "description": "Tool output on success"
+        },
+        "error": {
+          "$ref": "#/$defs/ExecutionError"
+        },
+        "metrics": {
+          "$ref": "#/$defs/ExecutionMetrics"
+        }
+      }
+    },
+    "ExecutionError": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {"type": "string"},
+        "message": {"type": "string"},
+        "details": {"type": "object"},
+        "retryable": {"type": "boolean", "default": false}
+      }
+    },
+    "ExecutionMetrics": {
+      "type": "object",
+      "properties": {
+        "startTime": {"type": "string", "format": "date-time"},
+        "endTime": {"type": "string", "format": "date-time"},
+        "durationMs": {"type": "integer", "minimum": 0},
+        "backend": {"type": "string"},
+        "cached": {"type": "boolean"}
+      }
+    }
+  }
+}

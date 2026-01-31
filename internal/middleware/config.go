@@ -35,5 +35,7 @@ func DefaultRegistry() *Registry {
 	registry := NewRegistry()
 	_ = registry.Register("logging", LoggingMiddlewareFactory)
 	_ = registry.Register("metrics", MetricsMiddlewareFactory)
+	_ = registry.Register("ratelimit", RateLimitMiddlewareFactory)
+	_ = registry.Register("audit", AuditLoggingMiddlewareFactory)
 	return registry
 }

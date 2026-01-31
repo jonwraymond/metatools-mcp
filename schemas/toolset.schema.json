@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aperturestack.dev/schemas/toolset.schema.json",
+  "title": "Toolset",
+  "description": "Collection of tools with shared configuration",
+  "type": "object",
+  "required": ["id", "name", "tools"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^v?\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9.]+)?$"
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {"type": "string", "description": "Tool ID reference"},
+          {"$ref": "tool.schema.json"}
+        ]
+      },
+      "minItems": 1
+    },
+    "config": {
+      "type": "object",
+      "properties": {
+        "timeout": {
+          "type": "string",
+          "pattern": "^\\d+[smh]$",
+          "description": "Execution timeout (e.g., '30s', '5m')"
+        },
+        "retries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "cachePolicy": {
+          "type": "string",
+          "enum": ["none", "default", "aggressive"]
+        }
+      }
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["read", "write", "execute", "admin"]
+      }
+    }
+  }
+}

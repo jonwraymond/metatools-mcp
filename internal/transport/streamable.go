@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jonwraymond/metatools-mcp/internal/auth"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -193,7 +194,8 @@ func (t *StreamableHTTPTransport) Serve(ctx context.Context, server Server) erro
 	}, opts)
 
 	mux := http.NewServeMux()
-	mux.Handle(path, handler)
+	// Wrap handler with auth headers middleware to extract HTTP headers into context
+	mux.Handle(path, auth.WithAuthHeaders(handler))
 
 	readHeaderTimeout := t.Config.ReadHeaderTimeout
 	if readHeaderTimeout == 0 {

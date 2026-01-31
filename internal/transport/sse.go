@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jonwraymond/metatools-mcp/internal/auth"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -69,7 +70,8 @@ func (t *SSETransport) Serve(ctx context.Context, server Server) error {
 	handler := mcp.NewSSEHandler(func(_ *http.Request) *mcp.Server {
 		return server.MCPServer()
 	}, nil)
-	mux.Handle(path, handler)
+	// Wrap handler with auth headers middleware to extract HTTP headers into context
+	mux.Handle(path, auth.WithAuthHeaders(handler))
 
 	httpServer := &http.Server{
 		Addr:              addr,
