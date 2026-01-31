@@ -8,14 +8,14 @@ import (
 
 	"github.com/jonwraymond/metatools-mcp/internal/adapters"
 	"github.com/jonwraymond/metatools-mcp/internal/config"
-	"github.com/jonwraymond/toolindex"
-	"github.com/jonwraymond/toolmodel"
+	"github.com/jonwraymond/tooldiscovery/index"
+	"github.com/jonwraymond/toolfoundation/model"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func newTestServerWithIndex(t *testing.T, idx toolindex.Index, notify bool, debounceMs int) *Server {
+func newTestServerWithIndex(t *testing.T, idx index.Index, notify bool, debounceMs int) *Server {
 	t.Helper()
 
 	cfg := config.Config{
@@ -44,10 +44,10 @@ func drainNotifications(ch <-chan struct{}, duration time.Duration) {
 	}
 }
 
-func registerIndexTool(t *testing.T, idx toolindex.Index, name string) {
+func registerIndexTool(t *testing.T, idx index.Index, name string) {
 	t.Helper()
 
-	tool := toolmodel.Tool{
+	tool := model.Tool{
 		Namespace: "test",
 		Tool: mcp.Tool{
 			Name: name,
@@ -56,16 +56,16 @@ func registerIndexTool(t *testing.T, idx toolindex.Index, name string) {
 			},
 		},
 	}
-	backend := toolmodel.ToolBackend{
-		Kind:  toolmodel.BackendKindLocal,
-		Local: &toolmodel.LocalBackend{Name: name},
+	backend := model.ToolBackend{
+		Kind:  model.BackendKindLocal,
+		Local: &model.LocalBackend{Name: name},
 	}
 
 	require.NoError(t, idx.RegisterTool(tool, backend))
 }
 
 func TestServer_ToolListChangedNotification(t *testing.T) {
-	idx := toolindex.NewInMemoryIndex()
+	idx := index.NewInMemoryIndex()
 	srv := newTestServerWithIndex(t, idx, true, 30)
 
 	ctx := context.Background()
@@ -101,7 +101,7 @@ func TestServer_ToolListChangedNotification(t *testing.T) {
 }
 
 func TestServer_ToolListChangedNotification_Debounce(t *testing.T) {
-	idx := toolindex.NewInMemoryIndex()
+	idx := index.NewInMemoryIndex()
 	srv := newTestServerWithIndex(t, idx, true, 50)
 
 	ctx := context.Background()
@@ -137,7 +137,7 @@ func TestServer_ToolListChangedNotification_Debounce(t *testing.T) {
 }
 
 func TestServer_ToolListChangedNotification_SinglePerChange(t *testing.T) {
-	idx := toolindex.NewInMemoryIndex()
+	idx := index.NewInMemoryIndex()
 	srv := newTestServerWithIndex(t, idx, true, 20)
 
 	ctx := context.Background()
@@ -171,7 +171,7 @@ func TestServer_ToolListChangedNotification_SinglePerChange(t *testing.T) {
 }
 
 func TestServer_ToolListChangedNotification_Disabled(t *testing.T) {
-	idx := toolindex.NewInMemoryIndex()
+	idx := index.NewInMemoryIndex()
 	srv := newTestServerWithIndex(t, idx, false, 30)
 
 	ctx := context.Background()

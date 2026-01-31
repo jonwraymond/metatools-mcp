@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/jonwraymond/metatools-mcp/pkg/metatools"
-	"github.com/jonwraymond/toolindex"
+	"github.com/jonwraymond/tooldiscovery/index"
 	"github.com/modelcontextprotocol/go-sdk/jsonrpc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -179,7 +179,7 @@ func TestSearchTools_IndexError(t *testing.T) {
 func TestSearchTools_InvalidCursor(t *testing.T) {
 	idx := &mockIndex{
 		searchFunc: func(_ context.Context, _ string, _ int, _ string) ([]metatools.ToolSummary, string, error) {
-			return nil, "", toolindex.ErrInvalidCursor
+			return nil, "", index.ErrInvalidCursor
 		},
 	}
 

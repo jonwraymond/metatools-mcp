@@ -4,28 +4,28 @@ import (
 	"fmt"
 
 	"github.com/jonwraymond/metatools-mcp/internal/config"
-	"github.com/jonwraymond/toolindex"
+	"github.com/jonwraymond/tooldiscovery/index"
 )
 
-// NewIndexFromSearchConfig creates a toolindex.Index configured from a SearchConfig.
+// NewIndexFromSearchConfig creates a index.Index configured from a SearchConfig.
 // When the searcher is nil (lexical strategy or default build), toolindex
 // uses its default lexical search behavior.
-func NewIndexFromSearchConfig(cfg config.SearchConfig) (toolindex.Index, error) {
+func NewIndexFromSearchConfig(cfg config.SearchConfig) (index.Index, error) {
 	searcher, err := SearcherFromConfig(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("selecting searcher: %w", err)
 	}
-	return toolindex.NewInMemoryIndex(toolindex.IndexOptions{
+	return index.NewInMemoryIndex(index.IndexOptions{
 		Searcher: searcher,
 	}), nil
 }
 
-// NewIndexFromConfig creates a toolindex.Index configured based on EnvConfig.
-func NewIndexFromConfig(cfg config.EnvConfig) (toolindex.Index, error) {
+// NewIndexFromConfig creates a index.Index configured based on EnvConfig.
+func NewIndexFromConfig(cfg config.EnvConfig) (index.Index, error) {
 	return NewIndexFromSearchConfig(cfg.Search)
 }
 
-// NewIndexFromAppConfig creates a toolindex.Index configured based on AppConfig.
-func NewIndexFromAppConfig(cfg config.AppConfig) (toolindex.Index, error) {
+// NewIndexFromAppConfig creates a index.Index configured based on AppConfig.
+func NewIndexFromAppConfig(cfg config.AppConfig) (index.Index, error) {
 	return NewIndexFromSearchConfig(cfg.Search.ToSearchConfig())
 }

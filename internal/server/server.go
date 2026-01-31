@@ -8,7 +8,7 @@ import (
 	"github.com/jonwraymond/metatools-mcp/internal/config"
 	"github.com/jonwraymond/metatools-mcp/internal/handlers"
 	"github.com/jonwraymond/metatools-mcp/internal/provider/builtin"
-	"github.com/jonwraymond/toolindex"
+	"github.com/jonwraymond/tooldiscovery/index"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -156,7 +156,7 @@ func (s *Server) registerToolListNotifications() {
 	if !s.config.NotifyToolListChanged {
 		return
 	}
-	changeNotifier, ok := s.config.Index.(toolindex.ChangeNotifier)
+	changeNotifier, ok := s.config.Index.(index.ChangeNotifier)
 	if !ok {
 		return
 	}
@@ -165,7 +165,7 @@ func (s *Server) registerToolListNotifications() {
 		debounce = 150 * time.Millisecond
 	}
 
-	s.toolListUnsub = changeNotifier.OnChange(func(_ toolindex.ChangeEvent) {
+	s.toolListUnsub = changeNotifier.OnChange(func(_ index.ChangeEvent) {
 		s.toolListMu.Lock()
 		defer s.toolListMu.Unlock()
 		if s.toolListTimer == nil {

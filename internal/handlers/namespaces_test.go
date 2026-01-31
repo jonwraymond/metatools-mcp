@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/jonwraymond/metatools-mcp/pkg/metatools"
-	"github.com/jonwraymond/toolindex"
+	"github.com/jonwraymond/tooldiscovery/index"
 	"github.com/modelcontextprotocol/go-sdk/jsonrpc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -97,7 +97,7 @@ func TestListNamespaces_WithCursor(t *testing.T) {
 func TestListNamespaces_InvalidCursor(t *testing.T) {
 	idx := &mockNamespacesIndex{
 		listNamespacesFunc: func(_ context.Context, _ int, _ string) ([]string, string, error) {
-			return nil, "", toolindex.ErrInvalidCursor
+			return nil, "", index.ErrInvalidCursor
 		},
 	}
 

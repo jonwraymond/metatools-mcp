@@ -5,7 +5,7 @@ import (
         "errors"
 
         "github.com/jonwraymond/metatools-mcp/pkg/metatools"
-        "github.com/jonwraymond/toolindex"
+        "github.com/jonwraymond/tooldiscovery/index"
         "github.com/modelcontextprotocol/go-sdk/jsonrpc"
 )
 
@@ -40,7 +40,7 @@ func (h *SearchHandler) Handle(ctx context.Context, input metatools.SearchToolsI
 
         tools, nextCursor, err := h.index.SearchPage(ctx, input.Query, limit, cursorStr)
         if err != nil {
-                if errors.Is(err, toolindex.ErrInvalidCursor) {
+                if errors.Is(err, index.ErrInvalidCursor) {
                         return nil, &jsonrpc.Error{Code: jsonrpc.CodeInvalidParams, Message: "invalid cursor"}
                 }
                 return nil, err

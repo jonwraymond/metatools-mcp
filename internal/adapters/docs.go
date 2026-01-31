@@ -5,23 +5,23 @@ import (
 
 	"github.com/jonwraymond/metatools-mcp/internal/handlers"
 	"github.com/jonwraymond/metatools-mcp/pkg/metatools"
-	"github.com/jonwraymond/tooldocs"
+	"github.com/jonwraymond/tooldiscovery/tooldoc"
 )
 
-// DocsAdapter bridges tooldocs.Store to the handlers.Store interface.
+// DocsAdapter bridges tooldoc.Store to the handlers.Store interface.
 type DocsAdapter struct {
-	store tooldocs.Store
+	store tooldoc.Store
 }
 
 // NewDocsAdapter creates a new docs adapter.
-func NewDocsAdapter(store tooldocs.Store) *DocsAdapter {
+func NewDocsAdapter(store tooldoc.Store) *DocsAdapter {
 	return &DocsAdapter{store: store}
 }
 
 // DescribeTool delegates to tooldocs and converts the result.
 func (a *DocsAdapter) DescribeTool(ctx context.Context, id string, level string) (handlers.ToolDoc, error) {
 	_ = ctx
-	doc, err := a.store.DescribeTool(id, tooldocs.DetailLevel(level))
+	doc, err := a.store.DescribeTool(id, tooldoc.DetailLevel(level))
 	if err != nil {
 		return handlers.ToolDoc{}, err
 	}
@@ -52,7 +52,7 @@ func (a *DocsAdapter) ListExamples(ctx context.Context, id string, maxExamples i
 	return convertExamples(examples), nil
 }
 
-func convertExamples(examples []tooldocs.ToolExample) []metatools.ToolExample {
+func convertExamples(examples []tooldoc.ToolExample) []metatools.ToolExample {
 	out := make([]metatools.ToolExample, len(examples))
 	for i, ex := range examples {
 		out[i] = metatools.ToolExample{

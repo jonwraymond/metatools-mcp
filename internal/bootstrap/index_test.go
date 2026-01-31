@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/jonwraymond/metatools-mcp/internal/config"
-	"github.com/jonwraymond/toolmodel"
+	"github.com/jonwraymond/toolfoundation/model"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -22,7 +22,7 @@ func TestNewIndexFromConfig_CreatesWorkingIndex(t *testing.T) {
 	require.NotNil(t, idx)
 
 	// Verify the index works by registering and searching for a tool
-	tool := toolmodel.Tool{
+	tool := model.Tool{
 		Tool: mcp.Tool{
 			Name:        "test_tool",
 			Description: "A test tool for verification",
@@ -34,9 +34,9 @@ func TestNewIndexFromConfig_CreatesWorkingIndex(t *testing.T) {
 		Namespace: "testing",
 	}
 
-	backend := toolmodel.ToolBackend{
-		Kind: toolmodel.BackendKindLocal,
-		Local: &toolmodel.LocalBackend{
+	backend := model.ToolBackend{
+		Kind: model.BackendKindLocal,
+		Local: &model.LocalBackend{
 			Name: "test_handler",
 		},
 	}
@@ -60,7 +60,7 @@ func TestNewIndexFromConfig_DefaultStrategyWorks(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, idx)
 
-	tool := toolmodel.Tool{
+	tool := model.Tool{
 		Tool: mcp.Tool{
 			Name:        "another_tool",
 			Description: "Another test tool",
@@ -72,9 +72,9 @@ func TestNewIndexFromConfig_DefaultStrategyWorks(t *testing.T) {
 		Namespace: "demo",
 	}
 
-	backend := toolmodel.ToolBackend{
-		Kind: toolmodel.BackendKindLocal,
-		Local: &toolmodel.LocalBackend{
+	backend := model.ToolBackend{
+		Kind: model.BackendKindLocal,
+		Local: &model.LocalBackend{
 			Name: "test_handler",
 		},
 	}
@@ -95,7 +95,7 @@ func TestNewIndexFromAppConfig_CreatesWorkingIndex(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, idx)
 
-	tool := toolmodel.Tool{
+	tool := model.Tool{
 		Tool: mcp.Tool{
 			Name:        "app_tool",
 			Description: "Tool registered via app config",
@@ -107,9 +107,9 @@ func TestNewIndexFromAppConfig_CreatesWorkingIndex(t *testing.T) {
 		Namespace: "app",
 	}
 
-	backend := toolmodel.ToolBackend{
-		Kind: toolmodel.BackendKindLocal,
-		Local: &toolmodel.LocalBackend{
+	backend := model.ToolBackend{
+		Kind: model.BackendKindLocal,
+		Local: &model.LocalBackend{
 			Name: "test_handler",
 		},
 	}

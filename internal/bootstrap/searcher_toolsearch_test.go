@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/jonwraymond/metatools-mcp/internal/config"
-	"github.com/jonwraymond/toolmodel"
-	"github.com/jonwraymond/toolsearch"
+	"github.com/jonwraymond/tooldiscovery/search"
+	"github.com/jonwraymond/toolfoundation/model"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -28,8 +28,8 @@ func TestSearcherFromConfig_BM25Strategy(t *testing.T) {
 	assert.NotNil(t, searcher)
 
 	// Verify it's the correct type
-	_, ok := searcher.(*toolsearch.BM25Searcher)
-	assert.True(t, ok, "expected *toolsearch.BM25Searcher")
+	_, ok := searcher.(*search.BM25Searcher)
+	assert.True(t, ok, "expected *search.BM25Searcher")
 }
 
 func TestSearcherFromConfig_LexicalStrategy(t *testing.T) {
@@ -58,7 +58,7 @@ func TestSearcherFromConfig_CustomBM25Values(t *testing.T) {
 
 	// We can't easily verify the internal config values, but we can
 	// verify it was created without error
-	_, ok := searcher.(*toolsearch.BM25Searcher)
+	_, ok := searcher.(*search.BM25Searcher)
 	assert.True(t, ok)
 }
 
@@ -77,7 +77,7 @@ func TestNewIndexFromConfig_BM25Strategy(t *testing.T) {
 	require.NotNil(t, idx)
 
 	// Verify the index works by registering and searching for a tool
-	tool := toolmodel.Tool{
+	tool := model.Tool{
 		Tool: mcp.Tool{
 			Name:        "bm25_test_tool",
 			Description: "A test tool for BM25 verification",
@@ -89,9 +89,9 @@ func TestNewIndexFromConfig_BM25Strategy(t *testing.T) {
 		Namespace: "testing",
 	}
 
-	backend := toolmodel.ToolBackend{
-		Kind: toolmodel.BackendKindLocal,
-		Local: &toolmodel.LocalBackend{
+	backend := model.ToolBackend{
+		Kind: model.BackendKindLocal,
+		Local: &model.LocalBackend{
 			Name: "test_handler",
 		},
 	}

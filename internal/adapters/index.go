@@ -4,16 +4,16 @@ import (
 	"context"
 
 	"github.com/jonwraymond/metatools-mcp/pkg/metatools"
-	"github.com/jonwraymond/toolindex"
+	"github.com/jonwraymond/tooldiscovery/index"
 )
 
-// IndexAdapter bridges toolindex.Index to the handlers.Index interface.
+// IndexAdapter bridges index.Index to the handlers.Index interface.
 type IndexAdapter struct {
-	idx toolindex.Index
+	idx index.Index
 }
 
 // NewIndexAdapter creates a new index adapter.
-func NewIndexAdapter(idx toolindex.Index) *IndexAdapter {
+func NewIndexAdapter(idx index.Index) *IndexAdapter {
 	return &IndexAdapter{idx: idx}
 }
 
@@ -57,14 +57,14 @@ func (a *IndexAdapter) SearchPage(ctx context.Context, query string, limit int, 
 	return out, nextCursor, nil
 }
 
-// ListNamespaces delegates to toolindex.
+// ListNamespaces delegates to index.
 func (a *IndexAdapter) ListNamespaces(ctx context.Context) ([]string, error) {
 	_ = ctx
 	namespaces, _, err := a.idx.ListNamespacesPage(100, "")
 	return namespaces, err
 }
 
-// ListNamespacesPage delegates to toolindex.
+// ListNamespacesPage delegates to index.
 func (a *IndexAdapter) ListNamespacesPage(ctx context.Context, limit int, cursor string) ([]string, string, error) {
 	_ = ctx
 	return a.idx.ListNamespacesPage(limit, cursor)
@@ -72,8 +72,8 @@ func (a *IndexAdapter) ListNamespacesPage(ctx context.Context, limit int, cursor
 
 // OnChange registers a listener for index mutations when supported.
 // Returns a no-op unsubscribe when change notifications are unavailable.
-func (a *IndexAdapter) OnChange(listener toolindex.ChangeListener) func() {
-	if notifier, ok := a.idx.(toolindex.ChangeNotifier); ok {
+func (a *IndexAdapter) OnChange(listener index.ChangeListener) func() {
+	if notifier, ok := a.idx.(index.ChangeNotifier); ok {
 		return notifier.OnChange(listener)
 	}
 	return func() {}
