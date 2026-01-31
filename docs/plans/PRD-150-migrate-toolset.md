@@ -4,6 +4,7 @@
 **Priority:** High
 **Effort:** 4 hours
 **Dependencies:** PRD-121, PRD-130
+**Status:** Done (2026-01-31)
 
 ---
 
@@ -15,8 +16,8 @@ Migrate the existing `toolset` repository into `toolcompose/set/` as the first p
 
 ## Source Analysis
 
-**Current Location:** `github.com/ApertureStack/toolset`
-**Target Location:** `github.com/ApertureStack/toolcompose/set`
+**Current Location:** `github.com/jonwraymond/toolset`
+**Target Location:** `github.com/jonwraymond/toolcompose/set`
 
 **Package Contents:**
 - Tool collection management
@@ -43,7 +44,7 @@ Migrate the existing `toolset` repository into `toolcompose/set/` as the first p
 
 ```bash
 cd /tmp/migration
-git clone git@github.com:ApertureStack/toolcompose.git
+git clone git@github.com:jonwraymond/toolcompose.git
 cd toolcompose
 
 mkdir -p set
@@ -53,7 +54,7 @@ mkdir -p set
 
 ```bash
 cd /tmp/migration
-git clone git@github.com:ApertureStack/toolset.git
+git clone git@github.com:jonwraymond/toolset.git
 cd toolset
 
 ls -la
@@ -76,15 +77,15 @@ ls -la toolcompose/set/
 cd /tmp/migration/toolcompose/set
 
 # Update self-reference
-sed -i '' 's|github.com/ApertureStack/toolset|github.com/ApertureStack/toolcompose/set|g' *.go
+sed -i '' 's|github.com/jonwraymond/toolset|github.com/jonwraymond/toolcompose/set|g' *.go
 
 # Update dependencies
-sed -i '' 's|github.com/ApertureStack/toolmodel|github.com/ApertureStack/toolfoundation/model|g' *.go
-sed -i '' 's|github.com/ApertureStack/tooladapter|github.com/ApertureStack/toolfoundation/adapter|g' *.go
-sed -i '' 's|github.com/ApertureStack/toolindex|github.com/ApertureStack/tooldiscovery/index|g' *.go
+sed -i '' 's|github.com/jonwraymond/toolmodel|github.com/jonwraymond/toolfoundation/model|g' *.go
+sed -i '' 's|github.com/jonwraymond/tooladapter|github.com/jonwraymond/toolfoundation/adapter|g' *.go
+sed -i '' 's|github.com/jonwraymond/toolindex|github.com/jonwraymond/tooldiscovery/index|g' *.go
 
 # Verify
-grep -r "ApertureStack/toolset\|ApertureStack/toolmodel\|ApertureStack/toolindex" . || echo "✓ All imports updated"
+grep -r "jonwraymond/toolset\|jonwraymond/toolmodel\|jonwraymond/toolindex" . || echo "✓ All imports updated"
 ```
 
 ### Task 5: Update Package Documentation
@@ -149,7 +150,7 @@ grep -r "ApertureStack/toolset\|ApertureStack/toolmodel\|ApertureStack/toolindex
 //
 // # Migration Note
 //
-// This package was migrated from github.com/ApertureStack/toolset as part of
+// This package was migrated from github.com/jonwraymond/toolset as part of
 // the ApertureStack consolidation.
 package set
 ```
@@ -191,12 +192,12 @@ Features:
 - Merge multiple toolsets
 
 Dependencies:
-- github.com/ApertureStack/toolfoundation/model
-- github.com/ApertureStack/tooldiscovery/index
+- github.com/jonwraymond/toolfoundation/model
+- github.com/jonwraymond/tooldiscovery/index
 
 This is part of the ApertureStack consolidation effort.
 
-Migration: github.com/ApertureStack/toolset → toolcompose/set
+Migration: github.com/jonwraymond/toolset → toolcompose/set
 
 Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
 
@@ -212,7 +213,7 @@ package set
 
 import (
     "context"
-    "github.com/ApertureStack/toolfoundation/model"
+    "github.com/jonwraymond/toolfoundation/model"
 )
 
 // Toolset represents a collection of tools.
@@ -290,6 +291,11 @@ func Merge(sets ...*Toolset) *Toolset
 3. Toolsets can be created and populated
 4. Filtering produces correct results
 5. Merge combines tools correctly
+
+## Completion Notes
+
+- Toolset migrated into `toolcompose/set` with builder, filters, policy, and exposure helpers.
+- Imports updated to `github.com/jonwraymond/...`.
 
 ---
 

@@ -81,8 +81,16 @@ This directory contains all Product Requirement Documents for the ApertureStack 
 
 | PRD | Title | Effort | Status |
 |-----|-------|--------|--------|
-| [PRD-150](./PRD-150-migrate-toolset.md) | Migrate toolset | 4h | Ready |
-| [PRD-151](./PRD-151-complete-toolskill.md) | Complete toolskill | 8h | Ready |
+| [PRD-150](./PRD-150-migrate-toolset.md) | Migrate toolset | 4h | Done |
+| [PRD-151](./PRD-151-complete-toolskill.md) | Complete toolskill | 8h | Done |
+| [PRD-152](./PRD-152-toolcompose-docs-alignment.md) | toolcompose docs alignment | 2h | Done |
+| [PRD-153](./PRD-153-toolcompose-set-policy-docs.md) | set filter/policy docs | 2h | Done |
+| [PRD-154](./PRD-154-toolcompose-skill-contracts.md) | skill contract docs | 2h | Done |
+| [PRD-155](./PRD-155-toolcompose-user-journey.md) | user journey + examples | 2h | Done |
+| [PRD-156](./PRD-156-toolcompose-docs-site.md) | docs site integration | 1h | Done |
+| [PRD-157](./PRD-157-toolcompose-release-propagation.md) | Release + propagation | 1h | Done |
+| [PRD-158](./PRD-158-toolcompose-validation.md) | toolcompose validation | 1h | Done |
+| [PRD-159](./PRD-159-toolcompose-docs-publish.md) | docs publish readiness | 1h | Done |
 
 ## Phase 6: Operations Layer - toolops (30h)
 

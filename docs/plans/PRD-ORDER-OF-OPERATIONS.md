@@ -8,7 +8,7 @@
 ## Critical Path
 
 ```
-PRD-100 → PRD-110 → PRD-120 → PRD-130 → PRD-150 → PRD-180 → PRD-190
+PRD-100 → PRD-110 → PRD-120 → PRD-130 → PRD-150 → PRD-152 → PRD-180 → PRD-190
    ↓         ↓         ↓         ↓         ↓
 PRD-101   PRD-111   PRD-121   PRD-131   PRD-151
 PRD-102   PRD-112   PRD-122   PRD-132           → PRD-181 → PRD-191
@@ -113,6 +113,19 @@ PRD-102   PRD-112   PRD-122   PRD-132           → PRD-181 → PRD-191
 | 21 | PRD-160 | Migrate toolobserve | 4h | PRD-120 |
 | 22 | PRD-161 | Migrate toolcache | 4h | PRD-120 |
 
+### Week 5b: Composition Hardening (Docs + Validation)
+
+| Order | PRD | Title | Est. Hours | Depends On |
+|-------|-----|-------|------------|------------|
+| 20.1 | PRD-152 | toolcompose docs alignment | 2h | PRD-150–151 |
+| 20.2 | PRD-153 | set filter/policy docs | 2h | PRD-150 |
+| 20.3 | PRD-154 | skill contract docs | 2h | PRD-151 |
+| 20.4 | PRD-155 | user journey + examples | 2h | PRD-150–151 |
+| 20.5 | PRD-156 | docs site integration | 1h | PRD-152–155 |
+| 20.6 | PRD-157 | release + propagation | 1h | PRD-150–156 |
+| 20.7 | PRD-158 | toolcompose validation | 1h | PRD-150–157 |
+| 20.8 | PRD-159 | docs publish readiness | 1h | PRD-156 |
+
 ### Week 6: Operations Layer (continued)
 
 | Order | PRD | Title | Est. Hours | Depends On |
@@ -162,6 +175,7 @@ These PRDs can run in parallel:
 - PRD-140, PRD-141, PRD-143
 - PRD-144–149
 - PRD-160, PRD-161, PRD-162
+- PRD-152–159
 
 ### Parallel Group 3 (During Phase 7)
 - PRD-170 and PRD-173 (independent)
