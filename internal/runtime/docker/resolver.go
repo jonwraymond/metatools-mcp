@@ -8,7 +8,7 @@ import (
 
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
-	dockerbackend "github.com/jonwraymond/toolruntime/backend/docker"
+	dockerbackend "github.com/jonwraymond/toolexec/runtime/backend/docker"
 )
 
 // Resolver implements toolruntime's ImageResolver interface using Docker SDK.

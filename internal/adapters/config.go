@@ -4,14 +4,14 @@ import (
 	"time"
 
 	"github.com/jonwraymond/metatools-mcp/internal/config"
-	"github.com/jonwraymond/toolcode"
 	"github.com/jonwraymond/tooldiscovery/index"
 	"github.com/jonwraymond/tooldiscovery/tooldoc"
-	"github.com/jonwraymond/toolrun"
+	"github.com/jonwraymond/toolexec/code"
+	"github.com/jonwraymond/toolexec/run"
 )
 
 // NewConfig adapts the core tool libraries into a metatools server config.
-func NewConfig(idx index.Index, docs tooldoc.Store, runner toolrun.Runner, exec toolcode.Executor) config.Config {
+func NewConfig(idx index.Index, docs tooldoc.Store, runner run.Runner, exec code.Executor) config.Config {
 	cfg := config.Config{
 		Index:                           NewIndexAdapter(idx),
 		Docs:                            NewDocsAdapter(docs),

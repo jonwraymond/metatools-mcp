@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/jonwraymond/toolrun"
+	"github.com/jonwraymond/toolexec/run"
 )
 
 // ErrorCode represents the standard error codes for metatools
@@ -77,8 +77,8 @@ func MapToolError(err error, toolID string, backend *BackendInfo, stepIndex int)
 		Message: err.Error(),
 	}
 
-	// Extract toolrun.ToolError context when present.
-	var trErr *toolrun.ToolError
+	// Extract run.ToolError context when present.
+	var trErr *run.ToolError
 	if errors.As(err, &trErr) {
 		op := trErr.Op
 		result.Op = &op
@@ -119,21 +119,21 @@ func MapToolError(err error, toolID string, backend *BackendInfo, stepIndex int)
 
 func mapErrorToCode(err error) ErrorCode {
 	switch {
-	case errors.Is(err, ErrToolNotFound) || errors.Is(err, toolrun.ErrToolNotFound):
+	case errors.Is(err, ErrToolNotFound) || errors.Is(err, run.ErrToolNotFound):
 		return CodeToolNotFound
-	case errors.Is(err, ErrNoBackends) || errors.Is(err, toolrun.ErrNoBackends):
+	case errors.Is(err, ErrNoBackends) || errors.Is(err, run.ErrNoBackends):
 		return CodeNoBackends
 	case errors.Is(err, ErrBackendOverrideInvalid):
 		return CodeBackendOverrideInvalid
 	case errors.Is(err, ErrBackendOverrideNoMatch):
 		return CodeBackendOverrideNoMatch
-	case errors.Is(err, ErrValidationInput) || errors.Is(err, toolrun.ErrValidation):
+	case errors.Is(err, ErrValidationInput) || errors.Is(err, run.ErrValidation):
 		return CodeValidationInput
-	case errors.Is(err, ErrValidationOutput) || errors.Is(err, toolrun.ErrOutputValidation):
+	case errors.Is(err, ErrValidationOutput) || errors.Is(err, run.ErrOutputValidation):
 		return CodeValidationOutput
-	case errors.Is(err, ErrStreamNotSupported) || errors.Is(err, toolrun.ErrStreamNotSupported):
+	case errors.Is(err, ErrStreamNotSupported) || errors.Is(err, run.ErrStreamNotSupported):
 		return CodeStreamNotSupported
-	case errors.Is(err, ErrExecution) || errors.Is(err, toolrun.ErrExecution):
+	case errors.Is(err, ErrExecution) || errors.Is(err, run.ErrExecution):
 		return CodeExecutionFailed
 	case errors.Is(err, context.Canceled):
 		return CodeCancelled

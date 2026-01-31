@@ -4,21 +4,21 @@ import (
 	"context"
 
 	"github.com/jonwraymond/metatools-mcp/internal/handlers"
-	"github.com/jonwraymond/toolmodel"
-	"github.com/jonwraymond/toolrun"
+	"github.com/jonwraymond/toolfoundation/model"
+	"github.com/jonwraymond/toolexec/run"
 )
 
-// RunnerAdapter bridges toolrun.Runner to the handlers.Runner interface.
+// RunnerAdapter bridges run.Runner to the handlers.Runner interface.
 type RunnerAdapter struct {
-	runner toolrun.Runner
+	runner run.Runner
 }
 
 // NewRunnerAdapter creates a new runner adapter.
-func NewRunnerAdapter(runner toolrun.Runner) *RunnerAdapter {
+func NewRunnerAdapter(runner run.Runner) *RunnerAdapter {
 	return &RunnerAdapter{runner: runner}
 }
 
-// Run delegates to toolrun.
+// Run delegates to run.
 func (a *RunnerAdapter) Run(ctx context.Context, toolID string, args map[string]any) (handlers.RunResult, error) {
 	res, err := a.runner.Run(ctx, toolID, args)
 	if err != nil {
@@ -34,9 +34,9 @@ func (a *RunnerAdapter) Run(ctx context.Context, toolID string, args map[string]
 
 // RunChain delegates to toolrun and maps results.
 func (a *RunnerAdapter) RunChain(ctx context.Context, steps []handlers.ChainStep) (handlers.RunResult, []handlers.StepResult, error) {
-	chainSteps := make([]toolrun.ChainStep, len(steps))
+	chainSteps := make([]run.ChainStep, len(steps))
 	for i, s := range steps {
-		chainSteps[i] = toolrun.ChainStep{
+		chainSteps[i] = run.ChainStep{
 			ToolID:      s.ToolID,
 			Args:        s.Args,
 			UsePrevious: s.UsePrevious,
@@ -71,8 +71,8 @@ func (a *RunnerAdapter) RunChain(ctx context.Context, steps []handlers.ChainStep
 
 // RunWithProgress delegates to toolrun when progress is supported.
 func (a *RunnerAdapter) RunWithProgress(ctx context.Context, toolID string, args map[string]any, onProgress func(handlers.ProgressEvent)) (handlers.RunResult, error) {
-	if pr, ok := a.runner.(toolrun.ProgressRunner); ok {
-		result, err := pr.RunWithProgress(ctx, toolID, args, func(ev toolrun.ProgressEvent) {
+	if pr, ok := a.runner.(run.ProgressRunner); ok {
+		result, err := pr.RunWithProgress(ctx, toolID, args, func(ev run.ProgressEvent) {
 			if onProgress != nil {
 				onProgress(handlers.ProgressEvent{
 					Progress: ev.Progress,
@@ -107,17 +107,17 @@ func (a *RunnerAdapter) RunWithProgress(ctx context.Context, toolID string, args
 
 // RunChainWithProgress delegates to toolrun when progress is supported.
 func (a *RunnerAdapter) RunChainWithProgress(ctx context.Context, steps []handlers.ChainStep, onProgress func(handlers.ProgressEvent)) (handlers.RunResult, []handlers.StepResult, error) {
-	if pr, ok := a.runner.(toolrun.ProgressRunner); ok {
-		chainSteps := make([]toolrun.ChainStep, len(steps))
+	if pr, ok := a.runner.(run.ProgressRunner); ok {
+		chainSteps := make([]run.ChainStep, len(steps))
 		for i, s := range steps {
-			chainSteps[i] = toolrun.ChainStep{
+			chainSteps[i] = run.ChainStep{
 				ToolID:      s.ToolID,
 				Args:        s.Args,
 				UsePrevious: s.UsePrevious,
 			}
 		}
 
-		final, stepResults, err := pr.RunChainWithProgress(ctx, chainSteps, func(ev toolrun.ProgressEvent) {
+		final, stepResults, err := pr.RunChainWithProgress(ctx, chainSteps, func(ev run.ProgressEvent) {
 			if onProgress != nil {
 				onProgress(handlers.ProgressEvent{
 					Progress: ev.Progress,
@@ -155,7 +155,7 @@ func (a *RunnerAdapter) RunChainWithProgress(ctx context.Context, steps []handle
 	return a.RunChain(ctx, steps)
 }
 
-func pickBackend(sr toolrun.StepResult) toolmodel.ToolBackend {
+func pickBackend(sr run.StepResult) model.ToolBackend {
 	if sr.Backend.Kind != "" {
 		return sr.Backend
 	}

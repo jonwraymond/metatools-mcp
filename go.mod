@@ -16,8 +16,9 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.0.0-alpha.1
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/jonwraymond/toolcode v0.3.0
-	github.com/jonwraymond/tooldiscovery v0.0.0-20260131044009-da18a6d00b96
+	github.com/jonwraymond/tooldiscovery v0.0.0
 	github.com/jonwraymond/tooldocs v0.2.0
+	github.com/jonwraymond/toolexec v0.1.0
 	github.com/jonwraymond/toolfoundation v0.1.0
 	github.com/jonwraymond/toolindex v0.3.0
 	github.com/jonwraymond/toolmodel v0.2.0

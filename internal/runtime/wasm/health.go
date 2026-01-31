@@ -5,7 +5,7 @@ import (
 
 	"github.com/tetratelabs/wazero"
 
-	wasmbackend "github.com/jonwraymond/toolruntime/backend/wasm"
+	wasmbackend "github.com/jonwraymond/toolexec/runtime/backend/wasm"
 )
 
 // wazeroVersion is the version of the wazero runtime.

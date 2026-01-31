@@ -10,7 +10,7 @@ import (
 	"github.com/tetratelabs/wazero"
 	"github.com/tetratelabs/wazero/imports/wasi_snapshot_preview1"
 
-	wasmbackend "github.com/jonwraymond/toolruntime/backend/wasm"
+	wasmbackend "github.com/jonwraymond/toolexec/runtime/backend/wasm"
 )
 
 // Client implements toolruntime's Runner interface using wazero.

@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	wasmbackend "github.com/jonwraymond/toolruntime/backend/wasm"
+	wasmbackend "github.com/jonwraymond/toolexec/runtime/backend/wasm"
 )
 
 // Test WASM binaries are embedded at package level for use across tests.

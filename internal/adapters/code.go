@@ -6,22 +6,22 @@ import (
 	"time"
 
 	"github.com/jonwraymond/metatools-mcp/internal/handlers"
-	"github.com/jonwraymond/toolcode"
+	"github.com/jonwraymond/toolexec/code"
 )
 
-// ExecutorAdapter bridges toolcode.Executor to the handlers.Executor interface.
+// ExecutorAdapter bridges code.Executor to the handlers.Executor interface.
 type ExecutorAdapter struct {
-	exec toolcode.Executor
+	exec code.Executor
 }
 
 // NewExecutorAdapter creates a new executor adapter.
-func NewExecutorAdapter(exec toolcode.Executor) *ExecutorAdapter {
+func NewExecutorAdapter(exec code.Executor) *ExecutorAdapter {
 	return &ExecutorAdapter{exec: exec}
 }
 
 // ExecuteCode delegates to toolcode and converts duration units.
 func (a *ExecutorAdapter) ExecuteCode(ctx context.Context, params handlers.ExecuteParams) (handlers.ExecuteResult, error) {
-	req := toolcode.ExecuteParams{
+	req := code.ExecuteParams{
 		Language:     params.Language,
 		Code:         params.Code,
 		MaxToolCalls: params.MaxToolCalls,
