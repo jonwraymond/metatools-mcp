@@ -12,14 +12,14 @@ Close the Phase 1 infrastructure gaps by stabilizing repository setup, CI/CD wor
 
 | Item | Location | Status |
 |---|---|---|
-| Workflow templates | `.github/workflow-templates/*` | Planned |
-| Dependency review workflow | `.github/workflows/dependency-review.yml` (each repo) | Planned |
-| Release-please config updated | `release-please-config.json` (each repo) | Planned |
-| Release-please manifest normalized | `.release-please-manifest.json` | Planned |
-| Workflow permissions set | Repo settings (GITHUB_TOKEN write) | Planned |
-| Branch protection applied | main branch | Planned |
-| Repo settings standardized | allow-squash/rebase, delete-branch | Planned |
-| Topics + descriptions set | per-repo | Planned |
+| Workflow templates | `.github/workflow-templates/*` | Done |
+| Dependency review workflow | `.github/workflows/dependency-review.yml` (each repo) | Done |
+| Release-please config updated | `release-please-config.json` (each repo) | Done |
+| Release-please manifest normalized | `.release-please-manifest.json` | Done |
+| Workflow permissions set | Repo settings (GITHUB_TOKEN write) | Done |
+| Branch protection applied | main branch | Done |
+| Repo settings standardized | allow-squash/rebase, delete-branch | Done |
+| Topics + descriptions set | per-repo | Done |
 
 ## Plan of Record
 
@@ -45,14 +45,14 @@ Close the Phase 1 infrastructure gaps by stabilizing repository setup, CI/CD wor
 
 ## Verification Checklist
 
-- [ ] All six repos exist and are public
-- [ ] Workflow templates created
-- [ ] Dependency review workflow present in each repo
-- [ ] Release-please config/manifest updated per repo
-- [ ] Workflow permissions set to write
-- [ ] Branch protection enabled
-- [ ] Repo settings + topics applied
-- [ ] Security alerts enabled
+- [x] All six repos exist and are public
+- [x] Workflow templates created
+- [x] Dependency review workflow present in each repo
+- [x] Release-please config/manifest updated per repo
+- [x] Workflow permissions set to write
+- [x] Branch protection enabled
+- [x] Repo settings + topics applied
+- [x] Security alerts enabled
 
 ## Notes
 
