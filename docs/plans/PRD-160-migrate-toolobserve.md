@@ -4,6 +4,7 @@
 **Priority:** High
 **Effort:** 4 hours
 **Dependencies:** PRD-120
+**Status:** Done (2026-01-31)
 
 ---
 
@@ -15,8 +16,8 @@ Migrate the existing `toolobserve` repository into `toolops/observe/` as the fir
 
 ## Source Analysis
 
-**Current Location:** `github.com/ApertureStack/toolobserve`
-**Target Location:** `github.com/ApertureStack/toolops/observe`
+**Current Location:** `github.com/jonwraymond/toolobserve`
+**Target Location:** `github.com/jonwraymond/toolops/observe`
 
 **Package Contents:**
 - OpenTelemetry integration for tracing
@@ -42,7 +43,7 @@ Migrate the existing `toolobserve` repository into `toolops/observe/` as the fir
 
 ```bash
 cd /tmp/migration
-git clone git@github.com:ApertureStack/toolops.git
+git clone git@github.com:jonwraymond/toolops.git
 cd toolops
 
 mkdir -p observe
@@ -52,13 +53,13 @@ mkdir -p observe
 
 ```bash
 cd /tmp/migration
-git clone git@github.com:ApertureStack/toolobserve.git
+git clone git@github.com:jonwraymond/toolobserve.git
 
 cp toolobserve/*.go toolops/observe/
 
 cd toolops/observe
-sed -i '' 's|github.com/ApertureStack/toolobserve|github.com/ApertureStack/toolops/observe|g' *.go
-sed -i '' 's|github.com/ApertureStack/toolmodel|github.com/ApertureStack/toolfoundation/model|g' *.go
+sed -i '' 's|github.com/jonwraymond/toolobserve|github.com/jonwraymond/toolops/observe|g' *.go
+sed -i '' 's|github.com/jonwraymond/toolmodel|github.com/jonwraymond/toolfoundation/model|g' *.go
 ```
 
 ### Task 3: Update Package Documentation
@@ -123,7 +124,7 @@ sed -i '' 's|github.com/ApertureStack/toolmodel|github.com/ApertureStack/toolfou
 //
 // # Migration Note
 //
-// This package was migrated from github.com/ApertureStack/toolobserve as part of
+// This package was migrated from github.com/jonwraymond/toolobserve as part of
 // the ApertureStack consolidation.
 package observe
 ```
@@ -162,7 +163,7 @@ Features:
 
 This is part of the ApertureStack consolidation effort.
 
-Migration: github.com/ApertureStack/toolobserve → toolops/observe
+Migration: github.com/jonwraymond/toolobserve → toolops/observe
 
 Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
 
@@ -180,6 +181,11 @@ git push origin main
 - [ ] Tracing works
 - [ ] Metrics collection works
 - [ ] Logging works
+
+## Completion Notes
+
+- `toolops/observe` includes observer, tracer, metrics, logger, and middleware helpers.
+- Imports updated to `github.com/jonwraymond/...`.
 
 ---
 

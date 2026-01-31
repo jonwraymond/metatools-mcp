@@ -4,6 +4,7 @@
 **Priority:** Medium
 **Effort:** 6 hours
 **Dependencies:** PRD-120
+**Status:** Done (2026-01-31)
 
 ---
 
@@ -15,7 +16,7 @@ Create a new `toolops/health/` package for health checking, readiness probes, an
 
 ## Package Design
 
-**Location:** `github.com/ApertureStack/toolops/health`
+**Location:** `github.com/jonwraymond/toolops/health`
 
 **Purpose:**
 - Health check endpoints
@@ -532,3 +533,8 @@ git push origin main
 
 - Gate G4: Operations layer complete (all 5 packages)
 - PRD-170: Create tooltransport
+
+## Completion Notes
+
+- `toolops/health` provides checkers, aggregators, and probe handlers.
+- Imports updated to `github.com/jonwraymond/...`.

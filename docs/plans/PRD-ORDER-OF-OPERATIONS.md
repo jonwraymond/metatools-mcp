@@ -18,7 +18,7 @@ PRD-102   PRD-112   PRD-122   PRD-132           → PRD-181 → PRD-191
                            PRD-141
                            PRD-142
                               ↓
-                           PRD-160 → PRD-162
+                           PRD-160 → PRD-162 → PRD-165 → PRD-169
                            PRD-161
                            PRD-163
                            PRD-164
@@ -134,6 +134,16 @@ PRD-102   PRD-112   PRD-122   PRD-132           → PRD-181 → PRD-191
 | 24 | PRD-163 | Create toolresilience | 8h | PRD-120 |
 | 25 | PRD-164 | Create toolhealth | 6h | PRD-120 |
 
+### Week 6b: Operations Hardening (Docs + Validation)
+
+| Order | PRD | Title | Est. Hours | Depends On |
+|-------|-----|-------|------------|------------|
+| 25.1 | PRD-165 | toolops docs alignment | 2h | PRD-160–164 |
+| 25.2 | PRD-166 | observe contracts docs | 2h | PRD-160 |
+| 25.3 | PRD-167 | cache policy docs | 2h | PRD-161 |
+| 25.4 | PRD-168 | auth/health/resilience docs | 2h | PRD-162–164 |
+| 25.5 | PRD-169 | release + validation | 2h | PRD-160–168 |
+
 ### Week 7-8: Protocol Layer
 
 | Order | PRD | Title | Est. Hours | Depends On |
@@ -176,6 +186,7 @@ These PRDs can run in parallel:
 - PRD-144–149
 - PRD-160, PRD-161, PRD-162
 - PRD-152–159
+- PRD-165–169
 
 ### Parallel Group 3 (During Phase 7)
 - PRD-170 and PRD-173 (independent)

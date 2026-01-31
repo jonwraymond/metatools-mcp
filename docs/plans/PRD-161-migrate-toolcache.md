@@ -4,6 +4,7 @@
 **Priority:** High
 **Effort:** 4 hours
 **Dependencies:** PRD-120
+**Status:** Done (2026-01-31)
 
 ---
 
@@ -15,8 +16,8 @@ Migrate the existing `toolcache` repository into `toolops/cache/` as the second 
 
 ## Source Analysis
 
-**Current Location:** `github.com/ApertureStack/toolcache`
-**Target Location:** `github.com/ApertureStack/toolops/cache`
+**Current Location:** `github.com/jonwraymond/toolcache`
+**Target Location:** `github.com/jonwraymond/toolops/cache`
 
 **Package Contents:**
 - Response caching middleware
@@ -43,13 +44,13 @@ Migrate the existing `toolcache` repository into `toolops/cache/` as the second 
 
 ```bash
 cd /tmp/migration
-git clone git@github.com:ApertureStack/toolcache.git
+git clone git@github.com:jonwraymond/toolcache.git
 
 cp toolcache/*.go toolops/cache/
 
 cd toolops/cache
-sed -i '' 's|github.com/ApertureStack/toolcache|github.com/ApertureStack/toolops/cache|g' *.go
-sed -i '' 's|github.com/ApertureStack/toolmodel|github.com/ApertureStack/toolfoundation/model|g' *.go
+sed -i '' 's|github.com/jonwraymond/toolcache|github.com/jonwraymond/toolops/cache|g' *.go
+sed -i '' 's|github.com/jonwraymond/toolmodel|github.com/jonwraymond/toolfoundation/model|g' *.go
 ```
 
 ### Task 2: Update Package Documentation
@@ -106,7 +107,7 @@ sed -i '' 's|github.com/ApertureStack/toolmodel|github.com/ApertureStack/toolfou
 //
 // # Migration Note
 //
-// This package was migrated from github.com/ApertureStack/toolcache as part of
+// This package was migrated from github.com/jonwraymond/toolcache as part of
 // the ApertureStack consolidation.
 package cache
 ```
@@ -147,7 +148,7 @@ Features:
 
 This is part of the ApertureStack consolidation effort.
 
-Migration: github.com/ApertureStack/toolcache → toolops/cache
+Migration: github.com/jonwraymond/toolcache → toolops/cache
 
 Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
 
@@ -160,3 +161,8 @@ git push origin main
 
 - PRD-162: Extract toolauth
 - PRD-163: Create toolresilience
+
+## Completion Notes
+
+- `toolops/cache` includes deterministic keying, policies, memory cache, and middleware.
+- Imports updated to `github.com/jonwraymond/...`.

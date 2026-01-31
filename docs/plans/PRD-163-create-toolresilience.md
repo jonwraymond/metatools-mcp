@@ -4,6 +4,7 @@
 **Priority:** Medium
 **Effort:** 8 hours
 **Dependencies:** PRD-120
+**Status:** Done (2026-01-31)
 
 ---
 
@@ -15,7 +16,7 @@ Create a new `toolops/resilience/` package for fault tolerance patterns includin
 
 ## Package Design
 
-**Location:** `github.com/ApertureStack/toolops/resilience`
+**Location:** `github.com/jonwraymond/toolops/resilience`
 
 **Purpose:**
 - Circuit breaker pattern
@@ -465,3 +466,8 @@ git push origin main
 
 - PRD-164: Create toolhealth
 - Gate G4: Operations layer complete
+
+## Completion Notes
+
+- `toolops/resilience` implements circuit breaker, retry, rate limiter, bulkhead, timeout, and executor composition.
+- Imports updated to `github.com/jonwraymond/...`.

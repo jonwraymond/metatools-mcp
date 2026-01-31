@@ -4,6 +4,7 @@
 **Priority:** High
 **Effort:** 8 hours
 **Dependencies:** PRD-120
+**Status:** Done (2026-01-31)
 
 ---
 
@@ -16,7 +17,7 @@ Extract authentication code from `metatools-mcp/internal/auth/` into `toolops/au
 ## Source Analysis
 
 **Current Location:** `metatools-mcp/internal/auth/` (embedded)
-**Target Location:** `github.com/ApertureStack/toolops/auth`
+**Target Location:** `github.com/jonwraymond/toolops/auth`
 
 **Code to Extract:**
 - JWT authentication
@@ -42,13 +43,13 @@ Extract authentication code from `metatools-mcp/internal/auth/` into `toolops/au
 ### Task 1: Analyze and Copy Source
 
 ```bash
-cd /Users/jraymond/Documents/Projects/ApertureStack/metatools-mcp
+cd /Users/jraymond/Documents/Projects/jonwraymond/metatools-mcp
 
 wc -l internal/auth/*.go
 
 cd /tmp/migration/toolops
 mkdir -p auth
-cp /Users/jraymond/Documents/Projects/ApertureStack/metatools-mcp/internal/auth/*.go auth/
+cp /Users/jraymond/Documents/Projects/jonwraymond/metatools-mcp/internal/auth/*.go auth/
 
 # Update package name if needed
 sed -i '' 's|package auth|package auth|g' auth/*.go
@@ -60,8 +61,8 @@ sed -i '' 's|package auth|package auth|g' auth/*.go
 cd /tmp/migration/toolops/auth
 
 # Update internal references
-sed -i '' 's|metatools-mcp/internal/auth|github.com/ApertureStack/toolops/auth|g' *.go
-sed -i '' 's|github.com/ApertureStack/toolmodel|github.com/ApertureStack/toolfoundation/model|g' *.go
+sed -i '' 's|metatools-mcp/internal/auth|github.com/jonwraymond/toolops/auth|g' *.go
+sed -i '' 's|github.com/jonwraymond/toolmodel|github.com/jonwraymond/toolfoundation/model|g' *.go
 ```
 
 ### Task 3: Define Core Interfaces
@@ -245,3 +246,8 @@ git push origin main
 
 - PRD-163: Create toolresilience
 - PRD-164: Create toolhealth
+
+## Completion Notes
+
+- `toolops/auth` provides authenticators (JWT/API key/OAuth2), RBAC, and transport helpers.
+- Imports updated to `github.com/jonwraymond/...`.

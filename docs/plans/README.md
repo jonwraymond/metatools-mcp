@@ -96,11 +96,16 @@ This directory contains all Product Requirement Documents for the ApertureStack 
 
 | PRD | Title | Effort | Status |
 |-----|-------|--------|--------|
-| [PRD-160](./PRD-160-migrate-toolobserve.md) | Migrate toolobserve | 4h | Ready |
-| [PRD-161](./PRD-161-migrate-toolcache.md) | Migrate toolcache | 4h | Ready |
-| [PRD-162](./PRD-162-extract-toolauth.md) | Extract toolauth | 8h | Ready |
-| [PRD-163](./PRD-163-create-toolresilience.md) | Create toolresilience | 8h | Ready |
-| [PRD-164](./PRD-164-create-toolhealth.md) | Create toolhealth | 6h | Ready |
+| [PRD-160](./PRD-160-migrate-toolobserve.md) | Migrate toolobserve | 4h | Done |
+| [PRD-161](./PRD-161-migrate-toolcache.md) | Migrate toolcache | 4h | Done |
+| [PRD-162](./PRD-162-extract-toolauth.md) | Extract toolauth | 8h | Done |
+| [PRD-163](./PRD-163-create-toolresilience.md) | Create toolresilience | 8h | Done |
+| [PRD-164](./PRD-164-create-toolhealth.md) | Create toolhealth | 6h | Done |
+| [PRD-165](./PRD-165-toolops-docs-alignment.md) | toolops docs alignment | 2h | Done |
+| [PRD-166](./PRD-166-toolops-observe-contracts.md) | observe contracts docs | 2h | Done |
+| [PRD-167](./PRD-167-toolops-cache-policy-docs.md) | cache policy docs | 2h | Done |
+| [PRD-168](./PRD-168-toolops-auth-health-resilience-docs.md) | auth/health/resilience docs | 2h | Done |
+| [PRD-169](./PRD-169-toolops-release-validation.md) | release + validation | 2h | Done |
 
 ## Phase 7: Protocol Layer - toolprotocol (84h)
 
