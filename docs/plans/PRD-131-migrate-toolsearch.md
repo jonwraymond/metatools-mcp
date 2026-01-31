@@ -1,9 +1,10 @@
 # PRD-131: Migrate toolsearch
 
-**Phase:** 3 - Discovery Layer
-**Priority:** High
-**Effort:** 4 hours
-**Dependencies:** PRD-130
+**Phase:** 3 - Discovery Layer  
+**Priority:** High  
+**Effort:** 4 hours  
+**Dependencies:** PRD-130  
+**Status:** Done (2026-01-31)
 
 ---
 
@@ -15,8 +16,8 @@ Migrate the existing `toolsearch` repository into `tooldiscovery/search/` as the
 
 ## Source Analysis
 
-**Current Location:** `github.com/ApertureStack/toolsearch`
-**Target Location:** `github.com/ApertureStack/tooldiscovery/search`
+**Current Location:** `github.com/jonwraymond/toolsearch`
+**Target Location:** `github.com/jonwraymond/tooldiscovery/search`
 
 **Package Contents:**
 - BM25 search implementation using Bleve
@@ -42,7 +43,7 @@ Migrate the existing `toolsearch` repository into `tooldiscovery/search/` as the
 
 ```bash
 cd /tmp/migration
-git clone git@github.com:ApertureStack/toolsearch.git
+git clone git@github.com:jonwraymond/toolsearch.git
 cd toolsearch
 
 # Analyze
@@ -68,31 +69,31 @@ ls -la search/
 cd /tmp/migration/tooldiscovery/search
 
 # Update self-reference
-OLD_IMPORT="github.com/ApertureStack/toolsearch"
-NEW_IMPORT="github.com/ApertureStack/tooldiscovery/search"
+OLD_IMPORT="github.com/jonwraymond/toolsearch"
+NEW_IMPORT="github.com/jonwraymond/tooldiscovery/search"
 
 for file in *.go; do
   sed -i '' "s|$OLD_IMPORT|$NEW_IMPORT|g" "$file"
 done
 
 # Update toolindex to tooldiscovery/index
-OLD_INDEX="github.com/ApertureStack/toolindex"
-NEW_INDEX="github.com/ApertureStack/tooldiscovery/index"
+OLD_INDEX="github.com/jonwraymond/toolindex"
+NEW_INDEX="github.com/jonwraymond/tooldiscovery/index"
 
 for file in *.go; do
   sed -i '' "s|$OLD_INDEX|$NEW_INDEX|g" "$file"
 done
 
 # Update toolmodel to toolfoundation/model
-OLD_MODEL="github.com/ApertureStack/toolmodel"
-NEW_MODEL="github.com/ApertureStack/toolfoundation/model"
+OLD_MODEL="github.com/jonwraymond/toolmodel"
+NEW_MODEL="github.com/jonwraymond/toolfoundation/model"
 
 for file in *.go; do
   sed -i '' "s|$OLD_MODEL|$NEW_MODEL|g" "$file"
 done
 
 # Verify
-grep -r "ApertureStack/toolsearch\|ApertureStack/toolindex\|ApertureStack/toolmodel" . || echo "✓ All imports updated"
+grep -r "jonwraymond/toolsearch\|jonwraymond/toolindex\|jonwraymond/toolmodel" . || echo "✓ All imports updated"
 ```
 
 ### Task 4: Update Package Documentation
@@ -149,7 +150,7 @@ grep -r "ApertureStack/toolsearch\|ApertureStack/toolindex\|ApertureStack/toolmo
 //
 // # Migration Note
 //
-// This package was migrated from github.com/ApertureStack/toolsearch as part of
+// This package was migrated from github.com/jonwraymond/toolsearch as part of
 // the ApertureStack consolidation.
 package search
 ```
@@ -197,12 +198,12 @@ Package contents:
 
 Dependencies:
 - github.com/blevesearch/bleve/v2
-- github.com/ApertureStack/toolfoundation/model
-- github.com/ApertureStack/tooldiscovery/index (interface only)
+- github.com/jonwraymond/toolfoundation/model
+- github.com/jonwraymond/tooldiscovery/index (interface only)
 
 This is part of the ApertureStack consolidation effort.
 
-Migration: github.com/ApertureStack/toolsearch → tooldiscovery/search
+Migration: github.com/jonwraymond/toolsearch → tooldiscovery/search
 
 Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
 
@@ -218,7 +219,7 @@ package search
 
 import (
     "context"
-    "github.com/ApertureStack/toolfoundation/model"
+    "github.com/jonwraymond/toolfoundation/model"
 )
 
 // Config configures the BM25 searcher.
@@ -253,15 +254,15 @@ func (s *BM25Searcher) Fingerprint() string
 
 ## Verification Checklist
 
-- [ ] All source files copied
-- [ ] Import paths updated (search, index, model)
-- [ ] Bleve dependency resolved
-- [ ] `go build ./...` succeeds
-- [ ] `go test ./...` passes
-- [ ] Fingerprint caching works
-- [ ] Package documentation updated
-- [ ] Committed with proper message
-- [ ] Pushed to main
+- [x] All source files copied
+- [x] Import paths updated (search, index, model)
+- [x] Bleve dependency resolved
+- [x] `go build ./...` succeeds
+- [x] `go test ./...` passes
+- [x] Fingerprint caching works
+- [x] Package documentation updated
+- [x] Committed with proper message
+- [x] Pushed to main
 
 ---
 
@@ -272,6 +273,14 @@ func (s *BM25Searcher) Fingerprint() string
 3. BM25 search returns relevant results
 4. Fingerprint caching is efficient
 5. Implements `index.Searcher` interface
+
+---
+
+## Completion Evidence
+
+- `tooldiscovery/search/` contains migrated sources and tests.
+- `tooldiscovery/search/doc.go` documents the package.
+- `go test ./search/...` passes in `tooldiscovery`.
 
 ---
 

@@ -51,10 +51,16 @@ This directory contains all Product Requirement Documents for the ApertureStack 
 
 | PRD | Title | Effort | Status |
 |-----|-------|--------|--------|
-| [PRD-130](./PRD-130-migrate-toolindex.md) | Migrate toolindex | 4h | Ready |
-| [PRD-131](./PRD-131-migrate-toolsearch.md) | Migrate toolsearch | 4h | Ready |
-| [PRD-132](./PRD-132-migrate-toolsemantic.md) | Migrate toolsemantic | 6h | Ready |
-| [PRD-133](./PRD-133-migrate-tooldocs.md) | Migrate tooldocs | 4h | Ready |
+| [PRD-130](./PRD-130-migrate-toolindex.md) | Migrate toolindex | 4h | Done |
+| [PRD-131](./PRD-131-migrate-toolsearch.md) | Migrate toolsearch | 4h | Done |
+| [PRD-132](./PRD-132-migrate-toolsemantic.md) | Migrate toolsemantic | 6h | Done |
+| [PRD-133](./PRD-133-migrate-tooldocs.md) | Migrate tooldocs | 4h | Done |
+| [PRD-134](./PRD-134-tooldiscovery-docs-alignment.md) | Docs + README alignment | 2h | Done |
+| [PRD-135](./PRD-135-tooldiscovery-search-policy.md) | Search strategy policy docs | 2h | Done |
+| [PRD-136](./PRD-136-tooldiscovery-semantic-contracts.md) | Semantic contracts docs | 2h | Done |
+| [PRD-137](./PRD-137-tooldiscovery-progressive-docs.md) | Progressive docs details | 2h | Done |
+| [PRD-138](./PRD-138-tooldiscovery-release-propagation.md) | Release + propagation | 1h | Done |
+| [PRD-139](./PRD-139-tooldiscovery-validation.md) | Discovery validation | 1h | Done |
 
 ## Phase 4: Execution Layer - toolexec (18h)
 

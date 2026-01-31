@@ -73,6 +73,17 @@ PRD-102   PRD-112   PRD-122   PRD-132           → PRD-181 → PRD-191
 | 13 | PRD-132 | Migrate toolsemantic | 6h | PRD-131 |
 | 14 | PRD-133 | Migrate tooldocs | 4h | PRD-120 |
 
+### Week 3b: Discovery Hardening (Docs + Validation)
+
+| Order | PRD | Title | Est. Hours | Depends On |
+|-------|-----|-------|------------|------------|
+| 14.1 | PRD-134 | Docs + README alignment | 2h | PRD-130–133 |
+| 14.2 | PRD-135 | Search strategy policy docs | 2h | PRD-131 |
+| 14.3 | PRD-136 | Semantic contracts docs | 2h | PRD-132 |
+| 14.4 | PRD-137 | Progressive docs details | 2h | PRD-133 |
+| 14.5 | PRD-138 | Release + propagation | 1h | PRD-130–133 |
+| 14.6 | PRD-139 | Discovery validation | 1h | PRD-130–138 |
+
 ### Week 4: Execution Layer
 
 | Order | PRD | Title | Est. Hours | Depends On |

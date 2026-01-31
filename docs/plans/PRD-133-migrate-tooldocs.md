@@ -1,22 +1,23 @@
 # PRD-133: Migrate tooldocs
 
-**Phase:** 3 - Discovery Layer
-**Priority:** Medium
-**Effort:** 4 hours
-**Dependencies:** PRD-120
+**Phase:** 3 - Discovery Layer  
+**Priority:** Medium  
+**Effort:** 4 hours  
+**Dependencies:** PRD-120  
+**Status:** Done (2026-01-31)
 
 ---
 
 ## Objective
 
-Migrate the existing `tooldocs` repository into `tooldiscovery/docs/` as the fourth package in the consolidated discovery layer.
+Migrate the existing `tooldocs` repository into `tooldiscovery/tooldoc/` as the fourth package in the consolidated discovery layer.
 
 ---
 
 ## Source Analysis
 
-**Current Location:** `github.com/ApertureStack/tooldocs`
-**Target Location:** `github.com/ApertureStack/tooldiscovery/docs`
+**Current Location:** `github.com/jonwraymond/tooldocs`
+**Target Location:** `github.com/jonwraymond/tooldiscovery/tooldoc`
 
 **Package Contents:**
 - Tool documentation storage and retrieval
@@ -31,9 +32,9 @@ Migrate the existing `tooldocs` repository into `tooldiscovery/docs/` as the fou
 
 | Deliverable | Location | Description |
 |-------------|----------|-------------|
-| Docs Package | `tooldiscovery/docs/` | Documentation management |
-| Tests | `tooldiscovery/docs/*_test.go` | All existing tests |
-| Documentation | `tooldiscovery/docs/doc.go` | Package documentation |
+| Docs Package | `tooldiscovery/tooldoc/` | Documentation management |
+| Tests | `tooldiscovery/tooldoc/*_test.go` | All existing tests |
+| Documentation | `tooldiscovery/tooldoc/doc.go` | Package documentation |
 
 ---
 
@@ -43,7 +44,7 @@ Migrate the existing `tooldocs` repository into `tooldiscovery/docs/` as the fou
 
 ```bash
 cd /tmp/migration
-git clone git@github.com:ApertureStack/tooldocs.git
+git clone git@github.com:jonwraymond/tooldocs.git
 cd tooldocs
 
 ls -la
@@ -66,31 +67,31 @@ ls -la docs/
 ### Task 3: Update Import Paths
 
 ```bash
-cd /tmp/migration/tooldiscovery/docs
+cd /tmp/migration/tooldiscovery/tooldoc
 
 # Update self-reference
-OLD_IMPORT="github.com/ApertureStack/tooldocs"
-NEW_IMPORT="github.com/ApertureStack/tooldiscovery/docs"
+OLD_IMPORT="github.com/jonwraymond/tooldocs"
+NEW_IMPORT="github.com/jonwraymond/tooldiscovery/tooldoc"
 
 for file in *.go; do
   sed -i '' "s|$OLD_IMPORT|$NEW_IMPORT|g" "$file"
 done
 
 # Update toolmodel to toolfoundation/model
-OLD_MODEL="github.com/ApertureStack/toolmodel"
-NEW_MODEL="github.com/ApertureStack/toolfoundation/model"
+OLD_MODEL="github.com/jonwraymond/toolmodel"
+NEW_MODEL="github.com/jonwraymond/toolfoundation/model"
 
 for file in *.go; do
   sed -i '' "s|$OLD_MODEL|$NEW_MODEL|g" "$file"
 done
 
 # Verify
-grep -r "ApertureStack/tooldocs\|ApertureStack/toolmodel" . || echo "✓ All imports updated"
+grep -r "jonwraymond/tooldocs\|jonwraymond/toolmodel" . || echo "✓ All imports updated"
 ```
 
 ### Task 4: Update Package Documentation
 
-**File:** `tooldiscovery/docs/doc.go`
+**File:** `tooldiscovery/tooldoc/doc.go`
 
 ```go
 // Package docs provides documentation storage and retrieval for tools.
@@ -145,7 +146,7 @@ grep -r "ApertureStack/tooldocs\|ApertureStack/toolmodel" . || echo "✓ All imp
 //
 // # Migration Note
 //
-// This package was migrated from github.com/ApertureStack/tooldocs as part of
+// This package was migrated from github.com/jonwraymond/tooldocs as part of
 // the ApertureStack consolidation.
 package docs
 ```
@@ -154,14 +155,14 @@ package docs
 
 Ensure these types exist in the migrated code:
 
-**File:** `tooldiscovery/docs/types.go`
+**File:** `tooldiscovery/tooldoc/types.go`
 
 ```go
 package docs
 
 import (
     "context"
-    "github.com/ApertureStack/toolfoundation/model"
+    "github.com/jonwraymond/toolfoundation/model"
 )
 
 // Level represents the disclosure level for documentation.
@@ -256,11 +257,11 @@ Features:
 - Last-updated tracking
 
 Dependencies:
-- github.com/ApertureStack/toolfoundation/model
+- github.com/jonwraymond/toolfoundation/model
 
 This is part of the ApertureStack consolidation effort.
 
-Migration: github.com/ApertureStack/tooldocs → tooldiscovery/docs
+Migration: github.com/jonwraymond/tooldocs → tooldiscovery/tooldoc
 
 Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
 
@@ -273,32 +274,32 @@ git push origin main
 
 | Source | Target |
 |--------|--------|
-| `tooldocs/store.go` | `tooldiscovery/docs/store.go` |
-| `tooldocs/store_test.go` | `tooldiscovery/docs/store_test.go` |
-| `tooldocs/types.go` | `tooldiscovery/docs/types.go` |
-| `tooldocs/file.go` | `tooldiscovery/docs/file.go` |
-| `tooldocs/cache.go` | `tooldiscovery/docs/cache.go` |
-| `tooldocs/doc.go` | `tooldiscovery/docs/doc.go` |
+| `tooldocs/store.go` | `tooldiscovery/tooldoc/store.go` |
+| `tooldocs/store_test.go` | `tooldiscovery/tooldoc/store_test.go` |
+| `tooldocs/types.go` | `tooldiscovery/tooldoc/types.go` |
+| `tooldocs/file.go` | `tooldiscovery/tooldoc/file.go` |
+| `tooldocs/cache.go` | `tooldiscovery/tooldoc/cache.go` |
+| `tooldocs/doc.go` | `tooldiscovery/tooldoc/doc.go` |
 
 ---
 
 ## Verification Checklist
 
-- [ ] All source files copied
-- [ ] Import paths updated
-- [ ] `go build ./...` succeeds
-- [ ] `go test ./...` passes
-- [ ] Progressive disclosure works
-- [ ] Example management works
-- [ ] Package documentation updated
-- [ ] Committed with proper message
-- [ ] Pushed to main
+- [x] All source files copied
+- [x] Import paths updated
+- [x] `go build ./...` succeeds
+- [x] `go test ./...` passes
+- [x] Progressive disclosure works
+- [x] Example management works
+- [x] Package documentation updated
+- [x] Committed with proper message
+- [x] Pushed to main
 
 ---
 
 ## Acceptance Criteria
 
-1. `tooldiscovery/docs` package builds successfully
+1. `tooldiscovery/tooldoc` package builds successfully
 2. All tests pass
 3. Three disclosure levels work correctly
 4. Examples can be stored and retrieved
@@ -306,11 +307,19 @@ git push origin main
 
 ---
 
+## Completion Evidence
+
+- `tooldiscovery/tooldoc/` contains migrated sources and tests.
+- `tooldiscovery/tooldoc/doc.go` documents the package.
+- `go test ./tooldoc/...` passes in `tooldiscovery`.
+
+---
+
 ## Rollback Plan
 
 ```bash
 cd /tmp/migration/tooldiscovery
-rm -rf docs/
+rm -rf tooldoc/
 git checkout HEAD~1 -- .
 git push origin main --force-with-lease
 ```

@@ -1,9 +1,10 @@
 # PRD-130: Migrate toolindex
 
-**Phase:** 3 - Discovery Layer
-**Priority:** Critical
-**Effort:** 4 hours
-**Dependencies:** PRD-120
+**Phase:** 3 - Discovery Layer  
+**Priority:** Critical  
+**Effort:** 4 hours  
+**Dependencies:** PRD-120  
+**Status:** Done (2026-01-31)
 
 ---
 
@@ -15,8 +16,8 @@ Migrate the existing `toolindex` repository into `tooldiscovery/index/` as the f
 
 ## Source Analysis
 
-**Current Location:** `github.com/ApertureStack/toolindex`
-**Target Location:** `github.com/ApertureStack/tooldiscovery/index`
+**Current Location:** `github.com/jonwraymond/toolindex`
+**Target Location:** `github.com/jonwraymond/tooldiscovery/index`
 
 **Package Contents:**
 - Tool registry with CRUD operations
@@ -44,7 +45,7 @@ Migrate the existing `toolindex` repository into `tooldiscovery/index/` as the f
 ```bash
 # Clone/create target
 cd /tmp/migration
-git clone git@github.com:ApertureStack/tooldiscovery.git
+git clone git@github.com:jonwraymond/tooldiscovery.git
 cd tooldiscovery
 
 # Create index directory
@@ -55,7 +56,7 @@ mkdir -p index
 
 ```bash
 cd /tmp/migration
-git clone git@github.com:ApertureStack/toolindex.git
+git clone git@github.com:jonwraymond/toolindex.git
 cd toolindex
 
 # Analyze contents
@@ -82,23 +83,23 @@ ls -la tooldiscovery/index/
 cd /tmp/migration/tooldiscovery/index
 
 # Update toolindex import
-OLD_IMPORT="github.com/ApertureStack/toolindex"
-NEW_IMPORT="github.com/ApertureStack/tooldiscovery/index"
+OLD_IMPORT="github.com/jonwraymond/toolindex"
+NEW_IMPORT="github.com/jonwraymond/tooldiscovery/index"
 
 for file in *.go; do
   sed -i '' "s|$OLD_IMPORT|$NEW_IMPORT|g" "$file"
 done
 
 # Update toolmodel to toolfoundation/model
-OLD_MODEL="github.com/ApertureStack/toolmodel"
-NEW_MODEL="github.com/ApertureStack/toolfoundation/model"
+OLD_MODEL="github.com/jonwraymond/toolmodel"
+NEW_MODEL="github.com/jonwraymond/toolfoundation/model"
 
 for file in *.go; do
   sed -i '' "s|$OLD_MODEL|$NEW_MODEL|g" "$file"
 done
 
 # Verify
-grep -r "ApertureStack/toolindex\|ApertureStack/toolmodel" . || echo "✓ All imports updated"
+grep -r "jonwraymond/toolindex\|jonwraymond/toolmodel" . || echo "✓ All imports updated"
 ```
 
 ### Task 5: Update go.mod
@@ -108,7 +109,7 @@ cd /tmp/migration/tooldiscovery
 
 # Add dependency on toolfoundation
 cat >> go.mod << EOF
-require github.com/ApertureStack/toolfoundation v0.1.0
+require github.com/jonwraymond/toolfoundation v0.1.0
 EOF
 
 go mod tidy
@@ -167,7 +168,7 @@ go mod tidy
 //
 // # Migration Note
 //
-// This package was migrated from github.com/ApertureStack/toolindex as part of
+// This package was migrated from github.com/jonwraymond/toolindex as part of
 // the ApertureStack consolidation.
 package index
 ```
@@ -203,11 +204,11 @@ Package contents:
 - Progressive disclosure support
 
 Dependencies:
-- github.com/ApertureStack/toolfoundation/model
+- github.com/jonwraymond/toolfoundation/model
 
 This is part of the ApertureStack consolidation effort.
 
-Migration: github.com/ApertureStack/toolindex → tooldiscovery/index
+Migration: github.com/jonwraymond/toolindex → tooldiscovery/index
 
 Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
 
@@ -225,7 +226,7 @@ package index
 
 import (
     "context"
-    "github.com/ApertureStack/toolfoundation/model"
+    "github.com/jonwraymond/toolfoundation/model"
 )
 
 // Index provides tool storage and retrieval.
@@ -266,14 +267,14 @@ type Options struct {
 
 ## Verification Checklist
 
-- [ ] All source files copied
-- [ ] Import paths updated
-- [ ] Dependency on toolfoundation works
-- [ ] `go build ./...` succeeds
-- [ ] `go test ./...` passes
-- [ ] Package documentation updated
-- [ ] Committed with proper message
-- [ ] Pushed to main
+- [x] All source files copied
+- [x] Import paths updated
+- [x] Dependency on toolfoundation works
+- [x] `go build ./...` succeeds
+- [x] `go test ./...` passes
+- [x] Package documentation updated
+- [x] Committed with proper message
+- [x] Pushed to main
 
 ---
 
@@ -284,6 +285,14 @@ type Options struct {
 3. Can import from `toolfoundation/model`
 4. Index and Searcher interfaces preserved
 5. Progressive disclosure works
+
+---
+
+## Completion Evidence
+
+- `tooldiscovery/index/` contains migrated sources and tests.
+- `tooldiscovery/index/doc.go` documents the package.
+- `go test ./index/...` passes in `tooldiscovery`.
 
 ---
 
