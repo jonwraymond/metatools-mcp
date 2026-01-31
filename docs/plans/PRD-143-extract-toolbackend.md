@@ -4,6 +4,7 @@
 **Priority:** High
 **Effort:** 6 hours
 **Dependencies:** PRD-120
+**Status:** Done (2026-01-31)
 
 ---
 
@@ -16,7 +17,7 @@ Extract backend management code from `metatools-mcp` into `toolexec/backend/` as
 ## Source Analysis
 
 **Current Location:** `metatools-mcp/internal/backend/` (embedded in MCP server)
-**Target Location:** `github.com/ApertureStack/toolexec/backend`
+**Target Location:** `github.com/jonwraymond/toolexec/backend`
 
 **Code to Extract:**
 - Backend registry and management
@@ -68,7 +69,7 @@ package backend
 
 import (
     "context"
-    "github.com/ApertureStack/toolfoundation/model"
+    "github.com/jonwraymond/toolfoundation/model"
 )
 
 // Backend represents a tool execution backend.
@@ -116,7 +117,7 @@ import (
     "fmt"
     "sync"
 
-    "github.com/ApertureStack/toolfoundation/model"
+    "github.com/jonwraymond/toolfoundation/model"
 )
 
 // Registry manages multiple backends.
@@ -266,7 +267,7 @@ import (
     "sync"
     "time"
 
-    "github.com/ApertureStack/toolfoundation/model"
+    "github.com/jonwraymond/toolfoundation/model"
 )
 
 // LocalBackend provides in-process tool execution.
@@ -427,7 +428,7 @@ import (
     "context"
     "testing"
 
-    "github.com/ApertureStack/toolfoundation/model"
+    "github.com/jonwraymond/toolfoundation/model"
 )
 
 func TestRegistry(t *testing.T) {
@@ -551,7 +552,7 @@ Features:
 - Health monitoring with latency tracking
 
 Dependencies:
-- github.com/ApertureStack/toolfoundation/model
+- github.com/jonwraymond/toolfoundation/model
 
 This extraction enables backend reuse across projects.
 
@@ -582,6 +583,11 @@ git push origin main
 3. Registry manages multiple backends
 4. Tools can be found across backends
 5. Health status is accurate
+
+## Completion Notes
+
+- Backend package extracted into `toolexec/backend` with registry, aggregator, and local backend.
+- Contracts documented in `backend.go` and validated by tests.
 
 ---
 

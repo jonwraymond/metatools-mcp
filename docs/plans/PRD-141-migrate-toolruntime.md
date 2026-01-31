@@ -4,6 +4,7 @@
 **Priority:** Critical
 **Effort:** 4 hours
 **Dependencies:** PRD-120
+**Status:** Done (2026-01-31)
 
 ---
 
@@ -15,13 +16,13 @@ Migrate the existing `toolruntime` repository into `toolexec/runtime/` as the se
 
 ## Source Analysis
 
-**Current Location:** `github.com/ApertureStack/toolruntime`
-**Target Location:** `github.com/ApertureStack/toolexec/runtime`
+**Current Location:** `github.com/jonwraymond/toolruntime`
+**Target Location:** `github.com/jonwraymond/toolexec/runtime`
 
 **Package Contents:**
 - Runtime abstraction for tool execution
 - 10 sandbox backends (unsafe, docker, containerd, kubernetes, firecracker, kata, gvisor, wasm, temporal, remote)
-- 3 security profiles (none, basic, strict)
+- 3 security profiles (dev, standard, hardened)
 - Error handling with structured errors
 - ~8,000 lines of code
 
@@ -44,7 +45,7 @@ Migrate the existing `toolruntime` repository into `toolexec/runtime/` as the se
 
 ```bash
 cd /tmp/migration
-git clone git@github.com:ApertureStack/toolruntime.git
+git clone git@github.com:jonwraymond/toolruntime.git
 cd toolruntime
 
 ls -la
@@ -76,13 +77,13 @@ ls -la runtime/backend/
 cd /tmp/migration/toolexec
 
 # Update all Go files recursively
-find runtime -name "*.go" -exec sed -i '' 's|github.com/ApertureStack/toolruntime|github.com/ApertureStack/toolexec/runtime|g' {} \;
+find runtime -name "*.go" -exec sed -i '' 's|github.com/jonwraymond/toolruntime|github.com/jonwraymond/toolexec/runtime|g' {} \;
 
 # Update toolmodel references
-find runtime -name "*.go" -exec sed -i '' 's|github.com/ApertureStack/toolmodel|github.com/ApertureStack/toolfoundation/model|g' {} \;
+find runtime -name "*.go" -exec sed -i '' 's|github.com/jonwraymond/toolmodel|github.com/jonwraymond/toolfoundation/model|g' {} \;
 
 # Verify
-grep -r "ApertureStack/toolruntime\|ApertureStack/toolmodel" runtime/ || echo "✓ All imports updated"
+grep -r "jonwraymond/toolruntime\|jonwraymond/toolmodel" runtime/ || echo "✓ All imports updated"
 ```
 
 ### Task 4: Update Package Documentation
@@ -150,30 +151,15 @@ grep -r "ApertureStack/toolruntime\|ApertureStack/toolmodel" runtime/ || echo "�
 //
 // # Migration Note
 //
-// This package was migrated from github.com/ApertureStack/toolruntime as part of
+// This package was migrated from github.com/jonwraymond/toolruntime as part of
 // the ApertureStack consolidation.
 package runtime
 ```
 
-### Task 5: Handle Backend Build Tags
+### Task 5: Backend Build Tags (Optional)
 
-Some backends may use build tags. Verify and document:
-
-```bash
-cd /tmp/migration/toolexec/runtime/backend
-
-# Check for build tags
-for dir in */; do
-  echo "=== $dir ==="
-  head -5 "$dir"/*.go 2>/dev/null | grep -E "//go:build|// \+build" || echo "(no build tags)"
-done
-```
-
-Expected build tags:
-- `docker`: `//go:build docker`
-- `kubernetes`: `//go:build kubernetes`
-- `wasm`: `//go:build wasm`
-- `unsafe`: always included (default)
+Backends are configured at runtime; no build tags are required. If tags are introduced
+later, document them alongside the backend matrix.
 
 ### Task 6: Update go.mod Dependencies
 
@@ -236,12 +222,12 @@ Backends (via build tags):
 - remote: always included
 
 Dependencies:
-- github.com/ApertureStack/toolfoundation/model
+- github.com/jonwraymond/toolfoundation/model
 - Various backend-specific dependencies
 
 This is part of the ApertureStack consolidation effort.
 
-Migration: github.com/ApertureStack/toolruntime → toolexec/runtime
+Migration: github.com/jonwraymond/toolruntime → toolexec/runtime
 
 Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
 
@@ -257,7 +243,7 @@ package runtime
 
 import (
     "context"
-    "github.com/ApertureStack/toolfoundation/model"
+    "github.com/jonwraymond/toolfoundation/model"
 )
 
 // Runtime executes tools in isolated environments.
@@ -324,9 +310,7 @@ type Resources struct {
 
 - [ ] All source files copied (including backend/)
 - [ ] Import paths updated
-- [ ] Build tags preserved
 - [ ] `go build ./...` succeeds
-- [ ] `go build -tags=docker ./...` succeeds
 - [ ] `go test ./...` passes
 - [ ] Security profiles work
 - [ ] Package documentation updated
@@ -338,8 +322,14 @@ type Resources struct {
 1. `toolexec/runtime` package builds successfully
 2. All tests pass
 3. Unsafe backend works without extra dependencies
-4. Docker backend works with `-tags=docker`
+4. Docker backend works when configured with a container runner
 5. Security profiles enforce appropriate isolation
+
+## Completion Notes
+
+- Migration completed into `toolexec/runtime` with `runtime/backend/*`.
+- Security profiles are `ProfileDev`, `ProfileStandard`, `ProfileHardened`.
+- No build tags are required; backend selection is runtime-configured.
 
 ---
 

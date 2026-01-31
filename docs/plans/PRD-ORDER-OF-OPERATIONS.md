@@ -14,7 +14,7 @@ PRD-101   PRD-111   PRD-121   PRD-131   PRD-151
 PRD-102   PRD-112   PRD-122   PRD-132           → PRD-181 → PRD-191
           PRD-113           PRD-133                       → PRD-192
                               ↓
-                           PRD-140 → PRD-143
+                           PRD-140 → PRD-143 → PRD-144 → PRD-149
                            PRD-141
                            PRD-142
                               ↓
@@ -93,6 +93,17 @@ PRD-102   PRD-112   PRD-122   PRD-132           → PRD-181 → PRD-191
 | 17 | PRD-142 | Migrate toolcode | 4h | PRD-140 |
 | 18 | PRD-143 | Extract toolbackend | 6h | PRD-120 |
 
+### Week 4b: Execution Hardening (Docs + Validation)
+
+| Order | PRD | Title | Est. Hours | Depends On |
+|-------|-----|-------|------------|------------|
+| 18.1 | PRD-144 | toolexec docs alignment | 2h | PRD-140–143 |
+| 18.2 | PRD-145 | Runtime security profile docs | 2h | PRD-141 |
+| 18.3 | PRD-146 | Backend matrix docs | 2h | PRD-141, PRD-143 |
+| 18.4 | PRD-147 | Toolcode/runtime contract docs | 2h | PRD-141, PRD-142 |
+| 18.5 | PRD-148 | Release + propagation | 1h | PRD-140–147 |
+| 18.6 | PRD-149 | toolexec validation | 1h | PRD-140–148 |
+
 ### Week 5: Composition + Operations Layers
 
 | Order | PRD | Title | Est. Hours | Depends On |
@@ -149,6 +160,7 @@ These PRDs can run in parallel:
 - PRD-121, PRD-122
 - PRD-130, PRD-133
 - PRD-140, PRD-141, PRD-143
+- PRD-144–149
 - PRD-160, PRD-161, PRD-162
 
 ### Parallel Group 3 (During Phase 7)

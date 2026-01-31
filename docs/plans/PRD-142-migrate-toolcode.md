@@ -4,6 +4,7 @@
 **Priority:** High
 **Effort:** 4 hours
 **Dependencies:** PRD-140
+**Status:** Done (2026-01-31)
 
 ---
 
@@ -15,8 +16,8 @@ Migrate the existing `toolcode` repository into `toolexec/code/` as the third pa
 
 ## Source Analysis
 
-**Current Location:** `github.com/ApertureStack/toolcode`
-**Target Location:** `github.com/ApertureStack/toolexec/code`
+**Current Location:** `github.com/jonwraymond/toolcode`
+**Target Location:** `github.com/jonwraymond/toolexec/code`
 
 **Package Contents:**
 - Code-based tool orchestration
@@ -43,7 +44,7 @@ Migrate the existing `toolcode` repository into `toolexec/code/` as the third pa
 
 ```bash
 cd /tmp/migration
-git clone git@github.com:ApertureStack/toolcode.git
+git clone git@github.com:jonwraymond/toolcode.git
 cd toolcode
 
 ls -la
@@ -68,21 +69,21 @@ ls -la code/
 cd /tmp/migration/toolexec/code
 
 # Update self-reference
-OLD_IMPORT="github.com/ApertureStack/toolcode"
-NEW_IMPORT="github.com/ApertureStack/toolexec/code"
+OLD_IMPORT="github.com/jonwraymond/toolcode"
+NEW_IMPORT="github.com/jonwraymond/toolexec/code"
 
 for file in *.go; do
   sed -i '' "s|$OLD_IMPORT|$NEW_IMPORT|g" "$file"
 done
 
 # Update toolmodel to toolfoundation/model
-sed -i '' 's|github.com/ApertureStack/toolmodel|github.com/ApertureStack/toolfoundation/model|g' *.go
+sed -i '' 's|github.com/jonwraymond/toolmodel|github.com/jonwraymond/toolfoundation/model|g' *.go
 
 # Update toolrun to toolexec/run
-sed -i '' 's|github.com/ApertureStack/toolrun|github.com/ApertureStack/toolexec/run|g' *.go
+sed -i '' 's|github.com/jonwraymond/toolrun|github.com/jonwraymond/toolexec/run|g' *.go
 
 # Verify
-grep -r "ApertureStack/toolcode\|ApertureStack/toolmodel\|ApertureStack/toolrun" . || echo "✓ All imports updated"
+grep -r "jonwraymond/toolcode\|jonwraymond/toolmodel\|jonwraymond/toolrun" . || echo "✓ All imports updated"
 ```
 
 ### Task 4: Update Package Documentation
@@ -157,7 +158,7 @@ grep -r "ApertureStack/toolcode\|ApertureStack/toolmodel\|ApertureStack/toolrun"
 //
 // # Migration Note
 //
-// This package was migrated from github.com/ApertureStack/toolcode as part of
+// This package was migrated from github.com/jonwraymond/toolcode as part of
 // the ApertureStack consolidation.
 package code
 ```
@@ -171,7 +172,7 @@ cd /tmp/migration/toolexec
 grep -h "import" code/*.go | sort -u
 
 # Should include:
-# "github.com/ApertureStack/toolexec/run"
+# "github.com/jonwraymond/toolexec/run"
 ```
 
 ### Task 6: Build and Test
@@ -210,12 +211,12 @@ Features:
 - TypeScript/JavaScript integration (via codeengine)
 
 Dependencies:
-- github.com/ApertureStack/toolfoundation/model
-- github.com/ApertureStack/toolexec/run
+- github.com/jonwraymond/toolfoundation/model
+- github.com/jonwraymond/toolexec/run
 
 This is part of the ApertureStack consolidation effort.
 
-Migration: github.com/ApertureStack/toolcode → toolexec/code
+Migration: github.com/jonwraymond/toolcode → toolexec/code
 
 Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
 
@@ -231,7 +232,7 @@ package code
 
 import (
     "context"
-    "github.com/ApertureStack/toolexec/run"
+    "github.com/jonwraymond/toolexec/run"
 )
 
 // Orchestrator manages code-based tool workflows.
@@ -305,6 +306,11 @@ type Config struct {
 3. Workflow execution produces correct results
 4. Parallel execution respects MaxWorkers
 5. Conditional execution works
+
+## Completion Notes
+
+- Migration completed into `toolexec/code` with docs and tests.
+- Imports updated to `github.com/jonwraymond/...` and `toolexec/run`.
 
 ---
 

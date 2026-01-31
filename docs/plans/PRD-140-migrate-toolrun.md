@@ -4,6 +4,7 @@
 **Priority:** Critical
 **Effort:** 4 hours
 **Dependencies:** PRD-120
+**Status:** Done (2026-01-31)
 
 ---
 
@@ -15,8 +16,8 @@ Migrate the existing `toolrun` repository into `toolexec/run/` as the first pack
 
 ## Source Analysis
 
-**Current Location:** `github.com/ApertureStack/toolrun`
-**Target Location:** `github.com/ApertureStack/toolexec/run`
+**Current Location:** `github.com/jonwraymond/toolrun`
+**Target Location:** `github.com/jonwraymond/toolexec/run`
 
 **Package Contents:**
 - Tool execution pipeline (6-step execution)
@@ -43,7 +44,7 @@ Migrate the existing `toolrun` repository into `toolexec/run/` as the first pack
 
 ```bash
 cd /tmp/migration
-git clone git@github.com:ApertureStack/toolexec.git
+git clone git@github.com:jonwraymond/toolexec.git
 cd toolexec
 
 mkdir -p run
@@ -53,7 +54,7 @@ mkdir -p run
 
 ```bash
 cd /tmp/migration
-git clone git@github.com:ApertureStack/toolrun.git
+git clone git@github.com:jonwraymond/toolrun.git
 cd toolrun
 
 ls -la
@@ -76,31 +77,31 @@ ls -la toolexec/run/
 cd /tmp/migration/toolexec/run
 
 # Update self-reference
-OLD_IMPORT="github.com/ApertureStack/toolrun"
-NEW_IMPORT="github.com/ApertureStack/toolexec/run"
+OLD_IMPORT="github.com/jonwraymond/toolrun"
+NEW_IMPORT="github.com/jonwraymond/toolexec/run"
 
 for file in *.go; do
   sed -i '' "s|$OLD_IMPORT|$NEW_IMPORT|g" "$file"
 done
 
 # Update toolmodel to toolfoundation/model
-OLD_MODEL="github.com/ApertureStack/toolmodel"
-NEW_MODEL="github.com/ApertureStack/toolfoundation/model"
+OLD_MODEL="github.com/jonwraymond/toolmodel"
+NEW_MODEL="github.com/jonwraymond/toolfoundation/model"
 
 for file in *.go; do
   sed -i '' "s|$OLD_MODEL|$NEW_MODEL|g" "$file"
 done
 
 # Update toolruntime if referenced
-OLD_RUNTIME="github.com/ApertureStack/toolruntime"
-NEW_RUNTIME="github.com/ApertureStack/toolexec/runtime"
+OLD_RUNTIME="github.com/jonwraymond/toolruntime"
+NEW_RUNTIME="github.com/jonwraymond/toolexec/runtime"
 
 for file in *.go; do
   sed -i '' "s|$OLD_RUNTIME|$NEW_RUNTIME|g" "$file"
 done
 
 # Verify
-grep -r "ApertureStack/toolrun\|ApertureStack/toolmodel\|ApertureStack/toolruntime" . || echo "✓ All imports updated"
+grep -r "jonwraymond/toolrun\|jonwraymond/toolmodel\|jonwraymond/toolruntime" . || echo "✓ All imports updated"
 ```
 
 ### Task 5: Update Package Documentation
@@ -173,7 +174,7 @@ grep -r "ApertureStack/toolrun\|ApertureStack/toolmodel\|ApertureStack/toolrunti
 //
 // # Migration Note
 //
-// This package was migrated from github.com/ApertureStack/toolrun as part of
+// This package was migrated from github.com/jonwraymond/toolrun as part of
 // the ApertureStack consolidation.
 package run
 ```
@@ -216,11 +217,11 @@ Features:
 - Response formatting
 
 Dependencies:
-- github.com/ApertureStack/toolfoundation/model
+- github.com/jonwraymond/toolfoundation/model
 
 This is part of the ApertureStack consolidation effort.
 
-Migration: github.com/ApertureStack/toolrun → toolexec/run
+Migration: github.com/jonwraymond/toolrun → toolexec/run
 
 Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
 
@@ -236,7 +237,7 @@ package run
 
 import (
     "context"
-    "github.com/ApertureStack/toolfoundation/model"
+    "github.com/jonwraymond/toolfoundation/model"
 )
 
 // Runner executes tools.
@@ -311,6 +312,12 @@ type Backend interface {
 3. Single tool execution works
 4. Chain execution produces correct results
 5. Multiple backends supported
+
+## Completion Notes
+
+- Migration completed into `toolexec/run` with tests and `doc.go`.
+- Imports updated to `github.com/jonwraymond/...`.
+- Runner uses option-based configuration (`NewRunner(WithIndex(...), WithBackends(...))`).
 
 ---
 

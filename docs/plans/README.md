@@ -66,10 +66,16 @@ This directory contains all Product Requirement Documents for the ApertureStack 
 
 | PRD | Title | Effort | Status |
 |-----|-------|--------|--------|
-| [PRD-140](./PRD-140-migrate-toolrun.md) | Migrate toolrun | 4h | Ready |
-| [PRD-141](./PRD-141-migrate-toolruntime.md) | Migrate toolruntime | 4h | Ready |
-| [PRD-142](./PRD-142-migrate-toolcode.md) | Migrate toolcode | 4h | Ready |
-| [PRD-143](./PRD-143-extract-toolbackend.md) | Extract toolbackend | 6h | Ready |
+| [PRD-140](./PRD-140-migrate-toolrun.md) | Migrate toolrun | 4h | Done |
+| [PRD-141](./PRD-141-migrate-toolruntime.md) | Migrate toolruntime | 4h | Done |
+| [PRD-142](./PRD-142-migrate-toolcode.md) | Migrate toolcode | 4h | Done |
+| [PRD-143](./PRD-143-extract-toolbackend.md) | Extract toolbackend | 6h | Done |
+| [PRD-144](./PRD-144-toolexec-docs-alignment.md) | toolexec docs alignment | 2h | Done |
+| [PRD-145](./PRD-145-toolexec-runtime-security-profiles.md) | Runtime security profile docs | 2h | Done |
+| [PRD-146](./PRD-146-toolexec-backend-matrix.md) | Backend matrix docs | 2h | Done |
+| [PRD-147](./PRD-147-toolexec-toolcode-runtime-contract.md) | Toolcode/runtime contract docs | 2h | Done |
+| [PRD-148](./PRD-148-toolexec-release-propagation.md) | Release + propagation | 1h | Done |
+| [PRD-149](./PRD-149-toolexec-validation.md) | toolexec validation | 1h | Done |
 
 ## Phase 5: Composition Layer - toolcompose (12h)
 
