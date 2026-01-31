@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/jonwraymond/toolmodel"
+	"github.com/jonwraymond/toolfoundation/model"
 )
 
 // ErrInvalidToolID is returned for malformed tool IDs.
@@ -22,9 +22,9 @@ func NewAggregator(registry *Registry) *Aggregator {
 }
 
 // ListAllTools returns tools from all enabled backends.
-func (a *Aggregator) ListAllTools(ctx context.Context) ([]toolmodel.Tool, error) {
+func (a *Aggregator) ListAllTools(ctx context.Context) ([]model.Tool, error) {
 	backends := a.registry.ListEnabled()
-	all := make([]toolmodel.Tool, 0)
+	all := make([]model.Tool, 0)
 
 	for _, b := range backends {
 		tools, err := b.ListTools(ctx)
@@ -64,7 +64,7 @@ func (a *Aggregator) Execute(ctx context.Context, toolID string, args map[string
 
 // ParseToolID splits a tool ID into backend and tool name.
 func ParseToolID(id string) (backendName, tool string, err error) {
-	backendName, tool, err = toolmodel.ParseToolID(id)
+	backendName, tool, err = model.ParseToolID(id)
 	if err != nil {
 		return "", "", ErrInvalidToolID
 	}

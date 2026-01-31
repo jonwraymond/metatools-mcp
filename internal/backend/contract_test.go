@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/jonwraymond/toolmodel"
+	"github.com/jonwraymond/toolfoundation/model"
 )
 
 type streamingBackend struct{}
@@ -12,7 +12,7 @@ type streamingBackend struct{}
 func (s *streamingBackend) Kind() string  { return "streaming" }
 func (s *streamingBackend) Name() string  { return "streaming" }
 func (s *streamingBackend) Enabled() bool { return true }
-func (s *streamingBackend) ListTools(_ context.Context) ([]toolmodel.Tool, error) {
+func (s *streamingBackend) ListTools(_ context.Context) ([]model.Tool, error) {
 	return nil, nil
 }
 func (s *streamingBackend) Execute(_ context.Context, _ string, _ map[string]any) (any, error) {

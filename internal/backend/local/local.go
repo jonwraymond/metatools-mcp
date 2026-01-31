@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/jonwraymond/metatools-mcp/internal/backend"
-	"github.com/jonwraymond/toolmodel"
+	"github.com/jonwraymond/toolfoundation/model"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -83,13 +83,13 @@ func (b *Backend) UnregisterHandler(name string) {
 }
 
 // ListTools returns tools available from this backend.
-func (b *Backend) ListTools(_ context.Context) ([]toolmodel.Tool, error) {
+func (b *Backend) ListTools(_ context.Context) ([]model.Tool, error) {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 
-	out := make([]toolmodel.Tool, 0, len(b.handlers))
+	out := make([]model.Tool, 0, len(b.handlers))
 	for _, def := range b.handlers {
-		tool := toolmodel.Tool{
+		tool := model.Tool{
 			Tool: mcp.Tool{
 				Name:         def.Name,
 				Title:        def.Title,
@@ -99,7 +99,7 @@ func (b *Backend) ListTools(_ context.Context) ([]toolmodel.Tool, error) {
 				Annotations:  def.Annotations,
 			},
 			Namespace: b.name,
-			Tags:      toolmodel.NormalizeTags(def.Tags),
+			Tags:      model.NormalizeTags(def.Tags),
 		}
 		out = append(out, tool)
 	}

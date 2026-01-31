@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/jonwraymond/toolmodel"
+	"github.com/jonwraymond/toolfoundation/model"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -15,7 +15,7 @@ func TestAggregator_ListAllTools(t *testing.T) {
 		kind:    "local",
 		name:    "local1",
 		enabled: true,
-		tools: []toolmodel.Tool{
+		tools: []model.Tool{
 			{Tool: mcp.Tool{Name: "tool_a"}, Namespace: "local1"},
 			{Tool: mcp.Tool{Name: "tool_b"}, Namespace: "local1"},
 		},
@@ -25,7 +25,7 @@ func TestAggregator_ListAllTools(t *testing.T) {
 		kind:    "mcp",
 		name:    "github",
 		enabled: true,
-		tools: []toolmodel.Tool{
+		tools: []model.Tool{
 			{Tool: mcp.Tool{Name: "create_issue"}, Namespace: "github"},
 		},
 	})
@@ -34,7 +34,7 @@ func TestAggregator_ListAllTools(t *testing.T) {
 		kind:    "local",
 		name:    "disabled",
 		enabled: false,
-		tools: []toolmodel.Tool{
+		tools: []model.Tool{
 			{Tool: mcp.Tool{Name: "should_not_appear"}, Namespace: "disabled"},
 		},
 	})

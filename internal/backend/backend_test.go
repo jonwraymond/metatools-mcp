@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/jonwraymond/toolmodel"
+	"github.com/jonwraymond/toolfoundation/model"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -15,7 +15,7 @@ type mockBackend struct {
 	kind    string
 	name    string
 	enabled bool
-	tools   []toolmodel.Tool
+	tools   []model.Tool
 	execFn  func(ctx context.Context, tool string, args map[string]any) (any, error)
 }
 
@@ -23,7 +23,7 @@ func (m *mockBackend) Kind() string  { return m.kind }
 func (m *mockBackend) Name() string  { return m.name }
 func (m *mockBackend) Enabled() bool { return m.enabled }
 
-func (m *mockBackend) ListTools(_ context.Context) ([]toolmodel.Tool, error) {
+func (m *mockBackend) ListTools(_ context.Context) ([]model.Tool, error) {
 	return m.tools, nil
 }
 
@@ -47,7 +47,7 @@ func TestBackend_Methods(t *testing.T) {
 		kind:    "local",
 		name:    "test-backend",
 		enabled: true,
-		tools: []toolmodel.Tool{
+		tools: []model.Tool{
 			{Tool: mcp.Tool{Name: "test_tool", Description: "A test tool"}},
 		},
 		execFn: func(_ context.Context, _ string, _ map[string]any) (any, error) {

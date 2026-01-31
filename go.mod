@@ -4,12 +4,20 @@ go 1.24.4
 
 replace github.com/jonwraymond/metatools-mcp => .
 
+replace github.com/jonwraymond/toolfoundation => ../toolfoundation
+
+replace github.com/jonwraymond/tooldiscovery => ../tooldiscovery
+
+replace github.com/jonwraymond/toolexec => ../toolexec
+
 require (
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/docker/docker v27.0.3+incompatible
 	github.com/go-viper/mapstructure/v2 v2.0.0-alpha.1
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/jonwraymond/toolcode v0.3.0
 	github.com/jonwraymond/tooldocs v0.2.0
+	github.com/jonwraymond/toolfoundation v0.1.0
 	github.com/jonwraymond/toolindex v0.3.0
 	github.com/jonwraymond/toolmodel v0.2.0
 	github.com/jonwraymond/toolrun v0.3.0
@@ -21,9 +29,12 @@ require (
 	github.com/knadh/koanf/providers/structs v0.1.0
 	github.com/knadh/koanf/v2 v2.1.0
 	github.com/modelcontextprotocol/go-sdk v1.2.0
+	github.com/redis/go-redis/v9 v9.17.3
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.11.1
 	github.com/tetratelabs/wazero v1.11.0
+	golang.org/x/sync v0.10.0
+	golang.org/x/time v0.14.0
 )
 
 require (
@@ -51,6 +62,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
@@ -86,7 +98,6 @@ require (
 	go.opentelemetry.io/otel/trace v1.39.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/sys v0.39.0 // indirect
-	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gotest.tools/v3 v3.5.2 // indirect

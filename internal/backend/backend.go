@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/jonwraymond/toolmodel"
+	"github.com/jonwraymond/toolfoundation/model"
 )
 
 // Common errors for backend operations.
@@ -33,7 +33,7 @@ type Backend interface {
 	Enabled() bool
 
 	// ListTools returns all tools available from this backend.
-	ListTools(ctx context.Context) ([]toolmodel.Tool, error)
+	ListTools(ctx context.Context) ([]model.Tool, error)
 
 	// Execute invokes a tool on this backend.
 	Execute(ctx context.Context, tool string, args map[string]any) (any, error)
