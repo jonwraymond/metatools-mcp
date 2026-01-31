@@ -1,9 +1,10 @@
 # PRD-121: Migrate tooladapter
 
-**Phase:** 2 - Foundation Layer
-**Priority:** Critical
-**Effort:** 4 hours
-**Dependencies:** PRD-120
+**Phase:** 2 - Foundation Layer  
+**Priority:** Critical  
+**Effort:** 4 hours  
+**Dependencies:** PRD-120  
+**Status:** Done (2026-01-31)
 
 ---
 
@@ -15,8 +16,8 @@ Migrate the existing `tooladapter` repository into `toolfoundation/adapter/` as 
 
 ## Source Analysis
 
-**Current Location:** `github.com/ApertureStack/tooladapter`
-**Target Location:** `github.com/ApertureStack/toolfoundation/adapter`
+**Current Location:** `github.com/jonwraymond/tooladapter`
+**Target Location:** `github.com/jonwraymond/toolfoundation/adapter`
 
 **Package Contents:**
 - Schema adapters for converting between tool formats
@@ -44,7 +45,7 @@ Migrate the existing `tooladapter` repository into `toolfoundation/adapter/` as 
 cd /tmp/migration
 
 # Clone source with full history
-git clone git@github.com:ApertureStack/tooladapter.git
+git clone git@github.com:jonwraymond/tooladapter.git
 cd tooladapter
 
 # Verify contents
@@ -72,8 +73,8 @@ ls -la adapter/
 ```bash
 cd /tmp/migration/toolfoundation/adapter
 
-OLD_IMPORT="github.com/ApertureStack/tooladapter"
-NEW_IMPORT="github.com/ApertureStack/toolfoundation/adapter"
+OLD_IMPORT="github.com/jonwraymond/tooladapter"
+NEW_IMPORT="github.com/jonwraymond/toolfoundation/adapter"
 
 # Update all Go files
 for file in *.go; do
@@ -82,15 +83,15 @@ for file in *.go; do
 done
 
 # Also update toolmodel import to toolfoundation/model
-OLD_MODEL="github.com/ApertureStack/toolmodel"
-NEW_MODEL="github.com/ApertureStack/toolfoundation/model"
+OLD_MODEL="github.com/jonwraymond/toolmodel"
+NEW_MODEL="github.com/jonwraymond/toolfoundation/model"
 
 for file in *.go; do
   sed -i '' "s|$OLD_MODEL|$NEW_MODEL|g" "$file"
 done
 
 # Verify
-grep -r "ApertureStack/tooladapter\|ApertureStack/toolmodel" . || echo "✓ All imports updated"
+grep -r "jonwraymond/tooladapter\|jonwraymond/toolmodel" . || echo "✓ All imports updated"
 ```
 
 ### Task 4: Update Package Documentation
@@ -138,7 +139,7 @@ grep -r "ApertureStack/tooladapter\|ApertureStack/toolmodel" . || echo "✓ All 
 //
 // # Migration Note
 //
-// This package was migrated from github.com/ApertureStack/tooladapter as part of
+// This package was migrated from github.com/jonwraymond/tooladapter as part of
 // the ApertureStack consolidation.
 package adapter
 ```
@@ -154,7 +155,7 @@ cd /tmp/migration/toolfoundation
 grep -h "import" adapter/*.go | sort -u
 
 # Should include:
-# "github.com/ApertureStack/toolfoundation/model"
+# "github.com/jonwraymond/toolfoundation/model"
 ```
 
 ### Task 6: Update go.mod and Build
@@ -205,7 +206,7 @@ Internal dependency:
 
 This is part of the ApertureStack consolidation effort.
 
-Migration: github.com/ApertureStack/tooladapter → toolfoundation/adapter
+Migration: github.com/jonwraymond/tooladapter → toolfoundation/adapter
 
 Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
 
@@ -221,7 +222,7 @@ The migrated adapter package should follow this interface pattern:
 ```go
 package adapter
 
-import "github.com/ApertureStack/toolfoundation/model"
+import "github.com/jonwraymond/toolfoundation/model"
 
 // Adapter converts between MCP tool format and external formats.
 type Adapter interface {
@@ -289,8 +290,8 @@ type LangChainAdapter struct{}
 **Verification:**
 ```go
 import (
-    "github.com/ApertureStack/toolfoundation/model"
-    "github.com/ApertureStack/toolfoundation/adapter"
+    "github.com/jonwraymond/toolfoundation/model"
+    "github.com/jonwraymond/toolfoundation/adapter"
 )
 
 func example() {
@@ -300,6 +301,14 @@ func example() {
     _ = external
 }
 ```
+
+---
+
+## Completion Evidence
+
+- `toolfoundation/adapter/` contains migrated sources and tests.
+- `toolfoundation/adapter/doc.go` documents the adapter contract.
+- `go test ./adapter/...` passes in `toolfoundation`.
 
 ---
 

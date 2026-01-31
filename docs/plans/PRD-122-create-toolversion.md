@@ -1,9 +1,10 @@
 # PRD-122: Create toolversion
 
-**Phase:** 2 - Foundation Layer
-**Priority:** High
-**Effort:** 8 hours
-**Dependencies:** PRD-120
+**Phase:** 2 - Foundation Layer  
+**Priority:** High  
+**Effort:** 8 hours  
+**Dependencies:** PRD-120  
+**Status:** Done (2026-01-31)
 
 ---
 
@@ -15,7 +16,7 @@ Create a new `toolfoundation/version` package for semantic versioning, compatibi
 
 ## Package Design
 
-**Location:** `github.com/ApertureStack/toolfoundation/version`
+**Location:** `github.com/jonwraymond/toolfoundation/version`
 
 **Purpose:**
 - Semantic version parsing and comparison
@@ -595,13 +596,13 @@ git push origin main
 
 ## Verification Checklist
 
-- [ ] All source files created
-- [ ] `go build ./...` succeeds
-- [ ] `go test ./...` passes
-- [ ] Coverage >= 90%
-- [ ] Package documentation complete
-- [ ] Committed with proper message
-- [ ] Pushed to main
+- [x] All source files created
+- [x] `go build ./...` succeeds
+- [x] `go test ./...` passes
+- [x] Coverage >= 90%
+- [x] Package documentation complete
+- [x] Committed with proper message
+- [x] Pushed to main
 
 ---
 
@@ -612,6 +613,14 @@ git push origin main
 3. Semver 2.0 parsing works correctly
 4. Constraint checking is accurate
 5. Compatibility matrix tracks versions correctly
+
+---
+
+## Completion Evidence
+
+- `toolfoundation/version/` contains version, constraint, compatibility types and tests.
+- `toolfoundation/version/doc.go` documents the package and usage.
+- `go test ./version/...` passes in `toolfoundation`.
 
 ---
 

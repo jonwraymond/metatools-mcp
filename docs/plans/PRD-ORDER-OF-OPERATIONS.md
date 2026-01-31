@@ -52,6 +52,18 @@ PRD-102   PRD-112   PRD-122   PRD-132           → PRD-181 → PRD-191
 | 9 | PRD-121 | Migrate tooladapter | 4h | PRD-120 |
 | 10 | PRD-122 | Create toolversion | 8h | PRD-120 |
 
+### Week 2b: Foundation Hardening (Docs + Contracts)
+
+| Order | PRD | Title | Est. Hours | Depends On |
+|-------|-----|-------|------------|------------|
+| 10.1 | PRD-123 | Docs + README alignment | 3h | PRD-122 |
+| 10.2 | PRD-124 | Schema validation policy docs | 2h | PRD-120 |
+| 10.3 | PRD-125 | Adapter feature matrix docs | 2h | PRD-121 |
+| 10.4 | PRD-126 | Version package usage docs | 2h | PRD-122 |
+| 10.5 | PRD-127 | Contract verification | 1h | PRD-120, PRD-121 |
+| 10.6 | PRD-128 | Release + propagation | 1h | PRD-122 |
+| 10.7 | PRD-129 | Gate G2 validation | 1h | PRD-120, PRD-121, PRD-122 |
+
 ### Week 3: Discovery Layer
 
 | Order | PRD | Title | Est. Hours | Depends On |

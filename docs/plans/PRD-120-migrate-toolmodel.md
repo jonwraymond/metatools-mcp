@@ -1,9 +1,10 @@
 # PRD-120: Migrate toolmodel
 
-**Phase:** 2 - Foundation Layer
-**Priority:** Critical
-**Effort:** 4 hours
-**Dependencies:** PRD-110
+**Phase:** 2 - Foundation Layer  
+**Priority:** Critical  
+**Effort:** 4 hours  
+**Dependencies:** PRD-110  
+**Status:** Done (2026-01-31)
 
 ---
 
@@ -15,8 +16,8 @@ Migrate the existing `toolmodel` repository into `toolfoundation/model/` as the 
 
 ## Source Analysis
 
-**Current Location:** `github.com/ApertureStack/toolmodel`
-**Target Location:** `github.com/ApertureStack/toolfoundation/model`
+**Current Location:** `github.com/jonwraymond/toolmodel`
+**Target Location:** `github.com/jonwraymond/toolfoundation/model`
 
 **Package Contents:**
 - Core tool schema types (`Tool`, `ToolInput`, `ToolOutput`)
@@ -47,7 +48,7 @@ mkdir -p /tmp/migration
 cd /tmp/migration
 
 # Clone source with full history
-git clone git@github.com:ApertureStack/toolmodel.git
+git clone git@github.com:jonwraymond/toolmodel.git
 cd toolmodel
 
 # Verify contents
@@ -60,7 +61,7 @@ go test ./...
 ```bash
 # Clone target
 cd /tmp/migration
-git clone git@github.com:ApertureStack/toolfoundation.git
+git clone git@github.com:jonwraymond/toolfoundation.git
 cd toolfoundation
 
 # Create model directory
@@ -90,8 +91,8 @@ ls -la toolfoundation/model/
 #!/bin/bash
 set -euo pipefail
 
-OLD_IMPORT="github.com/ApertureStack/toolmodel"
-NEW_IMPORT="github.com/ApertureStack/toolfoundation/model"
+OLD_IMPORT="github.com/jonwraymond/toolmodel"
+NEW_IMPORT="github.com/jonwraymond/toolfoundation/model"
 
 cd toolfoundation/model
 
@@ -104,7 +105,7 @@ for file in *.go; do
 done
 
 # Verify no old imports remain
-grep -r "ApertureStack/toolmodel" . && echo "⚠ Old imports still exist!" || echo "✓ All imports updated"
+grep -r "jonwraymond/toolmodel" . && echo "⚠ Old imports still exist!" || echo "✓ All imports updated"
 ```
 
 ### Task 5: Update Package Documentation
@@ -149,7 +150,7 @@ grep -r "ApertureStack/toolmodel" . && echo "⚠ Old imports still exist!" || ec
 //
 // # Migration Note
 //
-// This package was migrated from github.com/ApertureStack/toolmodel as part of
+// This package was migrated from github.com/jonwraymond/toolmodel as part of
 // the ApertureStack consolidation. The API remains unchanged.
 package model
 ```
@@ -202,7 +203,7 @@ Package contents:
 
 This is part of the ApertureStack consolidation effort.
 
-Migration: github.com/ApertureStack/toolmodel → toolfoundation/model
+Migration: github.com/jonwraymond/toolmodel → toolfoundation/model
 
 Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
 
@@ -214,7 +215,7 @@ git push origin main
 Create a tracking issue for updating imports in dependent repos:
 
 ```bash
-gh issue create -R ApertureStack/toolfoundation \
+gh issue create -R jonwraymond/toolfoundation \
   --title "Update dependent repos to use toolfoundation/model" \
   --body "## Dependent Repositories
 
@@ -228,12 +229,12 @@ The following repositories need import updates:
 
 ## Old Import
 \`\`\`go
-import \"github.com/ApertureStack/toolmodel\"
+import \"github.com/jonwraymond/toolmodel\"
 \`\`\`
 
 ## New Import
 \`\`\`go
-import \"github.com/ApertureStack/toolfoundation/model\"
+import \"github.com/jonwraymond/toolfoundation/model\"
 \`\`\`
 
 ## Timeline
@@ -281,7 +282,7 @@ Will be updated as part of each repo's migration PRD."
 **Verification:**
 ```go
 // This should work in any dependent package
-import "github.com/ApertureStack/toolfoundation/model"
+import "github.com/jonwraymond/toolfoundation/model"
 
 func example() {
     tool := model.Tool{
@@ -291,6 +292,14 @@ func example() {
     _ = tool
 }
 ```
+
+---
+
+## Completion Evidence
+
+- `toolfoundation/model/` contains migrated sources and tests.
+- `toolfoundation/model/doc.go` documents the package contract.
+- `go test ./model/...` passes in `toolfoundation`.
 
 ---
 

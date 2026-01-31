@@ -36,9 +36,16 @@ This directory contains all Product Requirement Documents for the ApertureStack 
 
 | PRD | Title | Effort | Status |
 |-----|-------|--------|--------|
-| [PRD-120](./PRD-120-migrate-toolmodel.md) | Migrate toolmodel | 4h | Ready |
-| [PRD-121](./PRD-121-migrate-tooladapter.md) | Migrate tooladapter | 4h | Ready |
-| [PRD-122](./PRD-122-create-toolversion.md) | Create toolversion | 8h | Ready |
+| [PRD-120](./PRD-120-migrate-toolmodel.md) | Migrate toolmodel | 4h | Done |
+| [PRD-121](./PRD-121-migrate-tooladapter.md) | Migrate tooladapter | 4h | Done |
+| [PRD-122](./PRD-122-create-toolversion.md) | Create toolversion | 8h | Done |
+| [PRD-123](./PRD-123-toolfoundation-docs-alignment.md) | Docs + README alignment | 3h | Done |
+| [PRD-124](./PRD-124-toolfoundation-schema-policy.md) | Schema validation policy docs | 2h | Done |
+| [PRD-125](./PRD-125-toolfoundation-adapter-matrix.md) | Adapter feature matrix docs | 2h | Done |
+| [PRD-126](./PRD-126-toolfoundation-version-usage.md) | Version package usage docs | 2h | Done |
+| [PRD-127](./PRD-127-toolfoundation-contracts.md) | Contract verification | 1h | Done |
+| [PRD-128](./PRD-128-toolfoundation-release-propagation.md) | Release + propagation | 1h | Done |
+| [PRD-129](./PRD-129-toolfoundation-g2-validation.md) | Gate G2 validation | 1h | Done |
 
 ## Phase 3: Discovery Layer - tooldiscovery (18h)
 
