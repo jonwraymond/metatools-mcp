@@ -13,8 +13,8 @@ import (
 	"github.com/jonwraymond/metatools-mcp/internal/config"
 	"github.com/jonwraymond/metatools-mcp/internal/server"
 	transportpkg "github.com/jonwraymond/metatools-mcp/internal/transport"
-	"github.com/jonwraymond/tooldocs"
-	"github.com/jonwraymond/toolrun"
+	"github.com/jonwraymond/tooldiscovery/tooldoc"
+	"github.com/jonwraymond/toolexec/run"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/spf13/cobra"
 )
@@ -132,8 +132,8 @@ func buildServerConfigFromConfig(appCfg config.AppConfig) (config.Config, error)
 	if err != nil {
 		return config.Config{}, fmt.Errorf("creating index: %w", err)
 	}
-	docs := tooldocs.NewInMemoryStore(tooldocs.StoreOptions{Index: idx})
-	runner := toolrun.NewRunner(toolrun.WithIndex(idx))
+	docs := tooldoc.NewInMemoryStore(tooldoc.StoreOptions{Index: idx})
+	runner := run.NewRunner(run.WithIndex(idx))
 
 	cfg := adapters.NewConfig(idx, docs, runner, nil)
 	cfg.Providers = appCfg.Providers

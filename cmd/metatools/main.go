@@ -9,8 +9,8 @@ import (
 	"github.com/jonwraymond/metatools-mcp/internal/bootstrap"
 	"github.com/jonwraymond/metatools-mcp/internal/config"
 	"github.com/jonwraymond/metatools-mcp/internal/server"
-	"github.com/jonwraymond/tooldocs"
-	"github.com/jonwraymond/toolrun"
+	"github.com/jonwraymond/tooldiscovery/tooldoc"
+	"github.com/jonwraymond/toolexec/run"
 )
 
 func main() {
@@ -33,8 +33,8 @@ func createServer() (*server.Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("creating index: %w", err)
 	}
-	docs := tooldocs.NewInMemoryStore(tooldocs.StoreOptions{Index: idx})
-	runner := toolrun.NewRunner(toolrun.WithIndex(idx))
+	docs := tooldoc.NewInMemoryStore(tooldoc.StoreOptions{Index: idx})
+	runner := run.NewRunner(run.WithIndex(idx))
 
 	exec, err := maybeCreateExecutor(idx, docs, runner)
 	if err != nil {

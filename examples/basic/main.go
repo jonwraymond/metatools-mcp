@@ -8,39 +8,39 @@ import (
 
 	"github.com/jonwraymond/metatools-mcp/internal/adapters"
 	"github.com/jonwraymond/metatools-mcp/internal/server"
-	"github.com/jonwraymond/tooldocs"
-	"github.com/jonwraymond/toolindex"
-	"github.com/jonwraymond/toolmodel"
-	"github.com/jonwraymond/toolrun"
+	"github.com/jonwraymond/tooldiscovery/index"
+	"github.com/jonwraymond/tooldiscovery/tooldoc"
+	"github.com/jonwraymond/toolfoundation/model"
+	"github.com/jonwraymond/toolexec/run"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // mapLocalRegistry is a minimal LocalRegistry for local tool handlers.
 type mapLocalRegistry struct {
-	handlers map[string]toolrun.LocalHandler
+	handlers map[string]run.LocalHandler
 }
 
 func newMapLocalRegistry() *mapLocalRegistry {
-	return &mapLocalRegistry{handlers: make(map[string]toolrun.LocalHandler)}
+	return &mapLocalRegistry{handlers: make(map[string]run.LocalHandler)}
 }
 
-func (r *mapLocalRegistry) Get(name string) (toolrun.LocalHandler, bool) {
+func (r *mapLocalRegistry) Get(name string) (run.LocalHandler, bool) {
 	h, ok := r.handlers[name]
 	return h, ok
 }
 
-func (r *mapLocalRegistry) Register(name string, h toolrun.LocalHandler) {
+func (r *mapLocalRegistry) Register(name string, h run.LocalHandler) {
 	r.handlers[name] = h
 }
 
 func main() {
 	// Wire the core libraries.
-	idx := toolindex.NewInMemoryIndex()
-	docs := tooldocs.NewInMemoryStore(tooldocs.StoreOptions{Index: idx})
+	idx := index.NewInMemoryIndex()
+	docs := tooldoc.NewInMemoryStore(tooldoc.StoreOptions{Index: idx})
 	locals := newMapLocalRegistry()
-	runner := toolrun.NewRunner(
-		toolrun.WithIndex(idx),
-		toolrun.WithLocalRegistry(locals),
+	runner := run.NewRunner(
+		run.WithIndex(idx),
+		run.WithLocalRegistry(locals),
 	)
 
 	// Register a simple local tool.
@@ -50,7 +50,7 @@ func main() {
 		return map[string]any{"echo": msg}, nil
 	})
 
-	tool := toolmodel.Tool{
+	tool := model.Tool{
 		Tool: mcp.Tool{
 			Name:        "echo",
 			Title:       "Echo",
@@ -76,9 +76,9 @@ func main() {
 		Tags:      []string{"example", "echo"},
 	}
 
-	backend := toolmodel.ToolBackend{
-		Kind: toolmodel.BackendKindLocal,
-		Local: &toolmodel.LocalBackend{
+	backend := model.ToolBackend{
+		Kind: model.BackendKindLocal,
+		Local: &model.LocalBackend{
 			Name: "echo",
 		},
 	}
@@ -87,10 +87,10 @@ func main() {
 		log.Fatalf("register tool: %v", err)
 	}
 
-	if err := docs.RegisterDoc(tool.ToolID(), tooldocs.DocEntry{
+	if err := docs.RegisterDoc(tool.ToolID(), tooldoc.DocEntry{
 		Summary: "Echo a string for testing MCP flows",
 		Notes:   "This is a local demo tool wired through toolrun.",
-		Examples: []tooldocs.ToolExample{
+		Examples: []tooldoc.ToolExample{
 			{
 				Title:       "Echo hello",
 				Description: "Return the same message you send.",

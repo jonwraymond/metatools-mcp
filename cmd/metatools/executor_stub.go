@@ -3,13 +3,13 @@
 package main
 
 import (
-	"github.com/jonwraymond/toolcode"
-	"github.com/jonwraymond/tooldocs"
-	"github.com/jonwraymond/toolindex"
-	"github.com/jonwraymond/toolrun"
+	"github.com/jonwraymond/tooldiscovery/index"
+	"github.com/jonwraymond/tooldiscovery/tooldoc"
+	"github.com/jonwraymond/toolexec/code"
+	"github.com/jonwraymond/toolexec/run"
 )
 
 // maybeCreateExecutor returns nil unless the toolruntime build tag is enabled.
-func maybeCreateExecutor(toolindex.Index, tooldocs.Store, toolrun.Runner) (toolcode.Executor, error) {
+func maybeCreateExecutor(index.Index, tooldoc.Store, run.Runner) (code.Executor, error) {
 	return nil, nil
 }

@@ -10,34 +10,34 @@ import (
 
 	"github.com/jonwraymond/metatools-mcp/internal/runtime/docker"
 	"github.com/jonwraymond/metatools-mcp/internal/runtime/wasm"
-	"github.com/jonwraymond/toolcode"
-	"github.com/jonwraymond/tooldocs"
-	"github.com/jonwraymond/toolindex"
-	"github.com/jonwraymond/toolrun"
-	"github.com/jonwraymond/toolruntime"
-	dockerbackend "github.com/jonwraymond/toolruntime/backend/docker"
-	"github.com/jonwraymond/toolruntime/backend/unsafe"
-	wasmbackend "github.com/jonwraymond/toolruntime/backend/wasm"
-	"github.com/jonwraymond/toolruntime/toolcodeengine"
+	"github.com/jonwraymond/tooldiscovery/index"
+	"github.com/jonwraymond/tooldiscovery/tooldoc"
+	"github.com/jonwraymond/toolexec/code"
+	"github.com/jonwraymond/toolexec/run"
+	"github.com/jonwraymond/toolexec/runtime"
+	dockerbackend "github.com/jonwraymond/toolexec/runtime/backend/docker"
+	"github.com/jonwraymond/toolexec/runtime/backend/unsafe"
+	wasmbackend "github.com/jonwraymond/toolexec/runtime/backend/wasm"
+	"github.com/jonwraymond/toolexec/runtime/toolcodeengine"
 )
 
 // maybeCreateExecutor wires toolruntime into toolcode when the build tag is set.
 // It configures both unsafe (dev) and Docker (standard) backends based on availability.
-func maybeCreateExecutor(idx toolindex.Index, docs tooldocs.Store, runner toolrun.Runner) (toolcode.Executor, error) {
+func maybeCreateExecutor(idx index.Index, docs tooldoc.Store, runner run.Runner) (code.Executor, error) {
 	// Unsafe backend for dev profile - always available
 	unsafeBackend := unsafe.New(unsafe.Config{
 		Mode:         unsafe.ModeSubprocess,
 		RequireOptIn: false, // Unsafe dev mode is explicit via build tag.
 	})
 
-	backends := map[toolruntime.SecurityProfile]toolruntime.Backend{
-		toolruntime.ProfileDev: unsafeBackend,
+	backends := map[runtime.SecurityProfile]runtime.Backend{
+		runtime.ProfileDev: unsafeBackend,
 	}
 
-	defaultProfile := toolruntime.ProfileDev
+	defaultProfile := runtime.ProfileDev
 
 	// Try to create Docker backend for standard profile
-	var dockerBack toolruntime.Backend
+	var dockerBack runtime.Backend
 	dockerClient, err := docker.NewClient(docker.ClientConfig{})
 	if err != nil {
 		slog.Warn("Docker client unavailable", "error", err)
@@ -66,7 +66,7 @@ func maybeCreateExecutor(idx toolindex.Index, docs tooldocs.Store, runner toolru
 
 	// Try to create WASM backend for edge/lightweight profile
 	// WASM provides strong isolation without Docker dependencies
-	var wasmBack toolruntime.Backend
+	var wasmBack runtime.Backend
 	if os.Getenv("METATOOLS_WASM_ENABLED") == "true" {
 		wasmClient, err := wasm.NewClient(wasm.ClientConfig{
 			MaxMemoryPages:         256, // 16MB default
@@ -102,24 +102,24 @@ func maybeCreateExecutor(idx toolindex.Index, docs tooldocs.Store, runner toolru
 	switch preferred {
 	case "wasm":
 		if wasmBack != nil {
-			backends[toolruntime.ProfileStandard] = wasmBack
+			backends[runtime.ProfileStandard] = wasmBack
 			standardBackend = "wasm"
 		} else {
 			slog.Warn("WASM backend requested but unavailable")
 		}
 	case "docker":
 		if dockerBack != nil {
-			backends[toolruntime.ProfileStandard] = dockerBack
+			backends[runtime.ProfileStandard] = dockerBack
 			standardBackend = "docker"
 		} else {
 			slog.Warn("Docker backend requested but unavailable")
 		}
 	default:
 		if dockerBack != nil {
-			backends[toolruntime.ProfileStandard] = dockerBack
+			backends[runtime.ProfileStandard] = dockerBack
 			standardBackend = "docker"
 		} else if wasmBack != nil {
-			backends[toolruntime.ProfileStandard] = wasmBack
+			backends[runtime.ProfileStandard] = wasmBack
 			standardBackend = "wasm"
 			slog.Info("Docker unavailable, using WASM for standard profile")
 		}
@@ -132,13 +132,13 @@ func maybeCreateExecutor(idx toolindex.Index, docs tooldocs.Store, runner toolru
 	// Honor requested runtime profile
 	if os.Getenv("METATOOLS_RUNTIME_PROFILE") == "standard" {
 		if standardBackend != "" {
-			defaultProfile = toolruntime.ProfileStandard
+			defaultProfile = runtime.ProfileStandard
 		} else {
 			slog.Warn("Standard profile requested but no standard backend available")
 		}
 	}
 
-	rt := toolruntime.NewDefaultRuntime(toolruntime.RuntimeConfig{
+	rt := runtime.NewDefaultRuntime(runtime.RuntimeConfig{
 		Backends:       backends,
 		DefaultProfile: defaultProfile,
 	})
@@ -151,7 +151,7 @@ func maybeCreateExecutor(idx toolindex.Index, docs tooldocs.Store, runner toolru
 		return nil, err
 	}
 
-	return toolcode.NewDefaultExecutor(toolcode.Config{
+	return code.NewDefaultExecutor(code.Config{
 		Index:          idx,
 		Docs:           docs,
 		Run:            runner,
