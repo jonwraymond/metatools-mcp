@@ -2,14 +2,6 @@ module github.com/jonwraymond/metatools-mcp
 
 go 1.24.4
 
-replace github.com/jonwraymond/metatools-mcp => .
-
-replace github.com/jonwraymond/toolfoundation => ../toolfoundation
-
-replace github.com/jonwraymond/tooldiscovery => ../tooldiscovery
-
-replace github.com/jonwraymond/toolexec => ../toolexec
-
 require (
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/docker/docker v27.0.3+incompatible
