@@ -1,3 +1,4 @@
+// Package middleware provides provider middleware for metatools.
 package middleware
 
 import (

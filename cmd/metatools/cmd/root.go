@@ -5,9 +5,11 @@ import (
 )
 
 var (
-	// Version information (set at build time)
-	Version   = "dev"
+	// Version is the semantic version set at build time.
+	Version = "dev"
+	// GitCommit is the git SHA set at build time.
 	GitCommit = "unknown"
+	// BuildDate is the build timestamp set at build time.
 	BuildDate = "unknown"
 )
 

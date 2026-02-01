@@ -1,3 +1,4 @@
+// Package provider defines contracts for tool providers.
 package provider
 
 import (

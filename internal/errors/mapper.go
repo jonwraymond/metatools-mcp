@@ -1,3 +1,4 @@
+//revive:disable:var-naming // Package name matches internal/errors path for consistency.
 package errors
 
 import (
@@ -10,6 +11,7 @@ import (
 // ErrorCode represents the standard error codes for metatools
 type ErrorCode string
 
+// Error code values returned in ErrorObject.Code.
 const (
 	CodeToolNotFound           ErrorCode = "tool_not_found"
 	CodeNoBackends             ErrorCode = "no_backends"

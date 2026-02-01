@@ -1,3 +1,4 @@
+// Package transport provides MCP transport implementations.
 package transport
 
 import (

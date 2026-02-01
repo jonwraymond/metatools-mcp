@@ -1,3 +1,4 @@
+// Package adapters bridges external tool libraries to handler interfaces.
 package adapters
 
 import (

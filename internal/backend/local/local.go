@@ -1,3 +1,4 @@
+// Package local implements a backend for in-process tool handlers.
 package local
 
 import (

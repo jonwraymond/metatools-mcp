@@ -1,3 +1,4 @@
+// Package builtin provides built-in MCP tool providers.
 package builtin
 
 import (

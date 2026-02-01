@@ -1,3 +1,4 @@
+// Package metatools provides shared types and helpers for metatools surfaces.
 package metatools
 
 import (

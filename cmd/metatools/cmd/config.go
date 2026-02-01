@@ -1,3 +1,4 @@
+// Package cmd wires the metatools CLI commands.
 package cmd
 
 import (

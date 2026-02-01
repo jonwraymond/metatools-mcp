@@ -1,3 +1,4 @@
+// Package server implements the MCP server wiring.
 package server
 
 import (

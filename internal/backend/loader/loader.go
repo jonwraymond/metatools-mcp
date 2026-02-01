@@ -1,3 +1,4 @@
+// Package loader constructs backend registries from configuration.
 package loader
 
 import (

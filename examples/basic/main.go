@@ -1,3 +1,4 @@
+// Package main provides a minimal metatools-mcp server example.
 package main
 
 import (

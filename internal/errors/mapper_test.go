@@ -1,3 +1,4 @@
+//revive:disable:var-naming // Package name matches internal/errors path for in-package tests.
 package errors
 
 import (

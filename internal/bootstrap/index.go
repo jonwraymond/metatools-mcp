@@ -1,3 +1,4 @@
+// Package bootstrap wires core services from configuration.
 package bootstrap
 
 import (

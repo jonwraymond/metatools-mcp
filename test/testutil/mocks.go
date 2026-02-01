@@ -1,3 +1,4 @@
+// Package testutil provides mocks for metatools tests.
 package testutil
 
 import (
@@ -29,6 +30,7 @@ type Backend struct {
 	ProviderID string
 }
 
+// Search delegates to SearchFunc when provided.
 func (m *MockIndex) Search(ctx context.Context, query string, limit int) ([]metatools.ToolSummary, error) {
 	if m.SearchFunc != nil {
 		return m.SearchFunc(ctx, query, limit)
@@ -36,6 +38,7 @@ func (m *MockIndex) Search(ctx context.Context, query string, limit int) ([]meta
 	return []metatools.ToolSummary{}, nil
 }
 
+// ListNamespaces delegates to ListNamespacesFunc when provided.
 func (m *MockIndex) ListNamespaces(ctx context.Context) ([]string, error) {
 	if m.ListNamespacesFunc != nil {
 		return m.ListNamespacesFunc(ctx)
@@ -43,6 +46,7 @@ func (m *MockIndex) ListNamespaces(ctx context.Context) ([]string, error) {
 	return []string{}, nil
 }
 
+// GetTool delegates to GetToolFunc when provided.
 func (m *MockIndex) GetTool(ctx context.Context, id string) (Tool, Backend, error) {
 	if m.GetToolFunc != nil {
 		return m.GetToolFunc(ctx, id)
@@ -66,6 +70,7 @@ type ToolDoc struct {
 	ExternalRefs []string
 }
 
+// DescribeTool delegates to DescribeToolFunc when provided.
 func (m *MockStore) DescribeTool(ctx context.Context, id string, level string) (ToolDoc, error) {
 	if m.DescribeToolFunc != nil {
 		return m.DescribeToolFunc(ctx, id, level)
@@ -73,6 +78,7 @@ func (m *MockStore) DescribeTool(ctx context.Context, id string, level string) (
 	return ToolDoc{}, nil
 }
 
+// ListExamples delegates to ListExamplesFunc when provided.
 func (m *MockStore) ListExamples(ctx context.Context, id string, maxExamples int) ([]metatools.ToolExample, error) {
 	if m.ListExamplesFunc != nil {
 		return m.ListExamplesFunc(ctx, id, maxExamples)
@@ -110,6 +116,7 @@ type StepResult struct {
 	Error      error
 }
 
+// Run delegates to RunFunc when provided.
 func (m *MockRunner) Run(ctx context.Context, toolID string, args map[string]any) (RunResult, error) {
 	if m.RunFunc != nil {
 		return m.RunFunc(ctx, toolID, args)
@@ -117,6 +124,7 @@ func (m *MockRunner) Run(ctx context.Context, toolID string, args map[string]any
 	return RunResult{}, nil
 }
 
+// RunChain delegates to RunChainFunc when provided.
 func (m *MockRunner) RunChain(ctx context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
 	if m.RunChainFunc != nil {
 		return m.RunChainFunc(ctx, steps)
@@ -145,6 +153,7 @@ type ExecuteResult struct {
 	DurationMs int
 }
 
+// ExecuteCode delegates to ExecuteCodeFunc when provided.
 func (m *MockExecutor) ExecuteCode(ctx context.Context, params ExecuteParams) (ExecuteResult, error) {
 	if m.ExecuteCodeFunc != nil {
 		return m.ExecuteCodeFunc(ctx, params)

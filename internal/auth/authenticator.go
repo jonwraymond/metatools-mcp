@@ -95,6 +95,6 @@ func (f AuthenticatorFunc) Name() string {
 }
 
 // Supports always returns true for function-based authenticators.
-func (f AuthenticatorFunc) Supports(ctx context.Context, req *AuthRequest) bool {
+func (f AuthenticatorFunc) Supports(_ context.Context, _ *AuthRequest) bool {
 	return true
 }

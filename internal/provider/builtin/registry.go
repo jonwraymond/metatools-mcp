@@ -94,8 +94,8 @@ func NewRegistry(deps Deps, opts RegistryOptions) (*provider.Registry, error) {
 	return registry, nil
 }
 
-// BuiltinProviders lists the built-in provider names.
-func BuiltinProviders() []string {
+// Providers lists the built-in provider names.
+func Providers() []string {
 	return []string{
 		"search_tools",
 		"list_namespaces",

@@ -1,5 +1,6 @@
 //go:build !toolruntime
 
+// Package main provides the metatools CLI binary.
 package main
 
 import (

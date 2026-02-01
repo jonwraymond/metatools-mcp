@@ -1,3 +1,4 @@
+// Package backend provides tool backend abstractions and orchestration.
 package backend
 
 import (
