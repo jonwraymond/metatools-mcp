@@ -1,54 +1,18 @@
 site_name: metatools-mcp
+site_description: MCP server that exposes the ApertureStack tools.
+repo_name: jonwraymond/metatools-mcp
+repo_url: https://github.com/jonwraymond/metatools-mcp
+edit_uri: edit/main/docs/
 docs_dir: docs
 nav:
   - Home: index.md
   - Architecture: architecture.md
-  - Usage: usage.md
-  - Examples: examples.md
   - Design Notes: design-notes.md
+  - Usage: usage.md
+  - API: api.md
+  - Examples: examples.md
   - User Journey: user-journey.md
-  - API Reference: api.md
   - Plan of Record: plan-of-record.md
-  - Changelog: changelog.md
-  - Proposals:
-      - Pluggable Architecture: proposals/pluggable-architecture.md
-      - Implementation Phases: proposals/implementation-phases.md
-      - Component Library Analysis: proposals/component-library-analysis.md
-      - Architecture Evaluation: proposals/architecture-evaluation.md
-      - Multi-Tenancy: proposals/multi-tenancy.md
-      - Protocol-Agnostic Tools: proposals/protocol-agnostic-tools.md
-      - MCP Spec Alignment: proposals/mcp-spec-alignment.md
-
+  - Plans: plans/README.md
 theme:
   name: material
-  features:
-    - navigation.instant
-    - navigation.tracking
-    - navigation.tabs
-    - navigation.sections
-    - navigation.expand
-    - navigation.top
-    - search.suggest
-    - search.highlight
-    - content.code.copy
-    - content.tabs.link
-    - toc.follow
-  palette:
-    - scheme: default
-      primary: teal
-      accent: amber
-      toggle:
-        icon: material/weather-night
-        name: Switch to dark mode
-    - scheme: slate
-      primary: teal
-      accent: amber
-      toggle:
-        icon: material/white-balance-sunny
-        name: Switch to light mode
-  font:
-    text: Space Grotesk
-    code: JetBrains Mono
-
-extra_css:
-  - stylesheets/extra.css
