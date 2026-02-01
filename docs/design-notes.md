@@ -5,14 +5,14 @@ This page documents the tradeoffs and error semantics behind `metatools-mcp`.
 ## Design tradeoffs
 
 - **MCP-native surface.** All metatools (search, describe, run, chain, execute_code) are exposed via the official MCP Go SDK types to keep wire compatibility.
-- **Adapters, not re-implementation.** The server delegates to toolindex/tooldocs/toolrun/toolcode via thin adapters so the libraries remain the source of truth.
+- **Adapters, not re-implementation.** The server delegates to tooldiscovery/index, tooldiscovery/tooldoc, toolexec/run, and toolexec/code via thin adapters so the libraries remain the source of truth.
 - **Structured error objects.** Tool-level errors are returned in a consistent `ErrorObject` shape rather than raw Go errors, preserving the MCP tool contract.
 - **Explicit limits.** Inputs such as `limit` and `max` are capped for safe defaults (e.g., search limit cap 100, examples cap 5).
 - **Opaque pagination.** Cursor tokens are opaque and validated against index mutations to prevent stale paging.
 - **Pluggable search.** BM25 is optional via build tags (`toolsearch`) and runtime config via env vars.
 - **Change notifications.** Tool list updates emit `notifications/tools/list_changed` with a debounce window; notifications can be disabled and are emitted as a single list change per debounce window.
 - **Transport abstraction.** The `Transport` interface decouples protocol handling from server logic, enabling stdio, SSE, and Streamable HTTP without code changes.
-- **Runtime isolation.** `execute_code` is optional; the `toolruntime` build tag enables sandboxed execution with runtime profile selection.
+- **Runtime isolation.** `execute_code` is optional; the `toolruntime` build tag enables sandboxed execution via toolexec/runtime with runtime profile selection.
 
 ## Transport layer
 
@@ -76,14 +76,14 @@ Key error behaviors:
 
 - **Transport:** implement `Transport` interface to add new protocols (e.g., WebSocket, gRPC).
 - **Search strategy:** enable BM25 via the `toolsearch` build tag and env vars.
-- **Tool execution:** swap `toolrun` runner implementation or configure different backends.
-- **Code execution:** plug in a different `toolcode.Engine` (e.g., toolruntime-backed).
+- **Tool execution:** swap `toolexec/run` runner implementation or configure different backends.
+- **Code execution:** plug in a different `toolexec/code` engine (e.g., toolexec/runtime-backed).
 - **Progress:** when a progress token is provided, `run_tool`, `run_chain`, and `execute_code` emit progress notifications. If the runner supports progress callbacks, step-level updates are forwarded; otherwise a coarse start/end signal is sent.
 
 ## Runtime profile selection
 
-When built with `-tags toolruntime`, metatools-mcp wires `toolruntime` into
-`toolcode`:
+When built with `-tags toolruntime`, metatools-mcp wires `toolexec/runtime` into
+`toolexec/code`:
 
 - **Dev profile (`dev`)** uses the unsafe subprocess backend for fast iteration.
 - **Standard profile (`standard`)** uses Docker by default or WASM when selected.
@@ -111,5 +111,5 @@ When built with `-tags toolruntime`, metatools-mcp wires `toolruntime` into
 
 ### General guidance
 
-- Keep tool schemas in `toolmodel` to preserve MCP compatibility end-to-end.
+- Keep tool schemas in `toolfoundation/model` to preserve MCP compatibility end-to-end.
 - Treat metatools as the stable surface; update libraries behind it as needed.

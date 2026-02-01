@@ -4,6 +4,7 @@
 **Priority:** High
 **Effort:** 2 hours
 **Dependencies:** PRD-190
+**Status:** Done (2026-02-01)
 
 ---
 
@@ -50,12 +51,12 @@ done
 cd /Users/jraymond/Documents/Projects/ApertureStack
 
 # Add consolidated submodules
-git submodule add git@github.com:ApertureStack/toolfoundation.git toolfoundation
-git submodule add git@github.com:ApertureStack/tooldiscovery.git tooldiscovery
-git submodule add git@github.com:ApertureStack/toolexec.git toolexec
-git submodule add git@github.com:ApertureStack/toolcompose.git toolcompose
-git submodule add git@github.com:ApertureStack/toolops.git toolops
-git submodule add git@github.com:ApertureStack/toolprotocol.git toolprotocol
+git submodule add git@github.com:jonwraymond/toolfoundation.git toolfoundation
+git submodule add git@github.com:jonwraymond/tooldiscovery.git tooldiscovery
+git submodule add git@github.com:jonwraymond/toolexec.git toolexec
+git submodule add git@github.com:jonwraymond/toolcompose.git toolcompose
+git submodule add git@github.com:jonwraymond/toolops.git toolops
+git submodule add git@github.com:jonwraymond/toolprotocol.git toolprotocol
 ```
 
 ### Task 3: Update .gitmodules
@@ -65,35 +66,35 @@ Verify `.gitmodules` looks like:
 ```ini
 [submodule "toolfoundation"]
     path = toolfoundation
-    url = git@github.com:ApertureStack/toolfoundation.git
+    url = git@github.com:jonwraymond/toolfoundation.git
 
 [submodule "tooldiscovery"]
     path = tooldiscovery
-    url = git@github.com:ApertureStack/tooldiscovery.git
+    url = git@github.com:jonwraymond/tooldiscovery.git
 
 [submodule "toolexec"]
     path = toolexec
-    url = git@github.com:ApertureStack/toolexec.git
+    url = git@github.com:jonwraymond/toolexec.git
 
 [submodule "toolcompose"]
     path = toolcompose
-    url = git@github.com:ApertureStack/toolcompose.git
+    url = git@github.com:jonwraymond/toolcompose.git
 
 [submodule "toolops"]
     path = toolops
-    url = git@github.com:ApertureStack/toolops.git
+    url = git@github.com:jonwraymond/toolops.git
 
 [submodule "toolprotocol"]
     path = toolprotocol
-    url = git@github.com:ApertureStack/toolprotocol.git
+    url = git@github.com:jonwraymond/toolprotocol.git
 
 [submodule "metatools-mcp"]
     path = metatools-mcp
-    url = git@github.com:ApertureStack/metatools-mcp.git
+    url = git@github.com:jonwraymond/metatools-mcp.git
 
 [submodule "ai-tools-stack"]
     path = ai-tools-stack
-    url = git@github.com:ApertureStack/ai-tools-stack.git
+    url = git@github.com:jonwraymond/ai-tools-stack.git
 ```
 
 ### Task 4: Commit Changes
@@ -155,12 +156,16 @@ ApertureStack/
 
 ## Verification Checklist
 
-- [ ] Old submodules removed
-- [ ] New submodules added
-- [ ] .gitmodules updated
-- [ ] Committed and pushed
-- [ ] Fresh clone works
-- [ ] `git submodule update --init` works
+- [x] Old submodules removed
+- [x] New submodules added
+- [x] .gitmodules updated
+- [x] Committed and pushed
+- [x] Fresh clone works
+- [x] `git submodule update --init` works
+
+## Implementation Summary
+
+- Root `.gitmodules` now points to consolidated repos under `jonwraymond`.
 
 ---
 

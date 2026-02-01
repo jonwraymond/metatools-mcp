@@ -13,13 +13,12 @@ This page consolidates **all proposals and PRDs** into a single, ordered executi
 
 These libraries and contracts are the foundation and must remain stable:
 
-- `toolmodel` – core types and MCP schema compatibility
-- `toolindex` – registry + discovery
-- `tooldocs` – progressive disclosure docs/examples
-- `toolrun` – execution and chaining
-- `toolcode` – code orchestration (optional)
-- `toolruntime` – sandbox/runtime isolation (optional)
-- `toolsearch` – BM25 search implementation (optional)
+- `toolfoundation` – core types + adapters + versioning
+- `tooldiscovery` – registry, docs, search strategies
+- `toolexec` – execution, orchestration, runtime isolation
+- `toolcompose` – toolsets + skills
+- `toolops` – observability, cache, auth, resilience, health
+- `toolprotocol` – transport, wire, content, session, task primitives
 
 See the master roadmap for the current version matrix: [ROADMAP](proposals/ROADMAP.md)
 
@@ -63,8 +62,8 @@ Docs:
 
 **Goal:** Normalize tools into composable, protocol‑agnostic sets without changing core semantics.
 
-8. **tooladapter (PRD‑008)**
-9. **toolset (PRD‑009)**
+8. **tooladapter (PRD‑008)** → now `toolfoundation/adapter`
+9. **toolset (PRD‑009)** → now `toolcompose/set`
 
 Docs:
 - [PRD‑008](plans/2026-01-28-prd-008-tooladapter-library.md)
@@ -76,8 +75,8 @@ Docs:
 
 **Goal:** Make the system operationally measurable and resilient.
 
-10. **toolobserve (PRD‑010)**
-11. **toolcache (PRD‑011)**
+10. **toolobserve (PRD‑010)** → now `toolops/observe`
+11. **toolcache (PRD‑011)** → now `toolops/cache`
 
 Docs:
 - [PRD‑010](plans/2026-01-28-prd-010-toolobserve-library.md)
@@ -90,7 +89,7 @@ Docs:
 **Goal:** Enable scale, isolation, and advanced discovery without destabilizing core APIs.
 
 12. **Multi‑tenancy core (PRD‑012)**
-13. **toolsemantic (PRD‑013)**
+13. **toolsemantic (PRD‑013)** → now `tooldiscovery/semantic`
 
 Docs:
 - [PRD‑012](plans/2026-01-28-prd-012-multi-tenancy-core.md)
@@ -102,7 +101,7 @@ Docs:
 
 **Goal:** Higher‑level capability composition for reusable workflows.
 
-14. **toolskill (PRD‑014)**
+14. **toolskill (PRD‑014)** → now `toolcompose/skill`
 
 Docs:
 - [PRD‑014](plans/2026-01-28-prd-014-toolskill-library.md)
@@ -113,7 +112,7 @@ Docs:
 
 **Goal:** Expand sandbox options and isolation strategies.
 
-15. **toolruntime Docker backend (PRD‑001)**
+15. **toolruntime Docker backend (PRD‑001)** → now `toolexec/runtime`
 
 Docs:
 - [PRD‑001](plans/2026-01-28-prd-001-toolruntime-docker-backend.md)
@@ -122,7 +121,7 @@ Docs:
 
 ## Go Architecture Review (Summary)
 
-- **Context propagation:** enforce in all public execution APIs; cancellation must be honored by toolrun/toolruntime to avoid leaked goroutines.
+- **Context propagation:** enforce in all public execution APIs; cancellation must be honored by toolexec/run and toolexec/runtime to avoid leaked goroutines.
 - **Concurrency safety:** all registries must be RW‑safe; avoid maps without guards under write paths.
 - **Pagination correctness:** use stable cursors and cap limits across list endpoints.
 - **Error semantics:** preserve tool errors as structured data; avoid panics in runtime paths.

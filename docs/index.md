@@ -1,8 +1,8 @@
 # metatools-mcp
 
 `metatools-mcp` is the MCP server that exposes the tool stack via a small,
-progressive-disclosure tool surface. It composes toolmodel, toolindex, tooldocs,
-toolrun, and optionally toolcode/toolruntime.
+progressive-disclosure tool surface. It composes `toolfoundation`, `tooldiscovery`,
+`toolexec`, and optionally `toolexec/runtime` for sandboxed execution.
 
 [![Docs](https://img.shields.io/badge/docs-ai--tools--stack-blue)](https://jonwraymond.github.io/ai-tools-stack/)
 
@@ -29,9 +29,9 @@ toolrun, and optionally toolcode/toolruntime.
 ## Quickstart
 
 ```go
-idx := toolindex.NewInMemoryIndex()
-docs := tooldocs.NewInMemoryStore(tooldocs.StoreOptions{Index: idx})
-runner := toolrun.NewRunner(toolrun.WithIndex(idx))
+idx := index.NewInMemoryIndex()
+docs := tooldoc.NewInMemoryStore(tooldoc.StoreOptions{Index: idx})
+runner := run.NewRunner(run.WithIndex(idx))
 
 cfg := adapters.NewConfig(idx, docs, runner, nil)
 server, _ := server.New(cfg)

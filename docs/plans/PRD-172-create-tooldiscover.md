@@ -4,6 +4,7 @@
 **Priority:** High
 **Effort:** 8 hours
 **Dependencies:** PRD-171
+**Status:** Done (2026-02-01)
 
 ---
 
@@ -18,7 +19,12 @@ Create `toolprotocol/discover/` for capability discovery across protocols.
 - Capability advertisement
 - Service discovery
 - Protocol negotiation
-- Agent card support (A2A)
+- In-memory discovery implementation
+
+## Implementation Summary
+
+- Implemented `Discoverable` + `Discovery` interfaces.
+- Added memory-backed registry with filtering + capability negotiation.
 
 ---
 

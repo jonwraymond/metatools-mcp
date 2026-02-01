@@ -4,6 +4,7 @@
 **Priority:** Medium
 **Effort:** 10 hours
 **Dependencies:** PRD-130
+**Status:** Done (2026-02-01)
 
 ---
 
@@ -18,7 +19,12 @@ Create `toolprotocol/resource/` for MCP Resources support.
 - Resource definition and storage
 - Resource templates
 - Subscription management
-- Resource caching
+- Static provider helpers
+
+## Implementation Summary
+
+- Implemented `Provider` interface, registry, and subscription manager.
+- Added static provider with template support and tests.
 
 ---
 

@@ -4,6 +4,7 @@
 **Priority:** Medium
 **Effort:** 6 hours
 **Dependencies:** PRD-173
+**Status:** Done (2026-02-01)
 
 ---
 
@@ -16,9 +17,14 @@ Create `toolprotocol/elicit/` for user input elicitation (MCP feature).
 ## Package Contents
 
 - Elicitation requests
-- Input types (text, confirmation, choice)
+- Input types (text, confirmation, choice, form)
 - Response handling
 - Timeout management
+
+## Implementation Summary
+
+- Implemented request/response types with JSON Schema support for forms.
+- Added `Elicitor` and `Handler` interfaces for server/client flows.
 
 ---
 

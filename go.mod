@@ -15,7 +15,7 @@ require (
 	github.com/docker/docker v27.0.3+incompatible
 	github.com/go-viper/mapstructure/v2 v2.0.0-alpha.1
 	github.com/golang-jwt/jwt/v5 v5.3.1
-	github.com/jonwraymond/tooldiscovery v0.0.0
+	github.com/jonwraymond/tooldiscovery v0.1.0
 	github.com/jonwraymond/toolexec v0.1.0
 	github.com/jonwraymond/toolfoundation v0.1.0
 	github.com/knadh/koanf/parsers/yaml v0.1.0

@@ -4,25 +4,25 @@
 **Priority:** Critical
 **Effort:** 8 hours
 **Dependencies:** PRD-120
+**Status:** Done (2026-02-01)
 
 ---
 
 ## Objective
 
-Create `toolprotocol/transport/` for multi-transport support including stdio, HTTP, SSE, WebSocket, and gRPC.
+Create `toolprotocol/transport/` for multi-transport support including stdio, SSE, and Streamable HTTP. WebSocket/gRPC are deferred.
 
 ---
 
 ## Package Design
 
-**Location:** `github.com/ApertureStack/toolprotocol/transport`
+**Location:** `github.com/jonwraymond/toolprotocol/transport`
 
 **Purpose:**
 - Transport abstraction layer
 - Stdio transport (MCP default)
-- HTTP/SSE transport
-- WebSocket transport
-- gRPC transport (optional)
+- SSE transport (legacy HTTP)
+- Streamable HTTP transport (MCP 2025-03-26)
 
 ---
 
@@ -32,10 +32,15 @@ Create `toolprotocol/transport/` for multi-transport support including stdio, HT
 |-------------|----------|-------------|
 | Transport Package | `toolprotocol/transport/` | Transport abstraction |
 | Stdio | `transport/stdio.go` | Stdio implementation |
-| HTTP/SSE | `transport/sse.go` | HTTP SSE implementation |
-| WebSocket | `transport/websocket.go` | WebSocket implementation |
-| gRPC | `transport/grpc.go` | gRPC implementation |
+| SSE | `transport/sse.go` | HTTP SSE implementation |
+| Streamable HTTP | `transport/streamable.go` | MCP 2025-03-26 HTTP transport |
+| Registry | `transport/factory.go` | Transport registry + factory |
 | Tests | `transport/*_test.go` | Comprehensive tests |
+
+## Implementation Summary
+
+- Implemented `Transport` and `Server` contracts with concurrency + cancellation requirements.
+- Shipped stdio, SSE, and streamable HTTP transports; WebSocket/gRPC deferred.
 
 ---
 

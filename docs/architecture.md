@@ -70,8 +70,8 @@ standard profile.
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#2b6cb0'}}}%%
 flowchart LR
     Agent["AI Agent"] --> MCP["metatools-mcp"]
-    MCP --> Toolcode["toolcode Executor"]
-    Toolcode --> Runtime["toolruntime Runtime"]
+    MCP --> Toolcode["toolexec/code Executor"]
+    Toolcode --> Runtime["toolexec/runtime"]
 
     Runtime --> Dev["dev profile<br/>unsafe subprocess"]
     Runtime --> Standard["standard profile<br/>Docker sandbox"]

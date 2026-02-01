@@ -111,32 +111,32 @@ This directory contains all Product Requirement Documents for the ApertureStack 
 
 | PRD | Title | Effort | Status |
 |-----|-------|--------|--------|
-| [PRD-170](./PRD-170-create-tooltransport.md) | Create tooltransport | 8h | Ready |
-| [PRD-171](./PRD-171-create-toolwire.md) | Create toolwire | 12h | Ready |
-| [PRD-172](./PRD-172-create-tooldiscover.md) | Create tooldiscover | 8h | Ready |
-| [PRD-173](./PRD-173-create-toolcontent.md) | Create toolcontent | 8h | Ready |
-| [PRD-174](./PRD-174-create-tooltask.md) | Create tooltask | 10h | Ready |
-| [PRD-175](./PRD-175-create-toolstream.md) | Create toolstream | 8h | Ready |
-| [PRD-176](./PRD-176-create-toolsession.md) | Create toolsession | 6h | Ready |
-| [PRD-177](./PRD-177-create-toolelicit.md) | Create toolelicit | 6h | Ready |
-| [PRD-178](./PRD-178-create-toolresource.md) | Create toolresource | 10h | Ready |
-| [PRD-179](./PRD-179-create-toolprompt.md) | Create toolprompt | 8h | Ready |
+| [PRD-170](./PRD-170-create-tooltransport.md) | Create tooltransport | 8h | Done |
+| [PRD-171](./PRD-171-create-toolwire.md) | Create toolwire | 12h | Done |
+| [PRD-172](./PRD-172-create-tooldiscover.md) | Create tooldiscover | 8h | Done |
+| [PRD-173](./PRD-173-create-toolcontent.md) | Create toolcontent | 8h | Done |
+| [PRD-174](./PRD-174-create-tooltask.md) | Create tooltask | 10h | Done |
+| [PRD-175](./PRD-175-create-toolstream.md) | Create toolstream | 8h | Done |
+| [PRD-176](./PRD-176-create-toolsession.md) | Create toolsession | 6h | Done |
+| [PRD-177](./PRD-177-create-toolelicit.md) | Create toolelicit | 6h | Done |
+| [PRD-178](./PRD-178-create-toolresource.md) | Create toolresource | 10h | Done |
+| [PRD-179](./PRD-179-create-toolprompt.md) | Create toolprompt | 8h | Done |
 
 ## Phase 8: Integration (22h)
 
 | PRD | Title | Effort | Status |
 |-----|-------|--------|--------|
-| [PRD-180](./PRD-180-update-metatools-mcp.md) | Update metatools-mcp | 12h | Ready |
-| [PRD-181](./PRD-181-update-ai-tools-stack.md) | Update ai-tools-stack | 4h | Ready |
-| [PRD-182](./PRD-182-documentation-site.md) | Documentation Site | 6h | Ready |
+| [PRD-180](./PRD-180-update-metatools-mcp.md) | Update metatools-mcp | 12h | Done |
+| [PRD-181](./PRD-181-update-ai-tools-stack.md) | Update ai-tools-stack | 4h | Done |
+| [PRD-182](./PRD-182-documentation-site.md) | Documentation Site | 6h | Done |
 
 ## Phase 9: Cleanup (8h)
 
 | PRD | Title | Effort | Status |
 |-----|-------|--------|--------|
-| [PRD-190](./PRD-190-archive-old-repos.md) | Archive Old Repos | 2h | Ready |
-| [PRD-191](./PRD-191-update-submodules.md) | Update Submodules | 2h | Ready |
-| [PRD-192](./PRD-192-validation.md) | Validation | 4h | Ready |
+| [PRD-190](./PRD-190-archive-old-repos.md) | Archive Old Repos | 2h | Done |
+| [PRD-191](./PRD-191-update-submodules.md) | Update Submodules | 2h | Done |
+| [PRD-192](./PRD-192-validation.md) | Validation | 4h | Done |
 
 ---
 

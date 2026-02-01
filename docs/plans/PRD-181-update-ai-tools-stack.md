@@ -4,6 +4,7 @@
 **Priority:** High
 **Effort:** 4 hours
 **Dependencies:** PRD-180
+**Status:** Done (2026-02-01)
 
 ---
 
@@ -62,18 +63,18 @@ The following repositories have been consolidated and archived:
 ### Task 2: Update go.mod
 
 ```go
-module github.com/ApertureStack/ai-tools-stack
+module github.com/jonwraymond/ai-tools-stack
 
 go 1.24
 
 require (
-    github.com/ApertureStack/toolfoundation v0.1.0
-    github.com/ApertureStack/tooldiscovery v0.1.0
-    github.com/ApertureStack/toolexec v0.1.0
-    github.com/ApertureStack/toolcompose v0.1.0
-    github.com/ApertureStack/toolops v0.1.0
-    github.com/ApertureStack/toolprotocol v0.1.0
-    github.com/ApertureStack/metatools-mcp v0.2.0
+    github.com/jonwraymond/toolfoundation v0.1.0
+    github.com/jonwraymond/tooldiscovery v0.1.0
+    github.com/jonwraymond/toolexec v0.1.0
+    github.com/jonwraymond/toolcompose v0.1.0
+    github.com/jonwraymond/toolops v0.1.0
+    github.com/jonwraymond/toolprotocol v0.1.0
+    github.com/jonwraymond/metatools-mcp v0.5.0
 )
 ```
 
@@ -88,23 +89,29 @@ AI Tool Ecosystem for building, discovering, and executing AI agent tools.
 
 | Repository | Description |
 |------------|-------------|
-| [toolfoundation](https://github.com/ApertureStack/toolfoundation) | Core schemas, adapters, versioning |
-| [tooldiscovery](https://github.com/ApertureStack/tooldiscovery) | Registry, search, semantic, docs |
-| [toolexec](https://github.com/ApertureStack/toolexec) | Execution, runtime, code |
-| [toolcompose](https://github.com/ApertureStack/toolcompose) | Toolsets, skills |
-| [toolops](https://github.com/ApertureStack/toolops) | Observability, caching, auth |
-| [toolprotocol](https://github.com/ApertureStack/toolprotocol) | MCP, A2A, ACP protocols |
-| [metatools-mcp](https://github.com/ApertureStack/metatools-mcp) | MCP server |
+| [toolfoundation](https://github.com/jonwraymond/toolfoundation) | Core schemas, adapters, versioning |
+| [tooldiscovery](https://github.com/jonwraymond/tooldiscovery) | Registry, search, semantic, docs |
+| [toolexec](https://github.com/jonwraymond/toolexec) | Execution, runtime, code |
+| [toolcompose](https://github.com/jonwraymond/toolcompose) | Toolsets, skills |
+| [toolops](https://github.com/jonwraymond/toolops) | Observability, caching, auth |
+| [toolprotocol](https://github.com/jonwraymond/toolprotocol) | MCP, A2A, ACP protocols |
+| [metatools-mcp](https://github.com/jonwraymond/metatools-mcp) | MCP server |
 
 ## Quick Start
 
 \`\`\`bash
-go get github.com/ApertureStack/metatools-mcp@latest
+go get github.com/jonwraymond/metatools-mcp@latest
 \`\`\`
 
 ## Documentation
 
-See [docs.aperturestack.dev](https://docs.aperturestack.dev)
+See the GitHub Pages docs site for ai-tools-stack
+
+## Implementation Summary
+
+- mkdocs nav + multirepo imports updated to consolidated repos.
+- docs workflow + changelog/version scripts updated to consolidated repos.
+- VERSIONS matrix aligned with consolidated repo tags.
 ```
 
 ### Task 4: Update Scripts

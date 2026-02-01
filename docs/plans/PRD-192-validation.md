@@ -4,6 +4,7 @@
 **Priority:** Critical
 **Effort:** 4 hours
 **Dependencies:** PRD-191
+**Status:** Done (2026-02-01)
 
 ---
 
@@ -37,12 +38,12 @@ for repo in "${REPOS[@]}"; do
   echo "Checking $repo..."
 
   # Verify repo exists
-  gh repo view "ApertureStack/$repo" > /dev/null
+  gh repo view "jonwraymond/$repo" > /dev/null
 
   # Clone and test
   cd /tmp
   rm -rf "$repo"
-  git clone "git@github.com:ApertureStack/$repo.git"
+  git clone "git@github.com:jonwraymond/$repo.git"
   cd "$repo"
 
   # Build
@@ -51,7 +52,7 @@ for repo in "${REPOS[@]}"; do
 
   # Test
   echo "  Testing..."
-  go test ./...
+  GOWORK=off go test ./...
 
   # Check CI status
   echo "  CI Status:"
@@ -74,14 +75,14 @@ echo "=== Integration Validation ==="
 
 cd /tmp
 rm -rf metatools-mcp-test
-git clone git@github.com:ApertureStack/metatools-mcp.git metatools-mcp-test
+git clone git@github.com:jonwraymond/metatools-mcp.git metatools-mcp-test
 cd metatools-mcp-test
 
 echo "Building metatools-mcp..."
 go build ./cmd/metatools
 
 echo "Running tests..."
-go test ./...
+GOWORK=off go test ./...
 
 echo "Starting server..."
 ./metatools serve &
@@ -110,7 +111,7 @@ echo "=== Submodule Validation ==="
 
 cd /tmp
 rm -rf ApertureStack-test
-git clone --recursive git@github.com:ApertureStack/ApertureStack.git ApertureStack-test
+git clone --recursive git@github.com:jonwraymond/ApertureStack.git ApertureStack-test
 cd ApertureStack-test
 
 echo "Checking submodules..."
@@ -120,7 +121,7 @@ echo "Building all submodules..."
 for dir in toolfoundation tooldiscovery toolexec toolcompose toolops toolprotocol; do
   echo "  Building $dir..."
   cd "$dir"
-  go build ./...
+  GOWORK=off go build ./...
   cd ..
 done
 
@@ -137,7 +138,7 @@ echo "=== Documentation Validation ==="
 
 cd /tmp
 rm -rf ai-tools-stack-test
-git clone git@github.com:ApertureStack/ai-tools-stack.git ai-tools-stack-test
+git clone git@github.com:jonwraymond/ai-tools-stack.git ai-tools-stack-test
 cd ai-tools-stack-test
 
 echo "Checking VERSIONS.md..."
@@ -179,7 +180,7 @@ ARCHIVED=(
 )
 
 for repo in "${ARCHIVED[@]}"; do
-  ARCHIVED_STATUS=$(gh repo view "ApertureStack/$repo" --json isArchived -q '.isArchived')
+  ARCHIVED_STATUS=$(gh repo view "jonwraymond/$repo" --json isArchived -q '.isArchived')
   if [ "$ARCHIVED_STATUS" = "true" ]; then
     echo "  ✓ $repo is archived"
   else
@@ -238,6 +239,14 @@ All 6 consolidated repos as submodules: ✓
 ## Conclusion
 
 Consolidation complete and validated.
+
+## Verification (2026-02-01)
+
+- Consolidated repos (`toolfoundation`, `tooldiscovery`, `toolexec`, `toolcompose`, `toolops`, `toolprotocol`) pass `go test ./...` locally with `GOWORK=off`.
+- `metatools-mcp` builds and tests clean; `./metatools version` runs.
+- Old repos archived under `jonwraymond` with README deprecation notice + MIGRATION.md present.
+- Submodules updated to consolidated repos; `git submodule status` clean.
+- Docs build not run locally (mkdocs not installed); rely on CI after push.
 ```
 
 ---

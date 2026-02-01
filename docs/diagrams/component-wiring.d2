@@ -86,19 +86,19 @@ core: "📦 Core Libraries" {
     stroke: ${core-fill}
   }
 
-  toolmodel: "📋 toolmodel\nSchema" {
+  toolmodel: "📋 toolfoundation/model\nSchema" {
     shape: package
     class: core-node
   }
-  toolindex: "🗂️ toolindex\nRegistry" {
+  toolindex: "🗂️ tooldiscovery/index\nRegistry" {
     shape: cylinder
     class: core-node
   }
-  tooldocs: "📚 tooldocs\nDocs" {
+  tooldocs: "📚 tooldiscovery/tooldoc\nDocs" {
     shape: document
     class: core-node
   }
-  toolrun: "▶️ toolrun\nExec" {
+  toolrun: "▶️ toolexec/run\nExec" {
     shape: step
     class: core-node
   }
@@ -113,15 +113,15 @@ optional: "🔌 Optional Extensions" {
     stroke-dash: 3
   }
 
-  toolcode: "💻 toolcode\nOrchestration" {
+  toolcode: "💻 toolexec/code\nOrchestration" {
     shape: page
     class: optional-node
   }
-  toolruntime: "🔒 toolruntime\nSandbox" {
+  toolruntime: "🔒 toolexec/runtime\nSandbox" {
     shape: cloud
     class: optional-node
   }
-  toolsearch: "🔍 toolsearch\nBM25" {
+  toolsearch: "🔍 tooldiscovery/search\nBM25" {
     shape: diamond
     class: optional-node
   }

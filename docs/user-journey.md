@@ -62,10 +62,10 @@ sequenceDiagram
     participant Agent as 🤖 AI Agent
     participant Transport as 🔄 Transport
     participant MCP as 🔷 metatools-mcp
-    participant Index as 📇 toolindex
-    participant Docs as 📚 tooldocs
-    participant Run as ▶️ toolrun
-    participant Code as 💻 toolcode
+    participant Index as 📇 tooldiscovery/index
+    participant Docs as 📚 tooldiscovery/tooldoc
+    participant Run as ▶️ toolexec/run
+    participant Code as 💻 toolexec/code
 
     rect rgb(128, 90, 213, 0.1)
         Note over Agent,MCP: Phase 0: Connection
@@ -146,10 +146,10 @@ flowchart TB
     end
 
     subgraph stack["Stack Libraries"]
-        Index["📇 toolindex"]
-        Docs2["📚 tooldocs"]
-        Run["▶️ toolrun"]
-        Code["💻 toolcode"]
+        Index["📇 tooldiscovery/index"]
+        Docs2["📚 tooldiscovery/tooldoc"]
+        Run["▶️ toolexec/run"]
+        Code["💻 toolexec/code"]
     end
 
     Request --> Stdio & Streamable --> Server
@@ -179,7 +179,7 @@ flowchart TB
 3. **Execute** a single tool with `run_tool` or a sequence with `run_chain`.
 4. **Orchestrate** complex flows using `execute_code` (optional).
 
-> When built with `-tags toolruntime`, `execute_code` runs in a sandboxed runtime.
+> When built with `-tags toolruntime`, `execute_code` runs in a sandboxed toolexec/runtime.
 > Default profile is `dev` (unsafe); set `METATOOLS_RUNTIME_PROFILE=standard`
 > to enable Docker when available. Set `METATOOLS_WASM_ENABLED=true` and
 > `METATOOLS_RUNTIME_BACKEND=wasm` to use the WASM backend instead.

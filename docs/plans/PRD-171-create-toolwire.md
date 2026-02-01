@@ -4,6 +4,7 @@
 **Priority:** Critical
 **Effort:** 12 hours
 **Dependencies:** PRD-170
+**Status:** Done (2026-02-01)
 
 ---
 
@@ -15,7 +16,7 @@ Create `toolprotocol/wire/` for protocol wire adapters supporting MCP, A2A (Goog
 
 ## Package Design
 
-**Location:** `github.com/ApertureStack/toolprotocol/wire`
+**Location:** `github.com/jonwraymond/toolprotocol/wire`
 
 **Purpose:**
 - Wire protocol adapters
@@ -34,8 +35,13 @@ Create `toolprotocol/wire/` for protocol wire adapters supporting MCP, A2A (Goog
 | MCP | `wire/mcp.go` | MCP wire adapter |
 | A2A | `wire/a2a.go` | Google A2A adapter |
 | ACP | `wire/acp.go` | IBM ACP adapter |
-| Negotiator | `wire/negotiate.go` | Protocol negotiation |
+| Registry | `wire/registry.go` | Wire registry + factory |
 | Tests | `wire/*_test.go` | Comprehensive tests |
+
+## Implementation Summary
+
+- Implemented `Wire` interface with deterministic encode/decode.
+- Added MCP, A2A, and ACP wire formats plus registry and error types.
 
 ---
 

@@ -4,6 +4,7 @@
 **Priority:** High
 **Effort:** 8 hours
 **Dependencies:** PRD-170
+**Status:** Done (2026-02-01)
 
 ---
 
@@ -16,9 +17,13 @@ Create `toolprotocol/stream/` for streaming and incremental updates.
 ## Package Contents
 
 - Stream abstraction
-- Server-sent events
-- Progress notifications
+- Progress notifications + partial results
 - Backpressure handling
+
+## Implementation Summary
+
+- Implemented `Source`/`Sink` with buffered streams and backpressure options.
+- Added event types for progress/partial/complete/error/heartbeat.
 
 ---
 

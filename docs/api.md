@@ -13,10 +13,10 @@ func (s *Server) ListTools() []*mcp.Tool
 
 ```go
 type Config struct {
-  Index    toolindex.Index
-  Docs     tooldocs.Store
-  Runner   toolrun.Runner
-  Executor toolcode.Executor // optional
+  Index    index.Index
+  Docs     tooldoc.Store
+  Runner   run.Runner
+  Executor code.Executor // optional
 
   NotifyToolListChanged           bool
   NotifyToolListChangedDebounceMs int
@@ -82,7 +82,7 @@ type TLSConfig struct {
 ## Toolruntime integration
 
 When built with `-tags toolruntime`, `execute_code` is backed by a
-`toolruntime` runtime. The runtime selects a profile at startup:
+`toolexec/runtime` runtime. The runtime selects a profile at startup:
 
 - `dev` profile: unsafe subprocess backend (default).
 - `standard` profile: Docker sandbox by default or WASM when selected.

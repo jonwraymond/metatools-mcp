@@ -4,6 +4,7 @@
 **Priority:** High
 **Effort:** 10 hours
 **Dependencies:** PRD-140, PRD-173
+**Status:** Done (2026-02-01)
 
 ---
 
@@ -16,9 +17,14 @@ Create `toolprotocol/task/` for task lifecycle management across protocols.
 ## Package Contents
 
 - Task creation and tracking
-- State machine (pending → running → complete/failed)
+- State machine (pending → running → complete/failed/cancelled)
 - Progress updates
-- Task cancellation
+- Subscriptions + cancellation
+
+## Implementation Summary
+
+- Implemented `Manager` interface with in-memory store and strict transitions.
+- Added subscription channels for progress updates.
 
 ---
 

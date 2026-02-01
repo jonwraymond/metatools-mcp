@@ -151,7 +151,7 @@ These map to the config schema loaded by `config.Load`:
 
 ## Tool list change notifications
 
-- `notifications/tools/list_changed` is emitted when the underlying toolindex changes.
+- `notifications/tools/list_changed` is emitted when the underlying tooldiscovery/index changes.
 - Notifications are debounced to avoid client spam and can be disabled with `METATOOLS_NOTIFY_TOOL_LIST_CHANGED=false`.
 
 ## Progress notifications
@@ -166,7 +166,7 @@ updates are forwarded; otherwise a coarse start/end signal is emitted.
 go run -tags toolruntime ./cmd/metatools
 ```
 
-This enables `execute_code` backed by a `toolruntime` engine.
+This enables `execute_code` backed by a `toolexec/runtime` engine.
 By default it uses the `dev` (unsafe) profile; set
 `METATOOLS_RUNTIME_PROFILE=standard` to enable the Docker backend when
 available. To use WASM instead, set `METATOOLS_WASM_ENABLED=true` and

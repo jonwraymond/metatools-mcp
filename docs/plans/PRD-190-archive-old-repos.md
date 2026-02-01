@@ -4,6 +4,7 @@
 **Priority:** High
 **Effort:** 2 hours
 **Dependencies:** PRD-180
+**Status:** Done (2026-02-01)
 
 ---
 
@@ -22,7 +23,7 @@ Archive all 13 standalone repositories that have been consolidated.
 | toolindex | tooldiscovery/index |
 | toolsearch | tooldiscovery/search |
 | toolsemantic | tooldiscovery/semantic |
-| tooldocs | tooldiscovery/docs |
+| tooldocs | tooldiscovery/tooldoc |
 | toolrun | toolexec/run |
 | toolruntime | toolexec/runtime |
 | toolcode | toolexec/code |
@@ -44,7 +45,7 @@ For each repo, update README.md:
 
 This repository has been archived. The code has been migrated to:
 
-**[toolfoundation](https://github.com/ApertureStack/toolfoundation)** (model package)
+**[toolfoundation](https://github.com/jonwraymond/toolfoundation)** (model package)
 
 ## Migration
 
@@ -52,10 +53,10 @@ Update your imports:
 
 ```go
 // Before
-import "github.com/ApertureStack/toolmodel"
+import "github.com/jonwraymond/toolmodel"
 
 // After
-import "github.com/ApertureStack/toolfoundation/model"
+import "github.com/jonwraymond/toolfoundation/model"
 ```
 
 See [MIGRATION.md](./MIGRATION.md) for details.
@@ -72,7 +73,7 @@ See [MIGRATION.md](./MIGRATION.md) for details.
 
 | Old | New |
 |-----|-----|
-| `github.com/ApertureStack/toolmodel` | `github.com/ApertureStack/toolfoundation/model` |
+| `github.com/jonwraymond/toolmodel` | `github.com/jonwraymond/toolfoundation/model` |
 
 ## Breaking Changes
 
@@ -83,12 +84,12 @@ See [MIGRATION.md](./MIGRATION.md) for details.
 
 1. Update go.mod:
    ```bash
-   go get github.com/ApertureStack/toolfoundation@latest
+go get github.com/jonwraymond/toolfoundation@latest
    ```
 
 2. Update imports:
    ```bash
-   sed -i 's|github.com/ApertureStack/toolmodel|github.com/ApertureStack/toolfoundation/model|g' *.go
+sed -i 's|github.com/jonwraymond/toolmodel|github.com/jonwraymond/toolfoundation/model|g' *.go
    ```
 
 3. Remove old dependency:
@@ -117,13 +118,13 @@ REPOS=(
 )
 
 for repo in "${REPOS[@]}"; do
-  echo "Archiving ApertureStack/$repo..."
+  echo "Archiving jonwraymond/$repo..."
 
   # Update README with deprecation notice
   # (done manually per repo with appropriate redirect)
 
   # Archive the repository
-  gh repo archive "ApertureStack/$repo" --yes
+  gh repo archive "jonwraymond/$repo" --yes
 
   echo "✓ $repo archived"
 done
@@ -133,11 +134,11 @@ done
 
 ```bash
 # List archived repos
-gh repo list ApertureStack --archived --limit 20
+gh repo list jonwraymond --archived --limit 20
 
 # Verify each is read-only
 for repo in toolmodel tooladapter toolindex toolsearch; do
-  gh repo view "ApertureStack/$repo" --json isArchived -q '.isArchived'
+  gh repo view "jonwraymond/$repo" --json isArchived -q '.isArchived'
 done
 ```
 
@@ -145,11 +146,11 @@ done
 
 ## Verification Checklist
 
-- [ ] All 13 repos have deprecation notices
-- [ ] All 13 repos have MIGRATION.md
-- [ ] All 13 repos are archived
-- [ ] Archives are read-only
-- [ ] Redirects work (README links to new location)
+- [x] All 13 repos have deprecation notices
+- [x] All 13 repos have MIGRATION.md
+- [x] All 13 repos are archived
+- [x] Archives are read-only
+- [x] Redirects work (README links to new location)
 
 ---
 
@@ -157,7 +158,12 @@ done
 
 ```bash
 # Unarchive a repo if needed
-gh repo unarchive ApertureStack/toolmodel --yes
+gh repo unarchive jonwraymond/toolmodel --yes
+
+## Verification (2026-02-01)
+
+- All 13 repos archived under `jonwraymond`.
+- README contains deprecation notice; MIGRATION.md present in each repo.
 ```
 
 ---

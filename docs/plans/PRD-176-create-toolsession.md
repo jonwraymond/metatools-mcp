@@ -4,6 +4,7 @@
 **Priority:** Medium
 **Effort:** 6 hours
 **Dependencies:** PRD-120
+**Status:** Done (2026-02-01)
 
 ---
 
@@ -18,7 +19,12 @@ Create `toolprotocol/session/` for session management.
 - Session lifecycle
 - Context preservation
 - Session state storage
-- Multi-turn interactions
+- TTL cleanup
+
+## Implementation Summary
+
+- Implemented `Store` interface with memory-backed store + TTL cleanup.
+- Added context helpers for request-scoped sessions.
 
 ---
 

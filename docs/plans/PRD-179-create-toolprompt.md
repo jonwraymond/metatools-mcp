@@ -4,6 +4,7 @@
 **Priority:** Medium
 **Effort:** 8 hours
 **Dependencies:** PRD-173
+**Status:** Done (2026-02-01)
 
 ---
 
@@ -19,6 +20,11 @@ Create `toolprotocol/prompt/` for MCP Prompts support.
 - Prompt templates with arguments
 - Message generation
 - Prompt registry
+
+## Implementation Summary
+
+- Implemented `Provider` + registry with argument validation.
+- Added helpers for message/content creation.
 
 ---
 

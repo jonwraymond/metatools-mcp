@@ -4,6 +4,7 @@
 **Priority:** Medium
 **Effort:** 6 hours
 **Dependencies:** PRD-181
+**Status:** Done (2026-02-01)
 
 ---
 
@@ -19,7 +20,7 @@ Update MkDocs documentation site with consolidated repository structure.
 
 ```yaml
 site_name: ApertureStack
-site_url: https://docs.aperturestack.dev
+site_url: https://jonwraymond.github.io/ai-tools-stack/
 
 nav:
   - Home: index.md
@@ -75,17 +76,17 @@ plugins:
   - multirepo:
       repos:
         - name: toolfoundation
-          import: github.com/ApertureStack/toolfoundation/docs
+          import: github.com/jonwraymond/toolfoundation/docs
         - name: tooldiscovery
-          import: github.com/ApertureStack/tooldiscovery/docs
+          import: github.com/jonwraymond/tooldiscovery/docs
         - name: toolexec
-          import: github.com/ApertureStack/toolexec/docs
+          import: github.com/jonwraymond/toolexec/docs
         - name: toolcompose
-          import: github.com/ApertureStack/toolcompose/docs
+          import: github.com/jonwraymond/toolcompose/docs
         - name: toolops
-          import: github.com/ApertureStack/toolops/docs
+          import: github.com/jonwraymond/toolops/docs
         - name: toolprotocol
-          import: github.com/ApertureStack/toolprotocol/docs
+          import: github.com/jonwraymond/toolprotocol/docs
 ```
 
 ### Task 2: Update Landing Page
@@ -153,10 +154,16 @@ graph TB
 
 ```bash
 # Install metatools-mcp
-go install github.com/ApertureStack/metatools-mcp/cmd/metatools@latest
+go install github.com/jonwraymond/metatools-mcp/cmd/metatools@latest
 
 # Run MCP server
 metatools serve
+
+## Implementation Summary
+
+- mkdocs nav and multirepo imports aligned with consolidated repos.
+- D2 diagrams re-rendered and embedded into component docs.
+- GitHub Pages publish flow uses mike for `latest`/`stable` versions.
 ```
 ```
 
