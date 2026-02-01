@@ -17,22 +17,22 @@ import (
 // TestBaselineCompilation verifies all consolidated packages compile and are accessible.
 func TestBaselineCompilation(t *testing.T) {
 	// This test simply verifies the imports compile
-	t.Run("model compiles", func(t *testing.T) {
+	t.Run("model compiles", func(_ *testing.T) {
 		var _ model.Tool
 	})
-	t.Run("index compiles", func(t *testing.T) {
+	t.Run("index compiles", func(_ *testing.T) {
 		var _ index.Index
 	})
-	t.Run("tooldoc compiles", func(t *testing.T) {
+	t.Run("tooldoc compiles", func(_ *testing.T) {
 		var _ tooldoc.Store
 	})
-	t.Run("search compiles", func(t *testing.T) {
+	t.Run("search compiles", func(_ *testing.T) {
 		var _ search.BM25Config
 	})
-	t.Run("run compiles", func(t *testing.T) {
+	t.Run("run compiles", func(_ *testing.T) {
 		var _ run.Runner
 	})
-	t.Run("code compiles", func(t *testing.T) {
+	t.Run("code compiles", func(_ *testing.T) {
 		var _ code.Executor
 	})
 }

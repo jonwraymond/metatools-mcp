@@ -93,7 +93,7 @@ func TestAuditMiddleware_LogsIdentity(t *testing.T) {
 func TestAuditMiddleware_LogsDuration(t *testing.T) {
 	mock := &mockProvider{
 		name: "slow-tool",
-		handleFunc: func(_ context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
+		handleFunc: func(_ context.Context, _ *mcp.CallToolRequest, _ map[string]any) (*mcp.CallToolResult, any, error) {
 			time.Sleep(50 * time.Millisecond)
 			return &mcp.CallToolResult{}, nil, nil
 		},
@@ -147,7 +147,7 @@ func TestAuditMiddleware_LogsFailure(t *testing.T) {
 	expectedErr := errors.New("tool execution failed")
 	mock := &mockProvider{
 		name: "failing-tool",
-		handleFunc: func(_ context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
+		handleFunc: func(_ context.Context, _ *mcp.CallToolRequest, _ map[string]any) (*mcp.CallToolResult, any, error) {
 			return nil, nil, expectedErr
 		},
 	}
@@ -175,7 +175,7 @@ func TestAuditMiddleware_LogsFailure(t *testing.T) {
 func TestAuditMiddleware_LogsIsErrorResult(t *testing.T) {
 	mock := &mockProvider{
 		name: "error-result-tool",
-		handleFunc: func(ctx context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
+		handleFunc: func(_ context.Context, _ *mcp.CallToolRequest, _ map[string]any) (*mcp.CallToolResult, any, error) {
 			return &mcp.CallToolResult{
 				IsError: true,
 				Content: []mcp.Content{
@@ -262,7 +262,7 @@ func TestAuditMiddleware_CustomAuditLogger(t *testing.T) {
 	mock := &mockProvider{name: "test-tool"}
 
 	var capturedEntry AuditEntry
-	customLogger := AuditLoggerFunc(func(ctx context.Context, entry AuditEntry) {
+	customLogger := AuditLoggerFunc(func(_ context.Context, entry AuditEntry) {
 		capturedEntry = entry
 	})
 
@@ -287,7 +287,7 @@ func TestAuditMiddleware_RequestIDCorrelation(t *testing.T) {
 
 	mw := NewAuditLoggingMiddleware(AuditConfig{
 		AuditLogger: auditLogger,
-		RequestIDExtractor: func(ctx context.Context) string {
+		RequestIDExtractor: func(_ context.Context) string {
 			return "req-12345"
 		},
 	})

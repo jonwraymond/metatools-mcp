@@ -10,7 +10,7 @@ import (
 func TestRegistry_RegisterAuthenticator(t *testing.T) {
 	reg := NewRegistry()
 
-	factory := func(cfg map[string]any) (Authenticator, error) {
+	factory := func(_ map[string]any) (Authenticator, error) {
 		return &JWTAuthenticator{}, nil
 	}
 
@@ -49,7 +49,7 @@ func TestRegistry_GetAuthenticator_NotFound(t *testing.T) {
 func TestRegistry_RegisterAuthorizer(t *testing.T) {
 	reg := NewRegistry()
 
-	factory := func(cfg map[string]any) (Authorizer, error) {
+	factory := func(_ map[string]any) (Authorizer, error) {
 		return AllowAllAuthorizer{}, nil
 	}
 
@@ -121,10 +121,10 @@ func TestDefaultRegistry_DenyAll(t *testing.T) {
 
 func TestRegistry_ListAuthenticators(t *testing.T) {
 	reg := NewRegistry()
-	_ = reg.RegisterAuthenticator("jwt", func(cfg map[string]any) (Authenticator, error) {
+	_ = reg.RegisterAuthenticator("jwt", func(_ map[string]any) (Authenticator, error) {
 		return &JWTAuthenticator{}, nil
 	})
-	_ = reg.RegisterAuthenticator("api_key", func(cfg map[string]any) (Authenticator, error) {
+	_ = reg.RegisterAuthenticator("api_key", func(_ map[string]any) (Authenticator, error) {
 		return &APIKeyAuthenticator{}, nil
 	})
 
@@ -135,7 +135,7 @@ func TestRegistry_ListAuthenticators(t *testing.T) {
 
 func TestRegistry_ListAuthorizers(t *testing.T) {
 	reg := NewRegistry()
-	_ = reg.RegisterAuthorizer("simple_rbac", func(cfg map[string]any) (Authorizer, error) {
+	_ = reg.RegisterAuthorizer("simple_rbac", func(_ map[string]any) (Authorizer, error) {
 		return &SimpleRBACAuthorizer{}, nil
 	})
 	_ = reg.RegisterAuthorizer("allow_all", func(cfg map[string]any) (Authorizer, error) {
