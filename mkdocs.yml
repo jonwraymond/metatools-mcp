@@ -6,13 +6,116 @@ edit_uri: edit/main/docs/
 docs_dir: docs
 nav:
   - Home: index.md
+  - API: api.md
   - Architecture: architecture.md
   - Design Notes: design-notes.md
   - Usage: usage.md
-  - API: api.md
   - Examples: examples.md
   - User Journey: user-journey.md
+  - Changelog: changelog.md
   - Plan of Record: plan-of-record.md
-  - Plans: plans/README.md
+  - Diagrams:
+      - data-flow: diagrams/data-flow.md
+      - dependency-graph: diagrams/dependency-graph.md
+      - layer-architecture: diagrams/layer-architecture.md
+      - protocol-adapters: diagrams/protocol-adapters.md
+      - repository-map: diagrams/repository-map.md
+      - CLAUDE: diagrams/CLAUDE.md
+  - Proposals:
+      - ARCHITECTURE-REVIEW: proposals/ARCHITECTURE-REVIEW.md
+      - ROADMAP: proposals/ROADMAP.md
+      - architecture-evaluation: proposals/architecture-evaluation.md
+      - auth-middleware: proposals/auth-middleware.md
+      - component-library-analysis: proposals/component-library-analysis.md
+      - implementation-phases: proposals/implementation-phases.md
+      - mcp-spec-alignment: proposals/mcp-spec-alignment.md
+      - multi-tenancy: proposals/multi-tenancy.md
+      - persistence-boundary: proposals/persistence-boundary.md
+      - pluggable-architecture: proposals/pluggable-architecture.md
+      - protocol-agnostic-tools: proposals/protocol-agnostic-tools.md
+      - CLAUDE: proposals/CLAUDE.md
+  - Plans:
+      - 2026-01-30-prd-016-execution-plan: plans/2026-01-30-prd-016-execution-plan.md
+      - 2026-01-30-prd-016-interface-contracts: plans/2026-01-30-prd-016-interface-contracts.md
+      - 2026-01-30-prd-017-auth-middleware: plans/2026-01-30-prd-017-auth-middleware.md
+      - CLAUDE: plans/CLAUDE.md
+      - CONSOLIDATION-MASTER-PLAN: plans/CONSOLIDATION-MASTER-PLAN.md
+      - PRD-100-109-remediation: plans/PRD-100-109-remediation.md
+      - PRD-100-master-plan: plans/PRD-100-master-plan.md
+      - PRD-101-architecture-diagrams: plans/PRD-101-architecture-diagrams.md
+      - PRD-102-schema-definitions: plans/PRD-102-schema-definitions.md
+      - PRD-110-119-remediation: plans/PRD-110-119-remediation.md
+      - PRD-110-repo-creation: plans/PRD-110-repo-creation.md
+      - PRD-111-cicd-templates: plans/PRD-111-cicd-templates.md
+      - PRD-112-github-org-config: plans/PRD-112-github-org-config.md
+      - PRD-113-release-automation: plans/PRD-113-release-automation.md
+      - PRD-120-migrate-toolmodel: plans/PRD-120-migrate-toolmodel.md
+      - PRD-121-migrate-tooladapter: plans/PRD-121-migrate-tooladapter.md
+      - PRD-122-create-toolversion: plans/PRD-122-create-toolversion.md
+      - PRD-123-toolfoundation-docs-alignment: plans/PRD-123-toolfoundation-docs-alignment.md
+      - PRD-124-toolfoundation-schema-policy: plans/PRD-124-toolfoundation-schema-policy.md
+      - PRD-125-toolfoundation-adapter-matrix: plans/PRD-125-toolfoundation-adapter-matrix.md
+      - PRD-126-toolfoundation-version-usage: plans/PRD-126-toolfoundation-version-usage.md
+      - PRD-127-toolfoundation-contracts: plans/PRD-127-toolfoundation-contracts.md
+      - PRD-128-toolfoundation-release-propagation: plans/PRD-128-toolfoundation-release-propagation.md
+      - PRD-129-toolfoundation-g2-validation: plans/PRD-129-toolfoundation-g2-validation.md
+      - PRD-130-migrate-toolindex: plans/PRD-130-migrate-toolindex.md
+      - PRD-131-migrate-toolsearch: plans/PRD-131-migrate-toolsearch.md
+      - PRD-132-migrate-toolsemantic: plans/PRD-132-migrate-toolsemantic.md
+      - PRD-133-migrate-tooldocs: plans/PRD-133-migrate-tooldocs.md
+      - PRD-134-tooldiscovery-docs-alignment: plans/PRD-134-tooldiscovery-docs-alignment.md
+      - PRD-135-tooldiscovery-search-policy: plans/PRD-135-tooldiscovery-search-policy.md
+      - PRD-136-tooldiscovery-semantic-contracts: plans/PRD-136-tooldiscovery-semantic-contracts.md
+      - PRD-137-tooldiscovery-progressive-docs: plans/PRD-137-tooldiscovery-progressive-docs.md
+      - PRD-138-tooldiscovery-release-propagation: plans/PRD-138-tooldiscovery-release-propagation.md
+      - PRD-139-tooldiscovery-validation: plans/PRD-139-tooldiscovery-validation.md
+      - PRD-140-migrate-toolrun: plans/PRD-140-migrate-toolrun.md
+      - PRD-141-migrate-toolruntime: plans/PRD-141-migrate-toolruntime.md
+      - PRD-142-migrate-toolcode: plans/PRD-142-migrate-toolcode.md
+      - PRD-143-extract-toolbackend: plans/PRD-143-extract-toolbackend.md
+      - PRD-144-toolexec-docs-alignment: plans/PRD-144-toolexec-docs-alignment.md
+      - PRD-145-toolexec-runtime-security-profiles: plans/PRD-145-toolexec-runtime-security-profiles.md
+      - PRD-146-toolexec-backend-matrix: plans/PRD-146-toolexec-backend-matrix.md
+      - PRD-147-toolexec-toolcode-runtime-contract: plans/PRD-147-toolexec-toolcode-runtime-contract.md
+      - PRD-148-toolexec-release-propagation: plans/PRD-148-toolexec-release-propagation.md
+      - PRD-149-toolexec-validation: plans/PRD-149-toolexec-validation.md
+      - PRD-150-migrate-toolset: plans/PRD-150-migrate-toolset.md
+      - PRD-151-complete-toolskill: plans/PRD-151-complete-toolskill.md
+      - PRD-152-toolcompose-docs-alignment: plans/PRD-152-toolcompose-docs-alignment.md
+      - PRD-153-toolcompose-set-policy-docs: plans/PRD-153-toolcompose-set-policy-docs.md
+      - PRD-154-toolcompose-skill-contracts: plans/PRD-154-toolcompose-skill-contracts.md
+      - PRD-155-toolcompose-user-journey: plans/PRD-155-toolcompose-user-journey.md
+      - PRD-156-toolcompose-docs-site: plans/PRD-156-toolcompose-docs-site.md
+      - PRD-157-toolcompose-release-propagation: plans/PRD-157-toolcompose-release-propagation.md
+      - PRD-158-toolcompose-validation: plans/PRD-158-toolcompose-validation.md
+      - PRD-159-toolcompose-docs-publish: plans/PRD-159-toolcompose-docs-publish.md
+      - PRD-160-migrate-toolobserve: plans/PRD-160-migrate-toolobserve.md
+      - PRD-161-migrate-toolcache: plans/PRD-161-migrate-toolcache.md
+      - PRD-162-extract-toolauth: plans/PRD-162-extract-toolauth.md
+      - PRD-163-create-toolresilience: plans/PRD-163-create-toolresilience.md
+      - PRD-164-create-toolhealth: plans/PRD-164-create-toolhealth.md
+      - PRD-165-toolops-docs-alignment: plans/PRD-165-toolops-docs-alignment.md
+      - PRD-166-toolops-observe-contracts: plans/PRD-166-toolops-observe-contracts.md
+      - PRD-167-toolops-cache-policy-docs: plans/PRD-167-toolops-cache-policy-docs.md
+      - PRD-168-toolops-auth-health-resilience-docs: plans/PRD-168-toolops-auth-health-resilience-docs.md
+      - PRD-169-toolops-release-validation: plans/PRD-169-toolops-release-validation.md
+      - PRD-170-create-tooltransport: plans/PRD-170-create-tooltransport.md
+      - PRD-171-create-toolwire: plans/PRD-171-create-toolwire.md
+      - PRD-172-create-tooldiscover: plans/PRD-172-create-tooldiscover.md
+      - PRD-173-create-toolcontent: plans/PRD-173-create-toolcontent.md
+      - PRD-174-create-tooltask: plans/PRD-174-create-tooltask.md
+      - PRD-175-create-toolstream: plans/PRD-175-create-toolstream.md
+      - PRD-176-create-toolsession: plans/PRD-176-create-toolsession.md
+      - PRD-177-create-toolelicit: plans/PRD-177-create-toolelicit.md
+      - PRD-178-create-toolresource: plans/PRD-178-create-toolresource.md
+      - PRD-179-create-toolprompt: plans/PRD-179-create-toolprompt.md
+      - PRD-180-update-metatools-mcp: plans/PRD-180-update-metatools-mcp.md
+      - PRD-181-update-ai-tools-stack: plans/PRD-181-update-ai-tools-stack.md
+      - PRD-182-documentation-site: plans/PRD-182-documentation-site.md
+      - PRD-190-archive-old-repos: plans/PRD-190-archive-old-repos.md
+      - PRD-191-update-submodules: plans/PRD-191-update-submodules.md
+      - PRD-192-validation: plans/PRD-192-validation.md
+      - PRD-ORDER-OF-OPERATIONS: plans/PRD-ORDER-OF-OPERATIONS.md
+      - README: plans/README.md
 theme:
   name: material

@@ -59,7 +59,7 @@ import "github.com/jonwraymond/toolmodel"
 import "github.com/jonwraymond/toolfoundation/model"
 ```
 
-See [MIGRATION.md](./MIGRATION.md) for details.
+See the stack migration guide for details: https://jonwraymond.github.io/ai-tools-stack/operations/migration-guide/
 ```
 
 ### Task 2: Create Migration Guides

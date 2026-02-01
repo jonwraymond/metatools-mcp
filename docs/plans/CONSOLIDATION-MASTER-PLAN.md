@@ -392,7 +392,7 @@ For each migration PRD:
 
 ## References
 
-- [LIBRARY-CATEGORIZATION.md](../LIBRARY-CATEGORIZATION.md) - Full library inventory
-- [MULTI-PROTOCOL-TRANSPORT.md](../MULTI-PROTOCOL-TRANSPORT.md) - Protocol layer design
-- [EXTRACTION-ANALYSIS.md](../EXTRACTION-ANALYSIS.md) - metatools-mcp extraction
-- [MCP-FEATURES-ANALYSIS.md](../MCP-FEATURES-ANALYSIS.md) - MCP protocol features
+- [LIBRARY-CATEGORIZATION.md](https://github.com/jonwraymond/metatools-mcp/blob/main/LIBRARY-CATEGORIZATION.md) - Full library inventory
+- [MULTI-PROTOCOL-TRANSPORT.md](https://github.com/jonwraymond/metatools-mcp/blob/main/MULTI-PROTOCOL-TRANSPORT.md) - Protocol layer design
+- [EXTRACTION-ANALYSIS.md](https://github.com/jonwraymond/metatools-mcp/blob/main/EXTRACTION-ANALYSIS.md) - metatools-mcp extraction
+- [MCP-FEATURES-ANALYSIS.md](https://github.com/jonwraymond/metatools-mcp/blob/main/MCP-FEATURES-ANALYSIS.md) - MCP protocol features

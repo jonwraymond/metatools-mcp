@@ -28,7 +28,7 @@ See the master roadmap for the current version matrix: [ROADMAP](proposals/ROADM
 
 **Goal:** Ensure the MCP server edge is protocol‑correct before expanding capability.
 
-1. **MCP spec alignment (PRD‑015)**
+1. **MCP spec alignment**
    - `notifications/tools/list_changed`
    - pagination/cursor consistency
    - cancellation propagation
@@ -36,7 +36,7 @@ See the master roadmap for the current version matrix: [ROADMAP](proposals/ROADM
 
 Docs:
 - Proposal: [MCP Spec Alignment](proposals/mcp-spec-alignment.md)
-- PRD: [PRD‑015](plans/2026-01-28-prd-015-mcp-spec-alignment.md)
+- PRD: [PRD‑180](plans/PRD-180-update-metatools-mcp.md)
 
 ---
 
@@ -44,17 +44,16 @@ Docs:
 
 **Goal:** Provide CLI, configuration, transport, and provider/backends for production use.
 
-2. **CLI foundation (PRD‑002)**
-3. **Configuration layer (PRD‑003)**
-4. **Transport layer (PRD‑004)**
-5. **Tool provider registry (PRD‑005)**
-6. **Backend registry (PRD‑006)**
-7. **Middleware chain (PRD‑007)**
+2. **Repo scaffolding + CLI surface**
+3. **Configuration layer**
+4. **Transport layer**
+5. **Tool provider registry**
+6. **Backend registry**
+7. **Middleware chain**
 
 Docs:
-- PRDs: [PRD‑002](plans/2026-01-28-prd-002-cli-cobra-foundation.md), [PRD‑003](plans/2026-01-28-prd-003-koanf-config.md),
-  [PRD‑004](plans/2026-01-28-prd-004-transport-sse.md), [PRD‑005](plans/2026-01-28-prd-005-tool-provider-registry.md),
-  [PRD‑006](plans/2026-01-28-prd-006-backend-registry.md), [PRD‑007](plans/2026-01-28-prd-007-middleware-chain.md)
+- PRDs: [PRD‑110](plans/PRD-110-repo-creation.md), [PRD‑111](plans/PRD-111-cicd-templates.md),
+  [PRD‑112](plans/PRD-112-github-org-config.md), [PRD‑113](plans/PRD-113-release-automation.md)
 
 ---
 
@@ -62,12 +61,12 @@ Docs:
 
 **Goal:** Normalize tools into composable, protocol‑agnostic sets without changing core semantics.
 
-8. **tooladapter (PRD‑008)** → now `toolfoundation/adapter`
-9. **toolset (PRD‑009)** → now `toolcompose/set`
+8. **tooladapter** → now `toolfoundation/adapter`
+9. **toolset** → now `toolcompose/set`
 
 Docs:
-- [PRD‑008](plans/2026-01-28-prd-008-tooladapter-library.md)
-- [PRD‑009](plans/2026-01-28-prd-009-toolset-composition.md)
+- [PRD‑121](plans/PRD-121-migrate-tooladapter.md)
+- [PRD‑150](plans/PRD-150-migrate-toolset.md)
 
 ---
 
@@ -75,12 +74,12 @@ Docs:
 
 **Goal:** Make the system operationally measurable and resilient.
 
-10. **toolobserve (PRD‑010)** → now `toolops/observe`
-11. **toolcache (PRD‑011)** → now `toolops/cache`
+10. **toolobserve** → now `toolops/observe`
+11. **toolcache** → now `toolops/cache`
 
 Docs:
-- [PRD‑010](plans/2026-01-28-prd-010-toolobserve-library.md)
-- [PRD‑011](plans/2026-01-28-prd-011-toolcache-library.md)
+- [PRD‑160](plans/PRD-160-migrate-toolobserve.md)
+- [PRD‑161](plans/PRD-161-migrate-toolcache.md)
 
 ---
 
@@ -88,12 +87,12 @@ Docs:
 
 **Goal:** Enable scale, isolation, and advanced discovery without destabilizing core APIs.
 
-12. **Multi‑tenancy core (PRD‑012)**
-13. **toolsemantic (PRD‑013)** → now `tooldiscovery/semantic`
+12. **Multi‑tenancy core**
+13. **toolsemantic** → now `tooldiscovery/semantic`
 
 Docs:
-- [PRD‑012](plans/2026-01-28-prd-012-multi-tenancy-core.md)
-- [PRD‑013](plans/2026-01-28-prd-013-toolsemantic-library.md)
+- Proposal: [Multi‑Tenancy](proposals/multi-tenancy.md)
+- [PRD‑132](plans/PRD-132-migrate-toolsemantic.md)
 
 ---
 
@@ -101,10 +100,10 @@ Docs:
 
 **Goal:** Higher‑level capability composition for reusable workflows.
 
-14. **toolskill (PRD‑014)** → now `toolcompose/skill`
+14. **toolskill** → now `toolcompose/skill`
 
 Docs:
-- [PRD‑014](plans/2026-01-28-prd-014-toolskill-library.md)
+- [PRD‑151](plans/PRD-151-complete-toolskill.md)
 
 ---
 
@@ -112,10 +111,10 @@ Docs:
 
 **Goal:** Expand sandbox options and isolation strategies.
 
-15. **toolruntime Docker backend (PRD‑001)** → now `toolexec/runtime`
+15. **toolruntime Docker backend** → now `toolexec/runtime`
 
 Docs:
-- [PRD‑001](plans/2026-01-28-prd-001-toolruntime-docker-backend.md)
+- [PRD‑141](plans/PRD-141-migrate-toolruntime.md)
 
 ---
 
