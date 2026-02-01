@@ -37,7 +37,7 @@ func TestImageResolver_Resolve_PullsImage(t *testing.T) {
 	assert.Equal(t, "alpine:3.18", resolved)
 
 	// Verify the image now exists
-	_, _, err = cli.ImageInspectWithRaw(context.Background(), "alpine:3.18")
+	_, err = cli.ImageInspect(context.Background(), "alpine:3.18")
 	require.NoError(t, err)
 }
 

@@ -25,7 +25,7 @@ func NewResolver(docker *client.Client) *Resolver {
 // Returns the resolved image reference (same as input for now).
 func (r *Resolver) Resolve(ctx context.Context, imageRef string) (string, error) {
 	// Check if image exists locally
-	_, _, err := r.docker.ImageInspectWithRaw(ctx, imageRef)
+	_, err := r.docker.ImageInspect(ctx, imageRef)
 	if err == nil {
 		return imageRef, nil // Already exists
 	}
