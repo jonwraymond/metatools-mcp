@@ -67,7 +67,7 @@ Week 20-21                                                    ██████
    - [Stream E: Agent Skills](#stream-e-agent-skills)
 4. [Phase Breakdown](#4-phase-breakdown)
 5. [Interface Contracts](#5-interface-contracts)
-6. [Edge Cases & Considerations](#6-edge-cases--considerations)
+6. [Edge Cases & Considerations](#6-edge-cases-considerations)
 7. [Rollout Strategy](#7-rollout-strategy)
 8. [Multi-Language Extensibility](#8-multi-language-extensibility)
 
