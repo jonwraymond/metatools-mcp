@@ -39,12 +39,12 @@ jobs:
           fi
 
       - name: golangci-lint (revive enabled)
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v7
         with:
-          version: latest
+          version: v2.8.0
           args: --enable revive
 
       - name: Gosec
         run: |
-          go install github.com/securego/gosec/v2/cmd/gosec@latest
-          gosec ./...
+          go install github.com/securego/gosec/v2/cmd/gosec@v2.22.11
+          "$(go env GOPATH)/bin/gosec" ./...
