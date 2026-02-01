@@ -196,7 +196,7 @@ func TestJWKSKeyProvider_CachesKeys(t *testing.T) {
 	jwk := rsaPublicKeyToJWK(&rsaKey.PublicKey, "cached-key")
 
 	var fetchCount int32
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		atomic.AddInt32(&fetchCount, 1)
 		jwks := map[string]any{"keys": []map[string]any{jwk}}
 		w.Header().Set("Content-Type", "application/json")
@@ -232,7 +232,7 @@ func TestJWKSKeyProvider_CacheExpiration(t *testing.T) {
 	jwk := rsaPublicKeyToJWK(&rsaKey.PublicKey, "expiring-key")
 
 	var fetchCount int32
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		atomic.AddInt32(&fetchCount, 1)
 		jwks := map[string]any{"keys": []map[string]any{jwk}}
 		w.Header().Set("Content-Type", "application/json")
@@ -267,7 +267,7 @@ func TestJWKSKeyProvider_ConcurrentAccess(t *testing.T) {
 	jwk := rsaPublicKeyToJWK(&rsaKey.PublicKey, "concurrent-key")
 
 	var fetchCount int32
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		atomic.AddInt32(&fetchCount, 1)
 		// Simulate slow response
 		time.Sleep(10 * time.Millisecond)
@@ -335,21 +335,21 @@ func TestJWKSKeyProvider_HTTPError(t *testing.T) {
 	}{
 		{
 			name: "server returns 500",
-			handler: func(w http.ResponseWriter, r *http.Request) {
+			handler: func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 			},
 			wantErrMsg: "unexpected status",
 		},
 		{
 			name: "server returns 404",
-			handler: func(w http.ResponseWriter, r *http.Request) {
+			handler: func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusNotFound)
 			},
 			wantErrMsg: "unexpected status",
 		},
 		{
 			name: "invalid JSON response",
-			handler: func(w http.ResponseWriter, r *http.Request) {
+			handler: func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				_, _ = w.Write([]byte("not valid json"))
 			},
@@ -357,7 +357,7 @@ func TestJWKSKeyProvider_HTTPError(t *testing.T) {
 		},
 		{
 			name: "missing keys field",
-			handler: func(w http.ResponseWriter, r *http.Request) {
+			handler: func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				_, _ = w.Write([]byte(`{}`))
 			},
@@ -401,7 +401,7 @@ func TestJWKSKeyProvider_RefreshFailureUsesCached(t *testing.T) {
 	jwk := rsaPublicKeyToJWK(&rsaKey.PublicKey, "fallback-key")
 
 	var callCount int32
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		count := atomic.AddInt32(&callCount, 1)
 		if count == 1 {
 			// First call succeeds

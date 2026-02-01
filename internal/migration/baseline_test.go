@@ -134,7 +134,7 @@ func TestCurrentRunnerCreation(t *testing.T) {
 }
 
 // TestCurrentCodeExecutorCreation verifies code.NewDefaultExecutor works.
-func TestCurrentCodeExecutorCreation(t *testing.T) {
+func TestCurrentCodeExecutorCreation(_ *testing.T) {
 	// code.NewDefaultExecutor requires a Config with Runner
 	// For this baseline test, we just verify the type exists
 	var _ code.Executor

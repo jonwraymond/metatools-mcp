@@ -33,7 +33,7 @@ func (m *mockProvider) Handle(ctx context.Context, req *mcp.CallToolRequest, arg
 
 func TestAuthMiddleware_ValidAuth(t *testing.T) {
 	// Authenticator that always succeeds
-	auth := AuthenticatorFunc(func(ctx context.Context, req *AuthRequest) (*AuthResult, error) {
+	auth := AuthenticatorFunc(func(_ context.Context, _ *AuthRequest) (*AuthResult, error) {
 		return AuthSuccess(&Identity{
 			Principal: "alice",
 			TenantID:  "tenant-1",
@@ -68,7 +68,7 @@ func TestAuthMiddleware_ValidAuth(t *testing.T) {
 
 func TestAuthMiddleware_InvalidAuth(t *testing.T) {
 	// Authenticator that always fails
-	auth := AuthenticatorFunc(func(ctx context.Context, req *AuthRequest) (*AuthResult, error) {
+	auth := AuthenticatorFunc(func(_ context.Context, _ *AuthRequest) (*AuthResult, error) {
 		return AuthFailure(ErrInvalidToken, "Bearer"), nil
 	})
 
@@ -91,7 +91,7 @@ func TestAuthMiddleware_InvalidAuth(t *testing.T) {
 
 func TestAuthMiddleware_AllowAnonymous(t *testing.T) {
 	// Authenticator that fails (no credentials)
-	auth := AuthenticatorFunc(func(ctx context.Context, req *AuthRequest) (*AuthResult, error) {
+	auth := AuthenticatorFunc(func(_ context.Context, _ *AuthRequest) (*AuthResult, error) {
 		return AuthFailure(ErrMissingCredentials, "Bearer"), nil
 	})
 
@@ -193,7 +193,7 @@ func TestAuthzMiddleware_NoIdentity(t *testing.T) {
 }
 
 func TestAuthMiddleware_ReturnsMiddlewareType(t *testing.T) {
-	auth := AuthenticatorFunc(func(ctx context.Context, req *AuthRequest) (*AuthResult, error) {
+	auth := AuthenticatorFunc(func(_ context.Context, _ *AuthRequest) (*AuthResult, error) {
 		return AuthSuccess(&Identity{Principal: "test"}), nil
 	})
 
@@ -223,7 +223,7 @@ func TestAuthzMiddleware_CustomResourceResolver(t *testing.T) {
 	})
 
 	mw := AuthzMiddleware(authz, AuthzMiddlewareConfig{
-		ResourceResolver: func(ctx context.Context, toolName string, input map[string]any) string {
+		ResourceResolver: func(_ context.Context, toolName string, _ map[string]any) string {
 			// Custom resolver that adds prefix
 			return "tool:" + toolName
 		},

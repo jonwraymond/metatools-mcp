@@ -103,7 +103,7 @@ func TestAuthzRequest_ToolName(t *testing.T) {
 func TestAuthorizerFunc(t *testing.T) {
 	called := false
 
-	fn := AuthorizerFunc(func(ctx context.Context, req *AuthzRequest) error {
+	fn := AuthorizerFunc(func(_ context.Context, _ *AuthzRequest) error {
 		called = true
 		return nil
 	})

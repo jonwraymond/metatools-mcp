@@ -1,3 +1,4 @@
+//revive:disable:exported // Auth-prefixed middleware types are part of the public auth API.
 package auth
 
 import (

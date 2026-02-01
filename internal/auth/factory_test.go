@@ -64,7 +64,7 @@ func TestRegistry_RegisterAuthorizer(t *testing.T) {
 func TestRegistry_GetAuthorizer(t *testing.T) {
 	reg := NewRegistry()
 
-	factory := func(cfg map[string]any) (Authorizer, error) {
+	factory := func(_ map[string]any) (Authorizer, error) {
 		return NewSimpleRBACAuthorizer(RBACConfig{}), nil
 	}
 
@@ -138,7 +138,7 @@ func TestRegistry_ListAuthorizers(t *testing.T) {
 	_ = reg.RegisterAuthorizer("simple_rbac", func(_ map[string]any) (Authorizer, error) {
 		return &SimpleRBACAuthorizer{}, nil
 	})
-	_ = reg.RegisterAuthorizer("allow_all", func(cfg map[string]any) (Authorizer, error) {
+	_ = reg.RegisterAuthorizer("allow_all", func(_ map[string]any) (Authorizer, error) {
 		return AllowAllAuthorizer{}, nil
 	})
 

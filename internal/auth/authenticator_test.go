@@ -57,7 +57,7 @@ func TestAuthenticatorFunc(t *testing.T) {
 		Identity:      &Identity{Principal: "test-user"},
 	}
 
-	fn := AuthenticatorFunc(func(ctx context.Context, req *AuthRequest) (*AuthResult, error) {
+	fn := AuthenticatorFunc(func(_ context.Context, _ *AuthRequest) (*AuthResult, error) {
 		called = true
 		return expectedResult, nil
 	})

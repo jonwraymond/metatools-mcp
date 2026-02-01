@@ -38,7 +38,7 @@ func (m *mockToolProvider) Tool() mcp.Tool {
 	return m.tool
 }
 
-func (m *mockToolProvider) Handle(ctx context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
+func (m *mockToolProvider) Handle(ctx context.Context, _ *mcp.CallToolRequest, _ map[string]any) (*mcp.CallToolResult, any, error) {
 	// Capture identity from context
 	m.identity = auth.IdentityFromContext(ctx)
 	if m.handleErr != nil {

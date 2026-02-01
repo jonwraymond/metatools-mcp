@@ -1,3 +1,4 @@
+//revive:disable:exported // Auth-prefixed types provide clarity across packages in the stack.
 package auth
 
 import "context"
