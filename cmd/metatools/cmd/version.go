@@ -38,11 +38,11 @@ func newVersionCmd() *cobra.Command {
 				return enc.Encode(info)
 			}
 
-			fmt.Fprintf(cmd.OutOrStdout(), "metatools %s\n", info.Version)
-			fmt.Fprintf(cmd.OutOrStdout(), "  Git commit: %s\n", info.GitCommit)
-			fmt.Fprintf(cmd.OutOrStdout(), "  Build date: %s\n", info.BuildDate)
-			fmt.Fprintf(cmd.OutOrStdout(), "  Go version: %s\n", info.GoVersion)
-			fmt.Fprintf(cmd.OutOrStdout(), "  Platform:   %s\n", info.Platform)
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "metatools %s\n", info.Version)
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "  Git commit: %s\n", info.GitCommit)
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "  Build date: %s\n", info.BuildDate)
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "  Go version: %s\n", info.GoVersion)
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "  Platform:   %s\n", info.Platform)
 			return nil
 		},
 	}

@@ -27,7 +27,7 @@ func newConfigValidateCmd() *cobra.Command {
 			if _, err := config.Load(configPath); err != nil {
 				return err
 			}
-			fmt.Fprintln(cmd.OutOrStdout(), "config is valid")
+			_, _ = fmt.Fprintln(cmd.OutOrStdout(), "config is valid")
 			return nil
 		},
 	}

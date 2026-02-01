@@ -20,7 +20,7 @@ func createIntrospectionServer(t *testing.T, handler http.HandlerFunc) *httptest
 }
 
 func introspectionResponse(active bool, claims map[string]any) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, _ *http.Request) {
 		response := map[string]any{"active": active}
 		for k, v := range claims {
 			response[k] = v
@@ -226,7 +226,7 @@ func TestOAuth2_NetworkError(t *testing.T) {
 }
 
 func TestOAuth2_ServerError(t *testing.T) {
-	server := createIntrospectionServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := createIntrospectionServer(t, func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 	defer server.Close()
@@ -464,7 +464,7 @@ func TestOAuth2_ConcurrentAccess(t *testing.T) {
 	results := make(chan bool, goroutines)
 
 	for i := 0; i < goroutines; i++ {
-		go func(tokenNum int) {
+		go func(_ int) {
 			defer wg.Done()
 			req := &AuthRequest{
 				Headers: map[string][]string{

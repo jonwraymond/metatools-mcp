@@ -40,7 +40,7 @@ func rsaPublicKeyToJWK(pub *rsa.PublicKey, kid string) map[string]any {
 
 func createJWKSServer(t *testing.T, keys []map[string]any) *httptest.Server {
 	t.Helper()
-	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		jwks := map[string]any{
 			"keys": keys,
 		}

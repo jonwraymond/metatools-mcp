@@ -70,16 +70,16 @@ func TestServeCmd_EnvVars(t *testing.T) {
 	oldHost := os.Getenv("METATOOLS_HOST")
 	oldConfig := os.Getenv("METATOOLS_CONFIG")
 	defer func() {
-		os.Setenv("METATOOLS_TRANSPORT", oldTransport)
-		os.Setenv("METATOOLS_PORT", oldPort)
-		os.Setenv("METATOOLS_HOST", oldHost)
-		os.Setenv("METATOOLS_CONFIG", oldConfig)
+		_ = os.Setenv("METATOOLS_TRANSPORT", oldTransport)
+		_ = os.Setenv("METATOOLS_PORT", oldPort)
+		_ = os.Setenv("METATOOLS_HOST", oldHost)
+		_ = os.Setenv("METATOOLS_CONFIG", oldConfig)
 	}()
 
-	os.Setenv("METATOOLS_TRANSPORT", "sse")
-	os.Setenv("METATOOLS_PORT", "9090")
-	os.Setenv("METATOOLS_HOST", "127.0.0.1")
-	os.Setenv("METATOOLS_CONFIG", "metatools.yaml")
+	_ = os.Setenv("METATOOLS_TRANSPORT", "sse")
+	_ = os.Setenv("METATOOLS_PORT", "9090")
+	_ = os.Setenv("METATOOLS_HOST", "127.0.0.1")
+	_ = os.Setenv("METATOOLS_CONFIG", "metatools.yaml")
 
 	cmd := newServeCmd()
 	if err := cmd.ParseFlags([]string{}); err != nil {

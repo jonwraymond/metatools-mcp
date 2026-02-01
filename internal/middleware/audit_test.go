@@ -65,7 +65,7 @@ func TestAuditMiddleware_LogsIdentity(t *testing.T) {
 
 	mw := NewAuditLoggingMiddleware(AuditConfig{
 		AuditLogger: auditLogger,
-		IdentityExtractor: func(ctx context.Context) AuditIdentity {
+		IdentityExtractor: func(_ context.Context) AuditIdentity {
 			return AuditIdentity{
 				Principal: "user@example.com",
 				TenantID:  "tenant-123",
@@ -93,7 +93,7 @@ func TestAuditMiddleware_LogsIdentity(t *testing.T) {
 func TestAuditMiddleware_LogsDuration(t *testing.T) {
 	mock := &mockProvider{
 		name: "slow-tool",
-		handleFunc: func(ctx context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
+		handleFunc: func(_ context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
 			time.Sleep(50 * time.Millisecond)
 			return &mcp.CallToolResult{}, nil, nil
 		},
@@ -147,7 +147,7 @@ func TestAuditMiddleware_LogsFailure(t *testing.T) {
 	expectedErr := errors.New("tool execution failed")
 	mock := &mockProvider{
 		name: "failing-tool",
-		handleFunc: func(ctx context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
+		handleFunc: func(_ context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
 			return nil, nil, expectedErr
 		},
 	}

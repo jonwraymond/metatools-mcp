@@ -269,12 +269,12 @@ func init() {
 	})
 
 	// Register allow_all authorizer
-	_ = DefaultRegistry.RegisterAuthorizer("allow_all", func(cfg map[string]any) (Authorizer, error) {
+	_ = DefaultRegistry.RegisterAuthorizer("allow_all", func(_ map[string]any) (Authorizer, error) {
 		return AllowAllAuthorizer{}, nil
 	})
 
 	// Register deny_all authorizer
-	_ = DefaultRegistry.RegisterAuthorizer("deny_all", func(cfg map[string]any) (Authorizer, error) {
+	_ = DefaultRegistry.RegisterAuthorizer("deny_all", func(_ map[string]any) (Authorizer, error) {
 		return DenyAllAuthorizer{}, nil
 	})
 

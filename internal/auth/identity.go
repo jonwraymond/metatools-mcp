@@ -9,6 +9,7 @@ import (
 )
 
 // AuthMethod identifies the authentication mechanism used.
+//revive:disable-next-line:exported
 type AuthMethod int
 
 const (
