@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5.0](https://github.com/jonwraymond/metatools-mcp/compare/metatools-mcp-v0.4.0...metatools-mcp-v0.5.0) (2026-02-03)
+
+
+### Features
+
+* add streamable transport and docker runtime ([cb2de14](https://github.com/jonwraymond/metatools-mcp/commit/cb2de141d1727693fb23216742c1c2d2e3ec0d8b))
+* add wasm runtime integration ([211c356](https://github.com/jonwraymond/metatools-mcp/commit/211c35666ee9836550ddf127b007e31302438d87))
+* add wasm runtime integration ([40055f4](https://github.com/jonwraymond/metatools-mcp/commit/40055f4f87f75fbf83518e0d79f750b8cdd2d6de))
+* **migration:** migrate entry points to consolidated repos ([32eb9f9](https://github.com/jonwraymond/metatools-mcp/commit/32eb9f91d9b202758f541323d641cf3c4c134726))
+* **migration:** migrate internal/backend to toolfoundation/model ([5200292](https://github.com/jonwraymond/metatools-mcp/commit/5200292d1bcef1afb00f7a2ea9da455c5b48c5b8))
+* **migration:** migrate toolindex/tooldocs/toolsearch to tooldiscovery ([df6c890](https://github.com/jonwraymond/metatools-mcp/commit/df6c890c5a073ccd155d67966446b746ebda55a5))
+* **migration:** migrate toolrun/toolruntime/toolcode to toolexec ([4ad9156](https://github.com/jonwraymond/metatools-mcp/commit/4ad9156a5fe891f26ba1a7f7937b8c5746708bc9))
+
 ## [0.4.0](https://github.com/jonwraymond/metatools-mcp/compare/metatools-mcp-v0.3.0...metatools-mcp-v0.4.0) (2026-01-29)
 
 
