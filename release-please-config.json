@@ -4,7 +4,11 @@
     ".": {
       "release-type": "go",
       "package-name": "metatools-mcp",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "exclude-paths": [
+        "VERSIONS.md",
+        "README.md"
+      ]
     }
   }
 }
