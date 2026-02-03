@@ -14,6 +14,9 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Create GitHub App token
         id: app_token
         uses: actions/create-github-app-token@v1
@@ -21,6 +24,7 @@ jobs:
           app-id: ${{ secrets.RELEASE_PLEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_PLEASE_APP_PRIVATE_KEY }}
       - name: Release Please
+        if: steps.changes.outputs.run == 'true'
         uses: googleapis/release-please-action@v4
         with:
           token: ${{ steps.app_token.outputs.token }}
