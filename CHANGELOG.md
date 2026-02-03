@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/jonwraymond/metatools-mcp/compare/metatools-mcp-v0.5.3...metatools-mcp-v0.6.0) (2026-02-03)
+
+
+### Features
+
+* **config:** persist execution limits in sqlite ([#33](https://github.com/jonwraymond/metatools-mcp/issues/33)) ([c8e1992](https://github.com/jonwraymond/metatools-mcp/commit/c8e199292bbee966741cbbc97a78d9b18b7b4b1a))
+
 ## [0.4.0](https://github.com/jonwraymond/metatools-mcp/compare/metatools-mcp-v0.3.0...metatools-mcp-v0.4.0) (2026-01-29)
 
 
