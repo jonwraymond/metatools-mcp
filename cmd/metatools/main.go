@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -29,6 +30,14 @@ func createServer() (*server.Server, error) {
 		return nil, fmt.Errorf("invalid config: %w", err)
 	}
 
+	appCfg, err := config.Load("")
+	if err != nil {
+		return nil, fmt.Errorf("loading app config: %w", err)
+	}
+	if err := appCfg.ApplyRuntimeLimitsStore(context.Background()); err != nil {
+		return nil, fmt.Errorf("apply runtime limits: %w", err)
+	}
+
 	idx, err := bootstrap.NewIndexFromConfig(envCfg)
 	if err != nil {
 		return nil, fmt.Errorf("creating index: %w", err)
@@ -36,7 +45,7 @@ func createServer() (*server.Server, error) {
 	docs := tooldoc.NewInMemoryStore(tooldoc.StoreOptions{Index: idx})
 	runner := run.NewRunner(run.WithIndex(idx))
 
-	exec, err := maybeCreateExecutor(idx, docs, runner)
+	exec, err := maybeCreateExecutor(appCfg.Execution, idx, docs, runner)
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,6 @@
 //go:build toolruntime
 
-package main
+package cmd
 
 import (
 	"context"

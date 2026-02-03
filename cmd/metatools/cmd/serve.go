@@ -135,7 +135,12 @@ func buildServerConfigFromConfig(appCfg config.AppConfig) (config.Config, error)
 	docs := tooldoc.NewInMemoryStore(tooldoc.StoreOptions{Index: idx})
 	runner := run.NewRunner(run.WithIndex(idx))
 
-	cfg := adapters.NewConfig(idx, docs, runner, nil)
+	exec, err := maybeCreateExecutor(appCfg.Execution, idx, docs, runner)
+	if err != nil {
+		return config.Config{}, fmt.Errorf("create executor: %w", err)
+	}
+
+	cfg := adapters.NewConfig(idx, docs, runner, exec)
 	cfg.Providers = appCfg.Providers
 	cfg.Middleware = appCfg.Middleware
 
@@ -160,6 +165,9 @@ func runServe(ctx context.Context, cfg *ServeConfig) error {
 	appCfg, err := loadServeConfig(cfg.Config, cfg)
 	if err != nil {
 		return fmt.Errorf("load config: %w", err)
+	}
+	if err := appCfg.ApplyRuntimeLimitsStore(ctx); err != nil {
+		return fmt.Errorf("apply runtime limits: %w", err)
 	}
 
 	serverCfg, err := buildServerConfigFromConfig(appCfg)

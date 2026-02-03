@@ -1,7 +1,4 @@
-//go:build !toolruntime
-
-// Package main provides the metatools CLI binary.
-package main
+package cmd
 
 import (
 	"github.com/jonwraymond/metatools-mcp/internal/config"
