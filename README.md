@@ -121,6 +121,7 @@ These are consumed by `config.Load` via Koanf (file/env/flags precedence):
 | `METATOOLS_TRANSPORT_STREAMABLE_STATELESS` | `false` | Disable session management |
 | `METATOOLS_TRANSPORT_STREAMABLE_JSON_RESPONSE` | `false` | Prefer JSON over SSE streaming |
 | `METATOOLS_TRANSPORT_STREAMABLE_SESSION_TIMEOUT` | `30m` | Idle session cleanup duration |
+| `METATOOLS_STATE_RUNTIME_LIMITS_DB` | "" | SQLite file for persisted execution limits |
 
 ### Runtime Environment (toolruntime build tag)
 

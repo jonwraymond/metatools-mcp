@@ -17,6 +17,7 @@ type AppConfig struct {
 	Execution  ExecutionConfig   `koanf:"execution"`
 	Providers  ProvidersConfig   `koanf:"providers"`
 	Backends   BackendsConfig    `koanf:"backends"`
+	State      StateConfig       `koanf:"state"`
 	Middleware middleware.Config `koanf:"middleware"`
 }
 
@@ -74,6 +75,11 @@ type ExecutionConfig struct {
 	Timeout       time.Duration `koanf:"timeout"`
 	MaxToolCalls  int           `koanf:"max_tool_calls"`
 	MaxChainSteps int           `koanf:"max_chain_steps"`
+}
+
+// StateConfig holds persistent runtime configuration.
+type StateConfig struct {
+	RuntimeLimitsDB string `koanf:"runtime_limits_db"`
 }
 
 // ProvidersConfig holds tool provider settings.
@@ -172,6 +178,9 @@ func DefaultAppConfig() AppConfig {
 				Watch:   false,
 			},
 		},
+		State: StateConfig{
+			RuntimeLimitsDB: "",
+		},
 		Middleware: middleware.Config{},
 	}
 }
@@ -194,6 +203,12 @@ func (c *AppConfig) Validate() error {
 
 	if c.Execution.Timeout < 0 {
 		return errors.New("execution timeout cannot be negative")
+	}
+	if c.Execution.MaxToolCalls < 0 {
+		return errors.New("execution max tool calls cannot be negative")
+	}
+	if c.Execution.MaxChainSteps < 0 {
+		return errors.New("execution max chain steps cannot be negative")
 	}
 
 	return nil

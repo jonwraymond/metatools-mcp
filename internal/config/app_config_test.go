@@ -20,6 +20,9 @@ func TestDefaultAppConfig(t *testing.T) {
 	if cfg.Execution.Timeout != 30*time.Second {
 		t.Errorf("Execution.Timeout = %v, want %v", cfg.Execution.Timeout, 30*time.Second)
 	}
+	if cfg.State.RuntimeLimitsDB != "" {
+		t.Errorf("State.RuntimeLimitsDB = %q, want empty", cfg.State.RuntimeLimitsDB)
+	}
 }
 
 func TestAppConfig_Validate(t *testing.T) {
@@ -42,5 +45,19 @@ func TestAppConfig_ValidateSearchStrategy(t *testing.T) {
 	cfg.Search.Strategy = "invalid"
 	if err := cfg.Validate(); err == nil {
 		t.Fatalf("Validate() should fail for invalid search strategy")
+	}
+}
+
+func TestAppConfig_ValidateExecutionLimits(t *testing.T) {
+	cfg := DefaultAppConfig()
+	cfg.Execution.MaxToolCalls = -1
+	if err := cfg.Validate(); err == nil {
+		t.Fatalf("Validate() should fail for negative max tool calls")
+	}
+
+	cfg = DefaultAppConfig()
+	cfg.Execution.MaxChainSteps = -1
+	if err := cfg.Validate(); err == nil {
+		t.Fatalf("Validate() should fail for negative max chain steps")
 	}
 }
