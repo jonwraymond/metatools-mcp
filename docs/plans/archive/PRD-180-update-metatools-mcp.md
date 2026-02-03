@@ -61,6 +61,7 @@ find . -name "*.go" -exec sed -i '' \
   -e 's|github.com/jonwraymond/toolrun|github.com/jonwraymond/toolexec/run|g' \
   -e 's|github.com/jonwraymond/toolruntime|github.com/jonwraymond/toolexec/runtime|g' \
   -e 's|github.com/jonwraymond/toolcode|github.com/jonwraymond/toolexec/code|g' \
+  -e 's|github.com/jonwraymond/metatools-mcp/internal/backend|github.com/jonwraymond/toolexec/backend|g' \
   -e 's|github.com/jonwraymond/toolset|github.com/jonwraymond/toolcompose/set|g' \
   -e 's|github.com/jonwraymond/toolobserve|github.com/jonwraymond/toolops/observe|g' \
   -e 's|github.com/jonwraymond/toolcache|github.com/jonwraymond/toolops/cache|g' \

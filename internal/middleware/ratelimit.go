@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/jonwraymond/metatools-mcp/internal/provider"
+	"github.com/jonwraymond/toolops/auth"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"golang.org/x/time/rate"
 )
@@ -65,13 +66,19 @@ func NewRateLimitMiddleware(cfg RateLimitConfig) Middleware {
 	}
 
 	return func(next provider.ToolProvider) provider.ToolProvider {
+		identityExtractor := cfg.IdentityExtractor
+		if identityExtractor == nil {
+			identityExtractor = func(ctx context.Context) string {
+				return auth.PrincipalFromContext(ctx)
+			}
+		}
 		return &rateLimitProvider{
 			next:              next,
 			config:            cfg,
 			globalLimiter:     rate.NewLimiter(rate.Limit(cfg.Rate), cfg.Burst),
 			toolLimiters:      make(map[string]*rate.Limiter),
 			identityLimiters:  make(map[string]*rate.Limiter),
-			identityExtractor: cfg.IdentityExtractor,
+			identityExtractor: identityExtractor,
 		}
 	}
 }

@@ -55,4 +55,16 @@ backends:
 
 middleware:
   chain: []
-  configs: {}
+  configs:
+    # auth:
+    #   config:
+    #     allow_anonymous: false
+    #     authenticators:
+    #       - name: "jwt"
+    #         config:
+    #           issuer: "https://auth.example.com"
+    #           audience: "metatools"
+    #           jwks_url: "https://auth.example.com/.well-known/jwks.json"
+    #     authorizer:
+    #       name: "allow_all"
+    #     allow_anonymous: false

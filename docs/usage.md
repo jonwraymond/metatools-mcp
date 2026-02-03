@@ -21,12 +21,12 @@ metatools config validate --config examples/metatools.yaml
 | Transport | Use Case | Protocol |
 |-----------|----------|----------|
 | `stdio` | Claude Desktop, local CLI clients | stdin/stdout JSON-RPC |
-| `streamable` | Web apps, REST APIs, remote clients | HTTP POST/GET/DELETE (MCP 2025-03-26) |
+| `streamable` | Web apps, REST APIs, remote clients | HTTP POST/GET/DELETE (MCP 2025-11-25) |
 | `sse` | Legacy web clients | HTTP + Server-Sent Events (deprecated) |
 
 ### Streamable HTTP (recommended for HTTP)
 
-Streamable HTTP is the MCP spec (2025-03-26) transport replacing SSE:
+Streamable HTTP is the MCP spec (2025-11-25) transport replacing SSE:
 
 ```bash
 # Basic HTTP server
@@ -83,7 +83,33 @@ controls which MCP tools are registered at startup.
 ## Middleware chain
 
 Configure optional middleware in `middleware.chain` (ordered) with per-middleware
-settings under `middleware.configs`. Built-in middleware: `logging`, `metrics`.
+settings under `middleware.configs`. Built-in middleware: `auth`, `logging`,
+`metrics`, `ratelimit`, `audit`.
+
+Example (JWT auth + RBAC):
+
+```yaml
+middleware:
+  chain: ["auth", "logging", "metrics"]
+  configs:
+    auth:
+      config:
+        allow_anonymous: false
+        authenticators:
+          - name: "jwt"
+            config:
+              issuer: "https://auth.example.com"
+              audience: "metatools"
+              jwks_url: "https://auth.example.com/.well-known/jwks.json"
+        authorizer:
+          name: "simple_rbac"
+          config:
+            roles:
+              admin:
+                allow:
+                  - tool: "*"
+                    actions: ["call", "list"]
+```
 
 ## Enable BM25 search (build tag + env)
 

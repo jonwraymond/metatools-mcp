@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/jonwraymond/metatools-mcp/internal/backend"
-	"github.com/jonwraymond/metatools-mcp/internal/backend/local"
+	"github.com/jonwraymond/toolexec/backend"
+	"github.com/jonwraymond/toolexec/backend/local"
 	"github.com/stretchr/testify/require"
 )
 

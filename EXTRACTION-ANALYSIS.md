@@ -11,7 +11,7 @@ After thorough analysis of metatools-mcp's internal packages, **3 major componen
 
 | Library | Lines | MCP Dependencies | Extraction Feasibility |
 |---------|-------|------------------|----------------------|
-| **toolauth** | ~2,500 | None | ✅ Fully extractable |
+| **toolops/auth** | ~2,500 | None | ✅ Extracted (complete) |
 | **toolbackend** | ~300 | None (uses toolmodel) | ✅ Fully extractable |
 | **tooltransport** | ~500 | Partial | ⚠️ Interface extractable, impls stay |
 
@@ -21,17 +21,17 @@ This would reduce metatools-mcp to a thin **composition layer** that wires toget
 
 ## Detailed Analysis
 
-### 1. toolauth (✅ EXTRACT)
+### 1. toolauth (✅ EXTRACTED)
 
-**Current Location:** `internal/auth/` (~2,500 lines)
+**Current Location:** `toolops/auth/` (~2,500 lines)
 
-**Why Extract:**
+**Why Extracted:**
 - Zero MCP dependencies - pure authentication/authorization
 - Reusable by any tool server (not just MCP)
 - Production-ready with 82.7% test coverage
 - Comprehensive feature set already implemented
 
-**Components:**
+**Components (migrated to `toolops/auth`):**
 
 | File | Lines | Purpose | Dependencies |
 |------|-------|---------|--------------|
@@ -87,7 +87,7 @@ type CompositeAuthenticator struct { ... }
 
 ### 2. toolbackend (✅ EXTRACT)
 
-**Current Location:** `internal/backend/` (~300 lines)
+**Current Location:** `toolexec/backend/` (extracted from MCP server)
 
 **Why Extract:**
 - Already uses `toolmodel.Tool` NOT `mcp.Tool` - protocol agnostic!

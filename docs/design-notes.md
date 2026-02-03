@@ -34,12 +34,12 @@ type Transport interface {
 | Transport | Status | Use Case | Rationale |
 |-----------|--------|----------|-----------|
 | `stdio` | **Recommended** (local) | Claude Desktop, local CLIs | Zero config, implicit session, lowest latency |
-| `streamable` | **Recommended** (HTTP) | Web apps, remote clients | MCP spec 2025-03-26 compliant, session management, bidirectional |
+| `streamable` | **Recommended** (HTTP) | Web apps, remote clients | MCP spec 2025-11-25 compliant, session management, bidirectional |
 | `sse` | **Deprecated** | Legacy web clients | Superseded by streamable per MCP spec |
 
 ### Streamable HTTP design decisions
 
-1. **Single endpoint (`/mcp`):** Follows MCP spec 2025-03-26 with POST/GET/DELETE methods
+1. **Single endpoint (`/mcp`):** Follows MCP spec 2025-11-25 with POST/GET/DELETE methods
    on one path, simplifying routing and CORS configuration.
 
 2. **Session management via header:** Uses `Mcp-Session-Id` header (not cookies) for

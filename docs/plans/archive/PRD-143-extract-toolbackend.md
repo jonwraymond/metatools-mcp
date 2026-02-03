@@ -16,7 +16,7 @@ Extract backend management code from `metatools-mcp` into `toolexec/backend/` as
 
 ## Source Analysis
 
-**Current Location:** `metatools-mcp/internal/backend/` (embedded in MCP server)
+**Current Location:** `toolexec/backend/` (extracted from MCP server)
 **Target Location:** `github.com/jonwraymond/toolexec/backend`
 
 **Code to Extract:**
@@ -49,7 +49,7 @@ cd /Users/jraymond/Documents/Projects/ApertureStack/metatools-mcp
 find . -name "*.go" -exec grep -l "Backend\|Provider" {} \;
 
 # Count lines in relevant files
-wc -l internal/backend/*.go 2>/dev/null || echo "Check actual path"
+wc -l ../toolexec/backend/*.go 2>/dev/null || echo "Check actual path"
 ```
 
 ### Task 2: Create Package Structure

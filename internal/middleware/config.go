@@ -33,6 +33,7 @@ func BuildChainFromConfig(registry *Registry, cfg *Config) (*Chain, error) {
 // DefaultRegistry returns a registry with built-in middleware.
 func DefaultRegistry() *Registry {
 	registry := NewRegistry()
+	_ = registry.Register("auth", AuthMiddlewareFactory)
 	_ = registry.Register("logging", LoggingMiddlewareFactory)
 	_ = registry.Register("metrics", MetricsMiddlewareFactory)
 	_ = registry.Register("ratelimit", RateLimitMiddlewareFactory)

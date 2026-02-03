@@ -28,9 +28,9 @@ Define explicit interface contracts (GoDoc + documented semantics) for all inter
 | `ToolProvider` | `metatools-mcp/internal/provider/provider.go:11` | Name() string<br/>Enabled() bool<br/>Tool() mcp.Tool<br/>Handle(ctx context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) |
 | `ConfigurableProvider` | `metatools-mcp/internal/provider/provider.go:27` | ToolProvider<br/>Configure(cfg map[string]any) error |
 | `StreamingProvider` | `metatools-mcp/internal/provider/provider.go:35` | ToolProvider<br/>HandleStream(ctx context.Context, req *mcp.CallToolRequest, args map[string]any) (<-chan any, error) |
-| `Backend` | `metatools-mcp/internal/backend/backend.go:20` | Kind() string<br/>Name() string<br/>Enabled() bool<br/>ListTools(ctx context.Context) ([]toolmodel.Tool, error)<br/>Execute(ctx context.Context, tool string, args map[string]any) (any, error)<br/>Start(ctx context.Context) error<br/>Stop() error |
-| `ConfigurableBackend` | `metatools-mcp/internal/backend/backend.go:44` | Backend<br/>Configure(raw []byte) error |
-| `StreamingBackend` | `metatools-mcp/internal/backend/backend.go:51` | Backend<br/>ExecuteStream(ctx context.Context, tool string, args map[string]any) (<-chan any, error) |
+| `Backend` | `toolexec/backend/backend.go:20` | Kind() string<br/>Name() string<br/>Enabled() bool<br/>ListTools(ctx context.Context) ([]toolmodel.Tool, error)<br/>Execute(ctx context.Context, tool string, args map[string]any) (any, error)<br/>Start(ctx context.Context) error<br/>Stop() error |
+| `ConfigurableBackend` | `toolexec/backend/backend.go:44` | Backend<br/>Configure(raw []byte) error |
+| `StreamingBackend` | `toolexec/backend/backend.go:51` | Backend<br/>ExecuteStream(ctx context.Context, tool string, args map[string]any) (<-chan any, error) |
 | `Index` | `metatools-mcp/internal/handlers/interfaces.go:10` | SearchPage(ctx context.Context, query string, limit int, cursor string) ([]metatools.ToolSummary, string, error)<br/>ListNamespacesPage(ctx context.Context, limit int, cursor string) ([]string, string, error) |
 | `Store` | `metatools-mcp/internal/handlers/interfaces.go:26` | DescribeTool(ctx context.Context, id string, level string) (ToolDoc, error)<br/>ListExamples(ctx context.Context, id string, maxExamples int) ([]metatools.ToolExample, error) |
 | `Runner` | `metatools-mcp/internal/handlers/interfaces.go:64` | Run(ctx context.Context, toolID string, args map[string]any) (RunResult, error)<br/>RunChain(ctx context.Context, steps []ChainStep) (RunResult, []StepResult, error) |

@@ -8,41 +8,59 @@
     "server": {
       "type": "object",
       "properties": {
-        "transport": {
+        "name": {"type": "string", "default": "metatools-mcp"},
+        "version": {"type": "string", "default": "dev"}
+      }
+    },
+    "transport": {
+      "type": "object",
+      "properties": {
+        "type": {
           "type": "string",
-          "enum": ["stdio", "sse", "websocket", "grpc"],
+          "enum": ["stdio", "streamable", "sse"],
           "default": "stdio"
         },
-        "host": {"type": "string", "default": "localhost"},
-        "port": {"type": "integer", "minimum": 1, "maximum": 65535, "default": 8080},
-        "tls": {
+        "http": {
           "type": "object",
           "properties": {
-            "enabled": {"type": "boolean", "default": false},
-            "certFile": {"type": "string"},
-            "keyFile": {"type": "string"}
+            "host": {"type": "string", "default": "0.0.0.0"},
+            "port": {"type": "integer", "minimum": 1, "maximum": 65535, "default": 8080},
+            "tls": {
+              "type": "object",
+              "properties": {
+                "enabled": {"type": "boolean", "default": false},
+                "cert": {"type": "string"},
+                "key": {"type": "string"}
+              }
+            }
+          }
+        },
+        "streamable": {
+          "type": "object",
+          "properties": {
+            "stateless": {"type": "boolean", "default": false},
+            "json_response": {"type": "boolean", "default": false},
+            "session_timeout": {"type": "string", "default": "30m"}
           }
         }
       }
     },
-    "tools": {
+    "search": {
       "type": "object",
       "properties": {
-        "directories": {
-          "type": "array",
-          "items": {"type": "string"},
-          "default": ["./tools"]
+        "strategy": {
+          "type": "string",
+          "enum": ["bm25", "lexical", "semantic"],
+          "default": "lexical"
         },
-        "providers": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["type", "url"],
-            "properties": {
-              "type": {"type": "string", "enum": ["http", "grpc", "mcp"]},
-              "url": {"type": "string", "format": "uri"},
-              "timeout": {"type": "string", "pattern": "^\\d+[smh]$"}
-            }
+        "bm25": {
+          "type": "object",
+          "properties": {
+            "name_boost": {"type": "integer", "default": 3},
+            "namespace_boost": {"type": "integer", "default": 2},
+            "tags_boost": {"type": "integer", "default": 2},
+            "max_docs": {"type": "integer", "default": 0},
+            "max_doctext_len": {"type": "integer", "default": 0}
           }
         }
       }
@@ -50,57 +68,65 @@
     "execution": {
       "type": "object",
       "properties": {
-        "defaultBackend": {
-          "type": "string",
-          "enum": ["local", "docker", "wasm", "kubernetes"],
-          "default": "local"
-        },
         "timeout": {"type": "string", "default": "30s"},
-        "maxConcurrent": {"type": "integer", "minimum": 1, "default": 10}
+        "max_tool_calls": {"type": "integer", "minimum": 1, "default": 64},
+        "max_chain_steps": {"type": "integer", "minimum": 1, "default": 8}
       }
     },
-    "cache": {
+    "providers": {
       "type": "object",
       "properties": {
-        "enabled": {"type": "boolean", "default": true},
-        "backend": {"type": "string", "enum": ["memory", "redis", "file"]},
-        "ttl": {"type": "string", "default": "5m"},
-        "maxSize": {"type": "string", "default": "100MB"}
-      }
-    },
-    "observability": {
-      "type": "object",
-      "properties": {
-        "tracing": {
+        "search_tools": {
+          "type": "object",
+          "properties": {"enabled": {"type": "boolean", "default": true}}
+        },
+        "list_namespaces": {
+          "type": "object",
+          "properties": {"enabled": {"type": "boolean", "default": true}}
+        },
+        "describe_tool": {
+          "type": "object",
+          "properties": {"enabled": {"type": "boolean", "default": true}}
+        },
+        "list_tool_examples": {
+          "type": "object",
+          "properties": {"enabled": {"type": "boolean", "default": true}}
+        },
+        "run_tool": {
+          "type": "object",
+          "properties": {"enabled": {"type": "boolean", "default": true}}
+        },
+        "run_chain": {
+          "type": "object",
+          "properties": {"enabled": {"type": "boolean", "default": true}}
+        },
+        "execute_code": {
           "type": "object",
           "properties": {
             "enabled": {"type": "boolean", "default": false},
-            "exporter": {"type": "string", "enum": ["otlp", "jaeger", "zipkin"]},
-            "endpoint": {"type": "string", "format": "uri"}
-          }
-        },
-        "metrics": {
-          "type": "object",
-          "properties": {
-            "enabled": {"type": "boolean", "default": true},
-            "port": {"type": "integer", "default": 9090}
-          }
-        },
-        "logging": {
-          "type": "object",
-          "properties": {
-            "level": {"type": "string", "enum": ["debug", "info", "warn", "error"]},
-            "format": {"type": "string", "enum": ["json", "text"]}
+            "sandbox": {"type": "string", "default": "dev"}
           }
         }
       }
     },
-    "auth": {
+    "backends": {
       "type": "object",
       "properties": {
-        "enabled": {"type": "boolean", "default": false},
-        "provider": {"type": "string", "enum": ["jwt", "apikey", "oauth2"]},
-        "config": {"type": "object"}
+        "local": {
+          "type": "object",
+          "properties": {
+            "enabled": {"type": "boolean", "default": true},
+            "paths": {"type": "array", "items": {"type": "string"}},
+            "watch": {"type": "boolean", "default": false}
+          }
+        }
+      }
+    },
+    "middleware": {
+      "type": "object",
+      "properties": {
+        "chain": {"type": "array", "items": {"type": "string"}, "default": []},
+        "configs": {"type": "object", "additionalProperties": {"type": "object"}}
       }
     }
   }

@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jonwraymond/metatools-mcp/internal/auth"
+	"github.com/jonwraymond/toolops/auth"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
