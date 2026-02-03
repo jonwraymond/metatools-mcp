@@ -36,10 +36,19 @@ func TestBuildChainFromConfig_Success(t *testing.T) {
 
 func TestDefaultRegistry(t *testing.T) {
 	registry := DefaultRegistry()
+	if !registry.Has("auth") {
+		t.Fatal("DefaultRegistry missing auth middleware")
+	}
 	if !registry.Has("logging") {
 		t.Fatal("DefaultRegistry missing logging middleware")
 	}
 	if !registry.Has("metrics") {
 		t.Fatal("DefaultRegistry missing metrics middleware")
+	}
+	if !registry.Has("ratelimit") {
+		t.Fatal("DefaultRegistry missing ratelimit middleware")
+	}
+	if !registry.Has("audit") {
+		t.Fatal("DefaultRegistry missing audit middleware")
 	}
 }

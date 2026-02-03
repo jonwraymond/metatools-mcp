@@ -15,7 +15,7 @@ The metatools ecosystem has grown to **13 production libraries** plus several pr
 |----------|-------|-----------|
 | **Existing (Complete)** | 11 | toolmodel, tooladapter, toolindex, toolsearch, tooldocs, toolrun, toolruntime, toolcode, toolset, toolobserve, toolcache |
 | **Existing (Partial)** | 2 | toolsemantic (~800 LOC), toolskill (~400 LOC) |
-| **Extract from metatools-mcp** | 2 | toolauth (~6,400 LOC), toolbackend (~600 LOC) |
+| **Extracted from metatools-mcp** | 2 | toolops/auth (~6,400 LOC), toolbackend (~600 LOC) |
 | **Proposed (Cross-Cutting)** | 2 | toolresilience, toolhealth |
 | **Proposed (Protocol Layer)** | 10 | tooltransport, toolwire, tooldiscover, toolcontent, tooltask, toolstream, toolsession, toolelicit, toolresource, toolprompt |
 | **Internal (metatools-mcp)** | 2 | toolgateway, multi-tenancy |
@@ -30,7 +30,7 @@ The metatools ecosystem has grown to **13 production libraries** plus several pr
 | toolindex | ~2k | 3,010 |
 | toolrun | ~3k | 4,905 |
 | toolruntime | ~4k | 1,958 |
-| toolauth (internal) | ~2.5k | 6,389 |
+| toolops/auth (extracted) | ~2.5k | 6,389 |
 | toolbackend (internal) | ~300 | 634 |
 
 ---
@@ -219,9 +219,9 @@ These exist within metatools-mcp rather than as separate libraries:
 |-----------|---------|--------|----------|
 | **Transport** | Stdio, SSE, Streamable HTTP | Complete | internal/transport |
 | **Provider Registry** | Tool provider registration | Complete | internal/provider |
-| **Backend Registry** | Backend registration, aggregator | Complete | internal/backend |
+| **Backend Registry** | Backend registration, aggregator | Complete | toolexec/backend |
 | **Middleware Chain** | Logging, metrics, auth, rate limiting | Complete | internal/middleware |
-| **Auth** | JWT, API Key, RBAC, OAuth2, JWKS | Complete | internal/auth |
+| **Auth** | JWT, API Key, RBAC, OAuth2, JWKS | Complete | toolops/auth |
 
 **Proposed Libraries (from ROADMAP):**
 
@@ -399,7 +399,7 @@ Items kept in metatools-mcp (not extracted to standalone libraries):
 | **tooldiscovery** | toolindex + toolsearch + toolsemantic + tooldocs | 3 Complete, 1 Partial |
 | **toolexec** | toolrun + toolruntime + toolcode + **toolbackend** | 3 Complete, 1 Extract |
 | **toolcompose** | toolset + toolskill | 1 Complete, 1 Partial |
-| **toolops** | toolobserve + toolcache + toolresilience + toolhealth + **toolauth** | 2 Complete, 2 Not Started, 1 Extract |
+| **toolops** | toolobserve + toolcache + toolresilience + toolhealth + **toolops/auth** | 2 Complete, 2 Not Started, 1 Extracted |
 | **toolprotocol** | tooltransport + toolwire + tooldiscover + toolcontent + tooltask + toolstream + toolsession + toolelicit + toolresource + toolprompt | All Not Started |
 | **metatools-mcp** | Transport, Provider, Middleware, Handlers + toolgateway, multi-tenancy | Core Complete (thin layer) |
 
@@ -407,7 +407,7 @@ Items kept in metatools-mcp (not extracted to standalone libraries):
 
 | Component | Lines | Destination | Benefit |
 |-----------|-------|-------------|---------|
-| **toolauth** | 6,389 | toolops/auth | Reusable auth for any server (gRPC, REST, etc.) |
+| **toolops/auth** | 6,389 | toolops/auth | Reusable auth for any server (gRPC, REST, etc.) |
 | **toolbackend** | 634 | toolexec/backend | Clean execution abstraction |
 | Remaining | ~14,000 | metatools-mcp | MCP server composition layer |
 
@@ -473,7 +473,7 @@ Items kept in metatools-mcp (not extracted to standalone libraries):
 | 15 | toolcache | Complete | 2,184 | Response caching |
 | 16 | toolresilience | Not Started | ~1k est | Circuit breaker, retry |
 | 17 | toolhealth | Not Started | ~500 est | Health checks |
-| 18 | **toolauth** | **Extract** | 6,389 | Auth/Authz (from metatools-mcp) |
+| 18 | **toolops/auth** | **Extracted** | 6,389 | Auth/Authz (from metatools-mcp) |
 
 #### Tier 7: Protocol Layer (toolprotocol)
 
@@ -504,7 +504,7 @@ Items kept in metatools-mcp (not extracted to standalone libraries):
 - `toolwire` (#20, toolprotocol) = Protocol **wire** adapters (how agents communicate over the wire)
 
 **Extraction from metatools-mcp:**
-- **toolauth** (6,389 lines): JWT, API Key, OAuth2, JWKS, RBAC - completely MCP-independent
+- **toolops/auth** (6,389 lines): JWT, API Key, OAuth2, JWKS, RBAC - completely MCP-independent
 - **toolbackend** (634 lines): Backend interface + registry - uses toolmodel, not MCP
 
 This consolidation reduces cognitive overhead while maintaining clean separation of concerns. Each consolidated repo represents a distinct **area of concern** with clear boundaries.

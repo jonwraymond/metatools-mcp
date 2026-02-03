@@ -10,13 +10,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jonwraymond/metatools-mcp/internal/auth"
+	"github.com/jonwraymond/toolops/auth"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // StreamableHTTPConfig holds configuration for the Streamable HTTP transport.
 //
-// Streamable HTTP is the recommended HTTP transport per MCP spec 2025-03-26,
+// Streamable HTTP is the recommended HTTP transport per MCP spec 2025-11-25,
 // replacing the deprecated SSE transport. It uses a single endpoint that handles:
 //   - POST: JSON-RPC requests (returns JSON or SSE stream)
 //   - GET: Opens server-to-client notification stream
@@ -84,7 +84,7 @@ type TLSConfig struct {
 }
 
 // StreamableHTTPTransport implements the Transport interface for MCP's
-// Streamable HTTP protocol (spec version 2025-03-26).
+// Streamable HTTP protocol (spec version 2025-11-25).
 //
 // This transport replaces the deprecated SSE transport and provides:
 //   - Single endpoint handling POST/GET/DELETE methods

@@ -1,5 +1,8 @@
 # Plan of Record (Ordered Execution)
 
+**Status:** Superseded  
+**Canonical Roadmap:** `ai-tools-stack/docs/roadmap.md`
+
 This page consolidates **all proposals and PRDs** into a single, ordered execution sequence. It is intentionally Go‑architecture focused: concurrency safety, context propagation, and production operational boundaries are explicit in each phase.
 
 ## Principles (Go Architect Evaluation)
@@ -20,7 +23,7 @@ These libraries and contracts are the foundation and must remain stable:
 - `toolops` – observability, cache, auth, resilience, health
 - `toolprotocol` – transport, wire, content, session, task primitives
 
-See the master roadmap for the current version matrix: [ROADMAP](proposals/ROADMAP.md)
+See the canonical stack roadmap for current status and version matrix: `ai-tools-stack/docs/roadmap.md`
 
 ---
 

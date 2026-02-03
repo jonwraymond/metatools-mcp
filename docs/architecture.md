@@ -40,7 +40,7 @@ classDiagram
     Transport <|.. StreamableHTTPTransport
     Transport <|.. SSETransport
 
-    note for StreamableHTTPTransport "MCP spec 2025-03-26\nRecommended for HTTP"
+    note for StreamableHTTPTransport "MCP spec 2025-11-25\nRecommended for HTTP"
     note for SSETransport "Deprecated"
 ```
 

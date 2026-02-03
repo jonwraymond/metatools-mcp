@@ -49,7 +49,7 @@ func newServeCmd() *cobra.Command {
 Transports:
   stdio      - Standard input/output (default, for MCP clients like Claude Desktop)
   sse        - Server-Sent Events over HTTP (deprecated, for legacy web clients)
-  streamable - Streamable HTTP (MCP spec 2025-03-26, recommended for HTTP clients)
+	streamable - Streamable HTTP (MCP spec 2025-11-25, recommended for HTTP clients)
 
 Examples:
   metatools serve                                    # stdio mode (default)

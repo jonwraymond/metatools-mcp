@@ -40,7 +40,7 @@ flowchart LR
 | Transport | Client Type | Session | Protocol |
 |-----------|------------|---------|----------|
 | `stdio` | Local CLI, Claude Desktop | Implicit | stdin/stdout JSON-RPC |
-| `streamable` | Web apps, remote clients | Mcp-Session-Id header | HTTP (MCP 2025-03-26) |
+| `streamable` | Web apps, remote clients | Mcp-Session-Id header | HTTP (MCP 2025-11-25) |
 | `sse` | Legacy web clients | Cookie-based | HTTP + SSE (deprecated) |
 
 **Streamable HTTP session flow:**

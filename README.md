@@ -46,7 +46,7 @@ metatools-mcp supports multiple transports for different deployment scenarios:
 | `streamable` | `metatools serve --transport=streamable --port=8080` | Web apps, remote clients (recommended for HTTP) |
 | `sse` | `metatools serve --transport=sse --port=8080` | Legacy web clients (deprecated) |
 
-**Streamable HTTP** implements MCP spec 2025-03-26 with session management via
+**Streamable HTTP** implements MCP spec 2025-11-25 with session management via
 `Mcp-Session-Id` header, supporting both SSE streaming and JSON responses.
 
 ```bash

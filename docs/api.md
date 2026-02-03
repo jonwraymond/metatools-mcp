@@ -55,7 +55,7 @@ type Info struct {
 | Type | Struct | Use Case |
 |------|--------|----------|
 | stdio | `StdioTransport` | Claude Desktop, local CLI |
-| streamable | `StreamableHTTPTransport` | Web apps, HTTP clients (MCP 2025-03-26) |
+| streamable | `StreamableHTTPTransport` | Web apps, HTTP clients (MCP 2025-11-25) |
 | sse | `SSETransport` | Legacy HTTP clients (deprecated) |
 
 ### StreamableHTTPConfig

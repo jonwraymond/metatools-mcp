@@ -2,9 +2,9 @@
 package loader
 
 import (
-	"github.com/jonwraymond/metatools-mcp/internal/backend"
-	"github.com/jonwraymond/metatools-mcp/internal/backend/local"
 	"github.com/jonwraymond/metatools-mcp/internal/config"
+	"github.com/jonwraymond/toolexec/backend"
+	"github.com/jonwraymond/toolexec/backend/local"
 )
 
 const defaultLocalBackendName = "local"

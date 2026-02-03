@@ -10,6 +10,7 @@ require (
 	github.com/jonwraymond/tooldiscovery v0.2.1
 	github.com/jonwraymond/toolexec v0.1.0
 	github.com/jonwraymond/toolfoundation v0.2.0
+	github.com/jonwraymond/toolops v0.1.4
 	github.com/knadh/koanf/parsers/yaml v1.1.0
 	github.com/knadh/koanf/providers/env v1.1.0
 	github.com/knadh/koanf/providers/file v1.2.1

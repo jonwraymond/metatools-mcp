@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/jonwraymond/metatools-mcp/internal/backend"
+	"github.com/jonwraymond/toolexec/backend"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
