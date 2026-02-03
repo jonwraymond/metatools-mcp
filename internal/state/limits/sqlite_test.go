@@ -12,7 +12,9 @@ func TestSQLiteStore_SaveLoad(t *testing.T) {
 	if err != nil {
 		t.Fatalf("open sqlite: %v", err)
 	}
-	defer db.Close()
+	defer func() {
+		_ = db.Close()
+	}()
 
 	store, err := NewSQLiteStore(db)
 	if err != nil {

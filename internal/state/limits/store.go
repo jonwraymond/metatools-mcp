@@ -1,3 +1,4 @@
+// Package limits persists execution limits for metatools-mcp.
 package limits
 
 import (
