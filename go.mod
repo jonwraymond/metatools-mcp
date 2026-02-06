@@ -1,6 +1,6 @@
 module github.com/jonwraymond/metatools-mcp
 
-go 1.25.6
+go 1.25.7
 
 require (
 	github.com/caarlos0/env/v11 v11.3.1
@@ -10,8 +10,8 @@ require (
 	github.com/jonwraymond/tooldiscovery v0.3.0
 	github.com/jonwraymond/toolexec v0.2.1
 	github.com/jonwraymond/toolfoundation v0.3.0
-	github.com/jonwraymond/toolops v0.1.5
-	github.com/jonwraymond/toolops-integrations v0.0.0
+	github.com/jonwraymond/toolops v0.1.7
+	github.com/jonwraymond/toolops-integrations v0.1.0
 	github.com/knadh/koanf/parsers/yaml v1.1.0
 	github.com/knadh/koanf/providers/env v1.1.0
 	github.com/knadh/koanf/providers/rawbytes v1.0.0
@@ -25,10 +25,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 	modernc.org/sqlite v1.32.0
 )
-
-replace github.com/jonwraymond/toolops => ../toolops
-
-replace github.com/jonwraymond/toolops-integrations => ../toolops-integrations
 
 require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect

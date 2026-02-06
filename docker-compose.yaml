@@ -4,7 +4,7 @@ services:
       context: ..
       dockerfile: metatools-mcp/Dockerfile
       args:
-        GO_VERSION: "1.25"
+        GO_VERSION: "1.25.7"
     image: metatools-mcp:local
     container_name: metatools-mcp
     ports:
