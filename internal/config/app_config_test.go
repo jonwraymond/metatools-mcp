@@ -61,3 +61,46 @@ func TestAppConfig_ValidateExecutionLimits(t *testing.T) {
 		t.Fatalf("Validate() should fail for negative max chain steps")
 	}
 }
+
+func TestAppConfig_ValidateMCPBackends(t *testing.T) {
+	cfg := DefaultAppConfig()
+	cfg.Backends.MCP = []MCPBackendConfig{{Name: "", URL: "https://example.com/mcp"}}
+	if err := cfg.Validate(); err == nil {
+		t.Fatalf("Validate() should fail for empty mcp backend name")
+	}
+
+	cfg = DefaultAppConfig()
+	cfg.Backends.MCP = []MCPBackendConfig{{Name: "test", URL: ""}}
+	if err := cfg.Validate(); err == nil {
+		t.Fatalf("Validate() should fail for empty mcp backend url")
+	}
+
+	cfg = DefaultAppConfig()
+	cfg.Backends.MCP = []MCPBackendConfig{
+		{Name: "dup", URL: "https://example.com/mcp"},
+		{Name: "dup", URL: "https://example.com/mcp"},
+	}
+	if err := cfg.Validate(); err == nil {
+		t.Fatalf("Validate() should fail for duplicate mcp backend names")
+	}
+}
+
+func TestAppConfig_ValidateMCPRefresh(t *testing.T) {
+	cfg := DefaultAppConfig()
+	cfg.Backends.MCPRefresh.Interval = -1
+	if err := cfg.Validate(); err == nil {
+		t.Fatalf("Validate() should fail for negative mcp refresh interval")
+	}
+
+	cfg = DefaultAppConfig()
+	cfg.Backends.MCPRefresh.Jitter = -1
+	if err := cfg.Validate(); err == nil {
+		t.Fatalf("Validate() should fail for negative mcp refresh jitter")
+	}
+
+	cfg = DefaultAppConfig()
+	cfg.Backends.MCPRefresh.StaleAfter = -1
+	if err := cfg.Validate(); err == nil {
+		t.Fatalf("Validate() should fail for negative mcp refresh stale_after")
+	}
+}

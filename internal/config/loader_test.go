@@ -92,3 +92,53 @@ func TestLoad_InvalidYAML(t *testing.T) {
 		t.Error("Load() should fail with invalid YAML")
 	}
 }
+
+func TestLoad_ExpandsEnvVarsInFile(t *testing.T) {
+	t.Setenv("MCP_BACKEND_TOKEN", "secret-token")
+
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, "metatools.yaml")
+
+	yaml := `
+backends:
+  mcp:
+    - name: deepwiki
+      url: https://mcp.deepwiki.com/mcp
+      headers:
+        Authorization: "Bearer ${MCP_BACKEND_TOKEN}"
+`
+	if err := os.WriteFile(configPath, []byte(yaml), 0644); err != nil {
+		t.Fatalf("WriteFile() error = %v", err)
+	}
+
+	cfg, err := Load(configPath)
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+
+	if got := cfg.Backends.MCP[0].Headers["Authorization"]; got != "Bearer secret-token" {
+		t.Errorf("Backends.MCP[0].Headers[\"Authorization\"] = %q, want %q", got, "Bearer secret-token")
+	}
+}
+
+func TestLoad_EnvVarMissingInFile(t *testing.T) {
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, "metatools.yaml")
+
+	yaml := `
+backends:
+  mcp:
+    - name: deepwiki
+      url: https://mcp.deepwiki.com/mcp
+      headers:
+        Authorization: "Bearer ${MISSING_TOKEN}"
+`
+	if err := os.WriteFile(configPath, []byte(yaml), 0644); err != nil {
+		t.Fatalf("WriteFile() error = %v", err)
+	}
+
+	_, err := Load(configPath)
+	if err == nil {
+		t.Fatal("Load() should fail when an env var referenced in the file is missing")
+	}
+}

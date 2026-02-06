@@ -1,0 +1,18 @@
+direction: right
+
+"Search config\nstrategy" -> "SearcherFromConfig"
+
+"SearcherFromConfig" -> "Lexical search" : "lexical"
+"SearcherFromConfig" -> "BM25 search" : "bm25"
+"SearcherFromConfig" -> "Semantic search" : "semantic"
+"SearcherFromConfig" -> "Hybrid search" : "hybrid"
+
+"Semantic search" -> "Embedder present?" 
+"Embedder present?" -> "Semantic index" : "yes"
+"Embedder present?" -> "Lexical fallback" : "no"
+
+"Hybrid search" -> "Embedder present? (hybrid)" 
+"Embedder present? (hybrid)" -> "Hybrid index" : "yes"
+"Embedder present? (hybrid)" -> "BM25 available?" : "no"
+"BM25 available?" -> "BM25 fallback" : "yes"
+"BM25 available?" -> "Lexical fallback (hybrid)" : "no"

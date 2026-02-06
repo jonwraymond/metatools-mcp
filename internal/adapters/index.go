@@ -5,6 +5,7 @@ import (
 
 	"github.com/jonwraymond/metatools-mcp/pkg/metatools"
 	"github.com/jonwraymond/tooldiscovery/index"
+	"github.com/jonwraymond/toolfoundation/model"
 )
 
 // IndexAdapter bridges index.Index to the handlers.Index interface.
@@ -68,6 +69,12 @@ func (a *IndexAdapter) ListNamespaces(ctx context.Context) ([]string, error) {
 func (a *IndexAdapter) ListNamespacesPage(ctx context.Context, limit int, cursor string) ([]string, string, error) {
 	_ = ctx
 	return a.idx.ListNamespacesPage(limit, cursor)
+}
+
+// GetAllBackends delegates to index.
+func (a *IndexAdapter) GetAllBackends(ctx context.Context, id string) ([]model.ToolBackend, error) {
+	_ = ctx
+	return a.idx.GetAllBackends(id)
 }
 
 // OnChange registers a listener for index mutations when supported.

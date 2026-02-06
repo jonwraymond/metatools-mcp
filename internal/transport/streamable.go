@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/jonwraymond/toolops/auth"
+	"github.com/jonwraymond/toolops/health"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -66,6 +67,12 @@ type StreamableHTTPConfig struct {
 	// Sessions with no HTTP activity for this duration are automatically
 	// closed. Zero means sessions never expire from inactivity.
 	SessionTimeout time.Duration
+
+	// HealthEnabled exposes the liveness endpoint when true.
+	HealthEnabled bool
+
+	// HealthPath is the HTTP path for the liveness endpoint.
+	HealthPath string
 }
 
 // TLSConfig holds TLS/HTTPS configuration for secure transport.
@@ -196,6 +203,13 @@ func (t *StreamableHTTPTransport) Serve(ctx context.Context, server Server) erro
 	mux := http.NewServeMux()
 	// Wrap handler with auth headers middleware to extract HTTP headers into context
 	mux.Handle(path, auth.WithAuthHeaders(handler))
+	if t.Config.HealthEnabled {
+		healthPath := t.Config.HealthPath
+		if healthPath == "" {
+			healthPath = "/healthz"
+		}
+		mux.HandleFunc(healthPath, health.LivenessHandler())
+	}
 
 	readHeaderTimeout := t.Config.ReadHeaderTimeout
 	if readHeaderTimeout == 0 {

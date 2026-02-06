@@ -40,12 +40,15 @@ type Server struct {
 // Handlers holds all the metatool handlers.
 type Handlers struct {
 	Search     *handlers.SearchHandler
+	ListTools  *handlers.ListToolsHandler
 	Namespaces *handlers.NamespacesHandler
 	Describe   *handlers.DescribeHandler
 	Examples   *handlers.ExamplesHandler
 	Run        *handlers.RunHandler
 	Chain      *handlers.ChainHandler
 	Code       *handlers.CodeHandler
+	Toolsets   *handlers.ToolsetsHandler
+	Skills     *handlers.SkillsHandler
 }
 
 // New creates a new metatools server.
@@ -54,8 +57,19 @@ func New(cfg config.Config) (*Server, error) {
 		return nil, err
 	}
 
+	var searchHandler *handlers.SearchHandler
+	var listToolsHandler *handlers.ListToolsHandler
+	if cfg.Refresher != nil {
+		searchHandler = handlers.NewSearchHandlerWithRefresher(cfg.Index, cfg.Refresher)
+		listToolsHandler = handlers.NewListToolsHandlerWithRefresher(cfg.Index, cfg.Refresher)
+	} else {
+		searchHandler = handlers.NewSearchHandler(cfg.Index)
+		listToolsHandler = handlers.NewListToolsHandler(cfg.Index)
+	}
+
 	h := &Handlers{
-		Search:     handlers.NewSearchHandler(cfg.Index),
+		Search:     searchHandler,
+		ListTools:  listToolsHandler,
 		Namespaces: handlers.NewNamespacesHandler(cfg.Index),
 		Describe:   handlers.NewDescribeHandler(cfg.Docs),
 		Examples:   handlers.NewExamplesHandler(cfg.Docs),
@@ -64,6 +78,12 @@ func New(cfg config.Config) (*Server, error) {
 	}
 	if cfg.Executor != nil {
 		h.Code = handlers.NewCodeHandler(cfg.Executor)
+	}
+	if cfg.Toolsets != nil {
+		h.Toolsets = handlers.NewToolsetsHandler(cfg.Toolsets)
+	}
+	if cfg.Skills != nil {
+		h.Skills = handlers.NewSkillsHandler(cfg.Skills, cfg.Toolsets, cfg.Runner, cfg.SkillDefaults)
 	}
 
 	serverOptions := &mcp.ServerOptions{
@@ -90,12 +110,15 @@ func New(cfg config.Config) (*Server, error) {
 	if registry == nil {
 		builtinRegistry, err := builtin.NewRegistry(builtin.Deps{
 			Search:     h.Search,
+			ListTools:  h.ListTools,
 			Namespaces: h.Namespaces,
 			Describe:   h.Describe,
 			Examples:   h.Examples,
 			Run:        h.Run,
 			Chain:      h.Chain,
 			Code:       h.Code,
+			Toolsets:   h.Toolsets,
+			Skills:     h.Skills,
 		}, builtin.RegistryOptions{Providers: cfg.Providers})
 		if err != nil {
 			return nil, err

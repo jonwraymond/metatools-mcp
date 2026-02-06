@@ -17,7 +17,7 @@ func TestCreateServer_ValidConfig(t *testing.T) {
 	require.NotNil(t, srv)
 
 	tools := srv.ListTools()
-	assert.Equal(t, 6, len(tools))
+	assert.Equal(t, 13, len(tools))
 	assert.True(t, srv.Capabilities().Tools)
 }
 
@@ -48,7 +48,7 @@ func TestCreateServer_ListToolsViaMCP(t *testing.T) {
 	res, err := clientSession.ListTools(ctx, nil)
 	require.NoError(t, err)
 	require.NotNil(t, res)
-	assert.GreaterOrEqual(t, len(res.Tools), 6)
+	assert.GreaterOrEqual(t, len(res.Tools), 13)
 }
 
 func TestMain_ContextShutdown(t *testing.T) {
@@ -67,7 +67,7 @@ func TestCreateServer_LexicalStrategy(t *testing.T) {
 	require.NotNil(t, srv)
 
 	tools := srv.ListTools()
-	assert.GreaterOrEqual(t, len(tools), 6)
+	assert.GreaterOrEqual(t, len(tools), 12)
 }
 
 func TestCreateServer_DefaultStrategy(t *testing.T) {
@@ -79,7 +79,7 @@ func TestCreateServer_DefaultStrategy(t *testing.T) {
 	require.NotNil(t, srv)
 
 	tools := srv.ListTools()
-	assert.GreaterOrEqual(t, len(tools), 6)
+	assert.GreaterOrEqual(t, len(tools), 12)
 }
 
 func TestCreateServer_InvalidStrategy(t *testing.T) {

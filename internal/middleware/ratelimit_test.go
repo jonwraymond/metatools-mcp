@@ -35,9 +35,9 @@ type mockProvider struct {
 	handleFunc func(ctx context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error)
 }
 
-func (m *mockProvider) Name() string    { return m.name }
-func (m *mockProvider) Enabled() bool   { return true }
-func (m *mockProvider) Tool() mcp.Tool  { return mcp.Tool{Name: m.name} }
+func (m *mockProvider) Name() string   { return m.name }
+func (m *mockProvider) Enabled() bool  { return true }
+func (m *mockProvider) Tool() mcp.Tool { return mcp.Tool{Name: m.name} }
 func (m *mockProvider) Handle(ctx context.Context, req *mcp.CallToolRequest, args map[string]any) (*mcp.CallToolResult, any, error) {
 	atomic.AddInt32(&m.callCount, 1)
 	if m.handleFunc != nil {
@@ -103,8 +103,8 @@ func TestRateLimitMiddleware_BurstAllowed(t *testing.T) {
 	mock := &mockProvider{name: "test-tool"}
 
 	mw := NewRateLimitMiddleware(RateLimitConfig{
-		Rate:  1.0,  // 1 per second
-		Burst: 10,   // But allow 10 burst
+		Rate:  1.0, // 1 per second
+		Burst: 10,  // But allow 10 burst
 	})
 
 	wrapped := mw(mock)

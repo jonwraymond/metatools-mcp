@@ -1,0 +1,27 @@
+# Refresh test config (intentionally aggressive).
+#
+# This file is for local verification of MCP backend refresh behavior.
+# Do not use these intervals in production.
+
+transport:
+  type: streamable
+  http:
+    host: 0.0.0.0
+    port: 8080
+  streamable:
+    stateless: false
+    json_response: false
+    session_timeout: 30m
+
+backends:
+  mcp:
+    - name: "deepwiki"
+      url: "https://mcp.deepwiki.com/mcp"
+      headers: {}
+      max_retries: 5
+  mcp_refresh:
+    interval: 2s
+    jitter: 0s
+    stale_after: 1s
+    on_demand: true
+

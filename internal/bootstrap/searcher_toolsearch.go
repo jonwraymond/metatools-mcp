@@ -8,12 +8,8 @@ import (
 	"github.com/jonwraymond/tooldiscovery/search"
 )
 
-// SearcherFromConfig returns a BM25 searcher when strategy is "bm25",
-// otherwise returns nil to use toolindex's default lexical search.
-func SearcherFromConfig(cfg config.SearchConfig) (index.Searcher, error) {
-	if cfg.Strategy != "bm25" {
-		return nil, nil
-	}
+// bm25SearcherFromConfig returns a BM25 searcher.
+func bm25SearcherFromConfig(cfg config.SearchConfig) (index.Searcher, error) {
 	return search.NewBM25Searcher(search.BM25Config{
 		NameBoost:      cfg.BM25NameBoost,
 		NamespaceBoost: cfg.BM25NamespaceBoost,

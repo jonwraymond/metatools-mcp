@@ -8,6 +8,9 @@ import (
 
 	"github.com/jonwraymond/metatools-mcp/internal/adapters"
 	"github.com/jonwraymond/metatools-mcp/internal/config"
+	"github.com/jonwraymond/metatools-mcp/internal/handlers"
+	"github.com/jonwraymond/metatools-mcp/internal/skills"
+	"github.com/jonwraymond/metatools-mcp/internal/toolset"
 	"github.com/jonwraymond/tooldiscovery/index"
 	"github.com/jonwraymond/toolfoundation/model"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -18,10 +21,20 @@ import (
 func newTestServerWithIndex(t *testing.T, idx index.Index, notify bool, debounceMs int) *Server {
 	t.Helper()
 
+	toolsets := toolset.NewRegistry(nil)
+	skillsRegistry := skills.NewRegistry(nil)
+	defaults := config.DefaultAppConfig().SkillDefaults
 	cfg := config.Config{
-		Index:                           adapters.NewIndexAdapter(idx),
-		Docs:                            &mockStore{},
-		Runner:                          &mockRunner{},
+		Index:    adapters.NewIndexAdapter(idx),
+		Docs:     &mockStore{},
+		Runner:   &mockRunner{},
+		Toolsets: toolsets,
+		Skills:   skillsRegistry,
+		SkillDefaults: handlers.SkillDefaults{
+			MaxSteps:     defaults.MaxSteps,
+			MaxToolCalls: defaults.MaxToolCalls,
+			Timeout:      defaults.Timeout,
+		},
 		Providers:                       config.DefaultAppConfig().Providers,
 		NotifyToolListChanged:           notify,
 		NotifyToolListChangedDebounceMs: debounceMs,

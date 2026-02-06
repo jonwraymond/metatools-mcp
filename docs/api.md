@@ -13,10 +13,20 @@ func (s *Server) ListTools() []*mcp.Tool
 
 ```go
 type Config struct {
-  Index    index.Index
-  Docs     tooldoc.Store
-  Runner   run.Runner
-  Executor code.Executor // optional
+  Index    handlers.Index
+  Docs     handlers.Store
+  Runner   handlers.Runner
+  Executor handlers.Executor // optional
+
+  Toolsets      handlers.ToolsetRegistry // optional (empty registry is valid)
+  Skills        handlers.SkillRegistry   // optional (empty registry is valid)
+  SkillDefaults handlers.SkillDefaults
+
+  Refresher handlers.Refresher // optional backend refresh
+
+  Providers        ProvidersConfig
+  ProviderRegistry *provider.Registry // optional override
+  Middleware       middleware.Config
 
   NotifyToolListChanged           bool
   NotifyToolListChangedDebounceMs int
@@ -95,12 +105,19 @@ When built with `-tags toolruntime`, `execute_code` is backed by a
 These are exported in `pkg/metatools`:
 
 - `SearchToolsInput` / `SearchToolsOutput`
+- `ListToolsInput` / `ListToolsOutput`
 - `ListNamespacesInput` / `ListNamespacesOutput`
 - `DescribeToolInput` / `DescribeToolOutput`
 - `ListToolExamplesInput` / `ListToolExamplesOutput`
 - `RunToolInput` / `RunToolOutput`
 - `RunChainInput` / `RunChainOutput`
 - `ExecuteCodeInput` / `ExecuteCodeOutput`
+- `ListToolsetsInput` / `ListToolsetsOutput`
+- `DescribeToolsetInput` / `DescribeToolsetOutput`
+- `ListSkillsInput` / `ListSkillsOutput`
+- `DescribeSkillInput` / `DescribeSkillOutput`
+- `PlanSkillInput` / `PlanSkillOutput`
+- `RunSkillInput` / `RunSkillOutput`
 
 Notes:
 - `SearchToolsInput`/`ListNamespacesInput` accept `limit` + `cursor`.

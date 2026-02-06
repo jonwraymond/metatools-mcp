@@ -2,15 +2,20 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/go-viper/mapstructure/v2"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/env"
-	"github.com/knadh/koanf/providers/file"
+	"github.com/knadh/koanf/providers/rawbytes"
 	"github.com/knadh/koanf/providers/structs"
 	"github.com/knadh/koanf/v2"
 )
+
+var envVarPattern = regexp.MustCompile(`\$\{([A-Za-z_][A-Za-z0-9_]*)\}`)
 
 // Load reads configuration from defaults, optional file, and environment variables.
 // Precedence: defaults < file < env.
@@ -31,7 +36,17 @@ func loadConfig(path string, overrides map[string]any) (AppConfig, error) {
 	}
 
 	if path != "" {
-		if err := k.Load(file.Provider(path), yaml.Parser()); err != nil {
+		b, err := os.ReadFile(path)
+		if err != nil {
+			return AppConfig{}, fmt.Errorf("read file %q: %w", path, err)
+		}
+
+		expanded, err := expandEnv(b)
+		if err != nil {
+			return AppConfig{}, fmt.Errorf("expand env in file %q: %w", path, err)
+		}
+
+		if err := k.Load(rawbytes.Provider(expanded), yaml.Parser()); err != nil {
 			return AppConfig{}, fmt.Errorf("load file %q: %w", path, err)
 		}
 	}
@@ -69,4 +84,32 @@ func loadConfig(path string, overrides map[string]any) (AppConfig, error) {
 	}
 
 	return cfg, nil
+}
+
+func expandEnv(b []byte) ([]byte, error) {
+	// Allow writing literal "$" without triggering substitution.
+	const dollarSentinel = "\x00METATOOLS_DOLLAR\x00"
+
+	s := string(b)
+	s = strings.ReplaceAll(s, "$$", dollarSentinel)
+
+	missing := make(map[string]struct{})
+	for _, match := range envVarPattern.FindAllStringSubmatch(s, -1) {
+		key := match[1]
+		if _, ok := os.LookupEnv(key); !ok {
+			missing[key] = struct{}{}
+		}
+	}
+	if len(missing) > 0 {
+		keys := make([]string, 0, len(missing))
+		for key := range missing {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+		return nil, fmt.Errorf("missing required environment variables: %s", strings.Join(keys, ", "))
+	}
+
+	s = os.ExpandEnv(s)
+	s = strings.ReplaceAll(s, dollarSentinel, "$")
+	return []byte(s), nil
 }

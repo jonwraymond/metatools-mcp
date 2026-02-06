@@ -1,0 +1,16 @@
+direction: right
+
+"Config\n(toolsets + skills)" -> "Toolset Registry"
+"Config\n(toolsets + skills)" -> "Skills Registry"
+
+"Toolset Registry" -> "toolcompose/set" : "filters + policy"
+"Skills Registry" -> "toolcompose/skill" : "steps + guards"
+
+"metatools-mcp" -> "Toolset Registry" : "list_toolsets / describe_toolset"
+"metatools-mcp" -> "Skills Registry" : "list_skills / describe_skill"
+
+"plan_skill" -> "Skill Planner" -> "Skill Plan"
+"run_skill" -> "Runner" -> "Tool Execution"
+
+"Skills Registry" -> "Skill Planner" : "definitions"
+"Toolset Registry" -> "Skill Planner" : "allowed tool IDs"

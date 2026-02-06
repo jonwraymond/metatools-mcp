@@ -1,0 +1,9 @@
+services:
+  metatools-mcp:
+    command:
+      - "serve"
+      - "--transport=streamable"
+      - "--host=0.0.0.0"
+      - "--port=8080"
+      - "--config=/app/examples/refresh-test.yaml"
+

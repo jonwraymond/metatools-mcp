@@ -1,0 +1,60 @@
+backends:
+    mcp:
+        - headers:
+            Authorization: Bearer secretref:bws:project/dotenv/key/APIFY_TOKEN
+          max_retries: 5
+          name: apify
+          url: https://mcp.apify.com
+        - max_retries: 5
+          name: brightdata
+          url: https://mcp.brightdata.com/mcp?token=secretref:bws:project/dotenv/key/BRIGHT_DATA_API_KEY
+        - headers:
+            CONTEXT7_API_KEY: secretref:bws:project/dotenv/key/CONTEXT7_API_KEY
+          max_retries: 5
+          name: context7
+          url: https://mcp.context7.com/mcp
+        - max_retries: 5
+          name: deepwiki
+          url: https://mcp.deepwiki.com/mcp
+        - headers:
+            EXA_API_KEY: secretref:bws:project/dotenv/key/EXA_API_KEY
+          max_retries: 5
+          name: exa
+          url: https://mcp.exa.ai/mcp?tools=web_search_exa,web_search_advanced_exa,get_code_context_exa,deep_search_exa,crawling_exa,company_research_exa,linkedin_search_exa,deep_researcher_start,deep_researcher_check
+        - headers:
+            x-ref-api-key: secretref:bws:project/dotenv/key/REF_API_KEY
+          max_retries: 5
+          name: ref
+          url: https://api.ref.tools/mcp
+        - headers:
+            Authorization: Bearer secretref:bws:project/dotenv/key/SUPABASE_ACCESS_TOKEN
+          max_retries: 5
+          name: supabase
+          url: https://mcp.supabase.com/mcp
+        - max_retries: 5
+          name: tavily
+          url: https://mcp.tavily.com/mcp/?tavilyApiKey=secretref:bws:project/dotenv/key/TAVILY_API_KEY
+        - headers:
+            Authorization: Bearer secretref:bws:project/dotenv/key/ZAI_API_KEY
+          max_retries: 5
+          name: zai-web-reader
+          url: https://api.z.ai/api/mcp/web_reader/mcp
+        - headers:
+            Authorization: Bearer secretref:bws:project/dotenv/key/ZAI_API_KEY
+          max_retries: 5
+          name: zai-web-search
+          url: https://api.z.ai/api/mcp/web_search_prime/mcp
+        - headers:
+            Authorization: Bearer secretref:bws:project/dotenv/key/ZAI_API_KEY
+          max_retries: 5
+          name: zai-zread
+          url: https://api.z.ai/api/mcp/zread/mcp
+secrets:
+    providers:
+        bws:
+            config:
+                access_token: ${BWS_ACCESS_TOKEN}
+                cache_ttl: 10m
+                organization_id: ${BWS_ORG_ID}
+            enabled: true
+    strict: true

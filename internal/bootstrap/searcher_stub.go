@@ -9,10 +9,8 @@ import (
 	"github.com/jonwraymond/tooldiscovery/index"
 )
 
-// SearcherFromConfig returns nil in the default build, delegating to
-// toolindex's default lexical search behavior. If BM25 is requested without
-// the toolsearch build tag, fail fast to avoid silent lexical fallback.
-func SearcherFromConfig(cfg config.SearchConfig) (index.Searcher, error) {
+// bm25SearcherFromConfig returns an error when bm25 is requested without toolsearch.
+func bm25SearcherFromConfig(cfg config.SearchConfig) (index.Searcher, error) {
 	if cfg.Strategy == "bm25" {
 		return nil, fmt.Errorf("bm25 strategy requested but toolsearch build tag is not enabled")
 	}

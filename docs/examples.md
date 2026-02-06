@@ -54,3 +54,8 @@ summaries, _ := idx.Search("ping", 3)
 res, _ := runner.Run(ctx, summaries[0].ID, map[string]any{})
 fmt.Println(res.Structured)
 ```
+
+## Toolsets and skills config
+
+See `examples/skills.yaml` for a full configuration that defines toolsets,
+skills, and default guardrails.

@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/jonwraymond/metatools-mcp/internal/handlers"
-	"github.com/jonwraymond/toolfoundation/model"
 	"github.com/jonwraymond/toolexec/run"
+	"github.com/jonwraymond/toolfoundation/model"
 )
 
 // RunnerAdapter bridges run.Runner to the handlers.Runner interface.

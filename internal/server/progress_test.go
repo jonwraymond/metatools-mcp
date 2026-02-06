@@ -7,6 +7,8 @@ import (
 
 	"github.com/jonwraymond/metatools-mcp/internal/config"
 	"github.com/jonwraymond/metatools-mcp/internal/handlers"
+	"github.com/jonwraymond/metatools-mcp/internal/skills"
+	"github.com/jonwraymond/metatools-mcp/internal/toolset"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -36,10 +38,20 @@ func (p *progressRunner) RunChainWithProgress(_ context.Context, _ []handlers.Ch
 }
 
 func TestServer_ProgressNotifications_RunTool(t *testing.T) {
+	toolsets := toolset.NewRegistry(nil)
+	skillsRegistry := skills.NewRegistry(nil)
+	defaults := config.DefaultAppConfig().SkillDefaults
 	cfg := config.Config{
-		Index:     &mockIndex{},
-		Docs:      &mockStore{},
-		Runner:    &progressRunner{},
+		Index:    &mockIndex{},
+		Docs:     &mockStore{},
+		Runner:   &progressRunner{},
+		Toolsets: toolsets,
+		Skills:   skillsRegistry,
+		SkillDefaults: handlers.SkillDefaults{
+			MaxSteps:     defaults.MaxSteps,
+			MaxToolCalls: defaults.MaxToolCalls,
+			Timeout:      defaults.Timeout,
+		},
 		Providers: config.DefaultAppConfig().Providers,
 	}
 

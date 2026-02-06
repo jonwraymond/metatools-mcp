@@ -89,7 +89,7 @@ func (p *authMiddlewareProvider) Handle(ctx context.Context, req *mcp.CallToolRe
 
 	result, err := p.authn.Authenticate(ctx, authReq)
 	if err != nil {
-		return errorResult("authentication error: "+err.Error()), nil, nil
+		return errorResult("authentication error: " + err.Error()), nil, nil
 	}
 
 	var identity *auth.Identity

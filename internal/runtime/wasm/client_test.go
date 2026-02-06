@@ -30,9 +30,9 @@ var stderrWasm = stderrWasmBytes
 var infiniteLoopWasm = infiniteLoopWasmBytes
 
 // These modules require more complex WASI setup and are not yet implemented.
-var echoArgsWasm []byte   // TODO: implement
-var echoEnvWasm []byte    // TODO: implement
-var echoStdinWasm []byte  // TODO: implement
+var echoArgsWasm []byte    // TODO: implement
+var echoEnvWasm []byte     // TODO: implement
+var echoStdinWasm []byte   // TODO: implement
 var allocMemoryWasm []byte // TODO: implement
 
 func skipIfNoTestWasm(t *testing.T, module []byte) {

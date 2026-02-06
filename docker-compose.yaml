@@ -1,0 +1,20 @@
+services:
+  metatools-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        GO_VERSION: "1.25"
+    image: metatools-mcp:local
+    container_name: metatools-mcp
+    ports:
+      - "8080:8080"
+    command:
+      - "serve"
+      - "--transport=streamable"
+      - "--host=0.0.0.0"
+      - "--port=8080"
+      - "--config=/app/examples/metatools.yaml"
+    volumes:
+      - "./examples:/app/examples:ro"
+    restart: unless-stopped

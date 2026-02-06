@@ -2,8 +2,12 @@ package handlers
 
 import (
 	"context"
+	"time"
 
+	"github.com/jonwraymond/metatools-mcp/internal/skills"
+	"github.com/jonwraymond/metatools-mcp/internal/toolset"
 	"github.com/jonwraymond/metatools-mcp/pkg/metatools"
+	"github.com/jonwraymond/toolfoundation/model"
 )
 
 // Index provides tool search and discovery.
@@ -15,6 +19,12 @@ import (
 type Index interface {
 	SearchPage(ctx context.Context, query string, limit int, cursor string) ([]metatools.ToolSummary, string, error)
 	ListNamespacesPage(ctx context.Context, limit int, cursor string) ([]string, string, error)
+	GetAllBackends(ctx context.Context, id string) ([]model.ToolBackend, error)
+}
+
+// Refresher optionally triggers backend refreshes before discovery operations.
+type Refresher interface {
+	MaybeRefresh(ctx context.Context) error
 }
 
 // ToolDoc represents a tool documentation result
@@ -112,4 +122,23 @@ type ExecuteResult struct {
 // - Context: methods must honor cancellation/deadlines and return ctx.Err() when canceled.
 type Executor interface {
 	ExecuteCode(ctx context.Context, params ExecuteParams) (ExecuteResult, error)
+}
+
+// ToolsetRegistry provides access to configured toolsets.
+type ToolsetRegistry interface {
+	List() []*toolset.Toolset
+	Get(id string) (*toolset.Toolset, bool)
+}
+
+// SkillRegistry provides access to configured skills.
+type SkillRegistry interface {
+	List() []*skills.Skill
+	Get(id string) (*skills.Skill, bool)
+}
+
+// SkillDefaults defines default limits for skills.
+type SkillDefaults struct {
+	MaxSteps     int
+	MaxToolCalls int
+	Timeout      time.Duration
 }

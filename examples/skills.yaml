@@ -1,0 +1,25 @@
+toolsets:
+  - name: "core"
+    description: "Core safe tools"
+    namespace_filters: ["local", "core"]
+    tag_filters: ["safe"]
+    allow_ids: []
+    deny_ids: []
+    policy: "allow_all"
+
+skills:
+  - name: "ping_check"
+    description: "Run a simple ping tool"
+    toolset_id: "toolset:core"
+    steps:
+      - id: "ping"
+        tool_id: "local.ping"
+        inputs: {}
+    guards:
+      max_steps: 4
+      allow_ids: []
+
+skill_defaults:
+  max_steps: 8
+  max_tool_calls: 32
+  timeout: 30s

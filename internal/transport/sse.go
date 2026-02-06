@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/jonwraymond/toolops/auth"
+	"github.com/jonwraymond/toolops/health"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -20,6 +21,8 @@ type SSEConfig struct {
 	Port              int
 	Path              string
 	ReadHeaderTimeout time.Duration
+	HealthEnabled     bool
+	HealthPath        string
 }
 
 // SSETransport serves MCP over Server-Sent Events.
@@ -73,6 +76,13 @@ func (t *SSETransport) Serve(ctx context.Context, server Server) error {
 	}, nil)
 	// Wrap handler with auth headers middleware to extract HTTP headers into context
 	mux.Handle(path, auth.WithAuthHeaders(handler))
+	if t.Config.HealthEnabled {
+		healthPath := t.Config.HealthPath
+		if healthPath == "" {
+			healthPath = "/healthz"
+		}
+		mux.HandleFunc(healthPath, health.LivenessHandler())
+	}
 
 	httpServer := &http.Server{
 		Addr:              addr,

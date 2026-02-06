@@ -7,6 +7,7 @@ import (
 
 	"github.com/jonwraymond/metatools-mcp/pkg/metatools"
 	"github.com/jonwraymond/tooldiscovery/index"
+	"github.com/jonwraymond/toolfoundation/model"
 	"github.com/modelcontextprotocol/go-sdk/jsonrpc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -25,6 +26,10 @@ func (m *mockNamespacesIndex) ListNamespacesPage(ctx context.Context, limit int,
 		return m.listNamespacesFunc(ctx, limit, cursor)
 	}
 	return []string{}, "", nil
+}
+
+func (m *mockNamespacesIndex) GetAllBackends(_ context.Context, _ string) ([]model.ToolBackend, error) {
+	return []model.ToolBackend{}, nil
 }
 
 func TestListNamespaces_Empty(t *testing.T) {

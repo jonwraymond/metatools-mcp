@@ -74,11 +74,88 @@ Config precedence:
 
 Example file: `examples/metatools.yaml`
 
+Environment variables in config files:
+- `${VAR}` and `$VAR` are expanded from the process environment.
+- Missing `${VAR}` values fail fast at startup (recommended for secrets).
+- Use `$$` to write a literal `$` without triggering expansion.
+
+## MCP backends (remote MCP servers)
+
+You can aggregate tools from remote MCP servers and execute them through the
+runner by configuring `backends.mcp`.
+
+```yaml
+backends:
+  mcp:
+    - name: "deepwiki"
+      url: "https://mcp.deepwiki.com/mcp"
+      headers: {}
+      max_retries: 5
+  mcp_refresh:
+    interval: 10m     # periodic refresh cadence (0 to disable)
+    jitter: 30s       # randomized jitter to avoid stampedes
+    stale_after: 15m  # on-demand refresh if older than this
+    on_demand: true   # refresh on search/list when stale
+```
+
+If a backend requires authentication headers, you can inject them via env vars:
+
+```yaml
+backends:
+  mcp:
+    - name: "private-mcp"
+      url: "https://mcp.example.com/mcp"
+      headers:
+        Authorization: "Bearer ${MCP_BACKEND_TOKEN}"
+```
+
+This registers tools from the remote server into the index and enables the
+runner to dispatch to them via MCP backend calls.
+
 ## Provider toggles
 
 Built-in metatools can be enabled/disabled via `providers.*.enabled` in the
 config file (see the `providers` block in `examples/metatools.yaml`). This
 controls which MCP tools are registered at startup.
+
+New providers for toolsets and skills:
+- `list_tools` (paged tool inventory)
+- `list_toolsets`, `describe_toolset`
+- `list_skills`, `describe_skill`, `plan_skill`, `run_skill`
+
+## Toolsets and skills
+
+Toolsets are deterministic collections of tools built from index filters and
+policies. Skills are pre-registered workflows that can be planned and executed
+by the server with guardrails.
+
+```yaml
+toolsets:
+  - name: "core"
+    description: "Core safe tools"
+    namespace_filters: ["local", "core"]
+    tag_filters: ["safe"]
+    allow_ids: []
+    deny_ids: []
+    policy: "allow_all"
+
+skills:
+  - name: "ping_check"
+    description: "Run a simple ping tool"
+    toolset_id: "toolset:core"
+    steps:
+      - id: "ping"
+        tool_id: "local.ping"
+        inputs: {}
+    guards:
+      max_steps: 4
+      allow_ids: []
+
+skill_defaults:
+  max_steps: 8
+  max_tool_calls: 32
+  timeout: 30s
+```
 
 ## Middleware chain
 
@@ -111,11 +188,64 @@ middleware:
                     actions: ["call", "list"]
 ```
 
+### Toolops integration (observe/cache/resilience)
+
+Toolops wrappers are configured outside the middleware chain and apply to
+execution paths (`run_tool`, `run_chain`, `execute_code`, `run_skill`).
+
+```yaml
+middleware:
+  observe:
+    enabled: true
+    config:
+      service: "metatools-mcp"
+  cache:
+    enabled: false
+    policy:
+      ttl: 5m
+  resilience:
+    enabled: true
+    retry:
+      enabled: true
+      config:
+        max_attempts: 3
+    circuit:
+      enabled: true
+      config:
+        failure_threshold: 5
+        success_threshold: 2
+    timeout: 30s
+```
+
 ## Enable BM25 search (build tag + env)
 
 ```bash
 go build -tags toolsearch ./cmd/metatools
 METATOOLS_SEARCH_STRATEGY=bm25 ./metatools
+```
+
+## Enable semantic or hybrid search (BYO embedder)
+
+Semantic/hybrid search requires the `toolsemantic` build tag and an embedder
+adapter registered at runtime.
+
+```bash
+go build -tags toolsemantic ./cmd/metatools
+METATOOLS_SEARCH_STRATEGY=semantic METATOOLS_SEARCH_SEMANTIC_EMBEDDER=my-embedder ./metatools
+```
+
+If `semantic` is requested without an embedder, the server falls back to lexical
+search. If `hybrid` is requested without an embedder, it falls back to BM25 when
+available, otherwise lexical.
+
+```yaml
+search:
+  strategy: semantic
+  semantic:
+    embedder: "my-embedder"
+    config:
+      model: "text-embedding-3-small"
+    weight: 0.5
 ```
 
 ## Environment variables
@@ -161,18 +291,20 @@ These map to the config schema loaded by `config.Load`:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `METATOOLS_SEARCH_STRATEGY` | `lexical` | `lexical` or `bm25` |
+| `METATOOLS_SEARCH_STRATEGY` | `lexical` | `lexical`, `bm25`, `semantic`, or `hybrid` |
 | `METATOOLS_SEARCH_BM25_NAME_BOOST` | `3` | BM25 name field boost |
 | `METATOOLS_SEARCH_BM25_NAMESPACE_BOOST` | `2` | BM25 namespace field boost |
 | `METATOOLS_SEARCH_BM25_TAGS_BOOST` | `2` | BM25 tags field boost |
 | `METATOOLS_SEARCH_BM25_MAX_DOCS` | `0` | Max docs to index (0=unlimited) |
 | `METATOOLS_SEARCH_BM25_MAX_DOCTEXT_LEN` | `0` | Max doc text length (0=unlimited) |
+| `METATOOLS_SEARCH_SEMANTIC_EMBEDDER` | "" | Embedder registry key (semantic/hybrid) |
+| `METATOOLS_SEARCH_SEMANTIC_WEIGHT` | `0.5` | Hybrid semantic weight |
 | `METATOOLS_NOTIFY_TOOL_LIST_CHANGED` | `true` | Emit `notifications/tools/list_changed` on index updates |
 | `METATOOLS_NOTIFY_TOOL_LIST_CHANGED_DEBOUNCE_MS` | `150` | Debounce window for list change notifications |
 
 ## Pagination and cursors
 
-- `search_tools` and `list_namespaces` accept `limit` (default 20, max 100) and `cursor`.
+- `search_tools`, `list_tools`, and `list_namespaces` accept `limit` (default 20, max 100) and `cursor`.
 - Responses include `nextCursor` when more results are available.
 - Cursor tokens are opaque and invalid cursors return JSON-RPC invalid params.
 
@@ -186,6 +318,20 @@ These map to the config schema loaded by `config.Load`:
 When callers supply a progress token, `run_tool`, `run_chain`, and `execute_code`
 emit progress notifications. If the runner exposes progress callbacks, step-level
 updates are forwarded; otherwise a coarse start/end signal is emitted.
+
+`run_skill` forwards progress from the underlying runner where available.
+
+## Health endpoint (HTTP transports)
+
+Streamable HTTP and SSE transports can expose a lightweight health endpoint.
+
+```yaml
+health:
+  enabled: true
+  http_path: /healthz
+```
+
+When enabled, `GET /healthz` returns a 200 with a simple JSON body.
 
 ## Optional toolruntime support
 

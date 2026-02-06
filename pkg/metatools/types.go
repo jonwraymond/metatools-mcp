@@ -64,6 +64,47 @@ type SearchToolsOutput struct {
 	NextCursor *string       `json:"nextCursor,omitempty"`
 }
 
+// ListToolsInput is the input for list_tools
+type ListToolsInput struct {
+	Limit       *int    `json:"limit,omitempty"`
+	Cursor      *string `json:"cursor,omitempty"`
+	BackendKind *string `json:"backend_kind,omitempty"` // local, provider, mcp
+	BackendName *string `json:"backend_name,omitempty"` // server name (mcp) or provider id
+}
+
+// Validate checks that the input is valid.
+func (l *ListToolsInput) Validate() error {
+	if l.BackendKind == nil {
+		return nil
+	}
+	switch *l.BackendKind {
+	case "local", "provider", "mcp":
+		return nil
+	default:
+		return errors.New("backend_kind must be one of: local, provider, mcp")
+	}
+}
+
+// GetLimit returns the effective limit, applying defaults and caps.
+func (l *ListToolsInput) GetLimit() int {
+	if l.Limit == nil {
+		return 20
+	}
+	if *l.Limit > 100 {
+		return 100
+	}
+	if *l.Limit < 1 {
+		return 1
+	}
+	return *l.Limit
+}
+
+// ListToolsOutput is the output for list_tools.
+type ListToolsOutput struct {
+	Tools      []ToolSummary `json:"tools"`
+	NextCursor *string       `json:"nextCursor,omitempty"`
+}
+
 // ListNamespacesInput is the input for list_namespaces
 type ListNamespacesInput struct {
 	Limit  *int    `json:"limit,omitempty"`
@@ -197,6 +238,172 @@ type RunToolOutput struct {
 	Backend    any          `json:"backend,omitempty"`
 	MCPResult  any          `json:"mcpResult,omitempty"`
 	DurationMs *int         `json:"durationMs,omitempty"`
+}
+
+// ToolsetSummary represents a minimal toolset summary.
+type ToolsetSummary struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+	ToolCount   int    `json:"toolCount"`
+}
+
+// ListToolsetsInput is the input for list_toolsets.
+type ListToolsetsInput struct{}
+
+// Validate checks that the input is valid.
+func (l *ListToolsetsInput) Validate() error { return nil }
+
+// ListToolsetsOutput is the output for list_toolsets.
+type ListToolsetsOutput struct {
+	Toolsets []ToolsetSummary `json:"toolsets"`
+}
+
+// DescribeToolsetInput is the input for describe_toolset.
+type DescribeToolsetInput struct {
+	ToolsetID string `json:"toolset_id"`
+}
+
+// Validate checks that the input is valid.
+func (d *DescribeToolsetInput) Validate() error {
+	if d.ToolsetID == "" {
+		return errors.New("toolset_id is required")
+	}
+	return nil
+}
+
+// ToolsetDetail is the detailed view of a toolset.
+type ToolsetDetail struct {
+	ID          string        `json:"id"`
+	Name        string        `json:"name"`
+	Description string        `json:"description,omitempty"`
+	Tools       []ToolSummary `json:"tools,omitempty"`
+}
+
+// DescribeToolsetOutput is the output for describe_toolset.
+type DescribeToolsetOutput struct {
+	Toolset ToolsetDetail `json:"toolset"`
+}
+
+// SkillStep defines a skill step.
+type SkillStep struct {
+	ID     string         `json:"id"`
+	ToolID string         `json:"tool_id"`
+	Inputs map[string]any `json:"inputs,omitempty"`
+}
+
+// SkillDefinition describes a skill.
+type SkillDefinition struct {
+	Name        string      `json:"name"`
+	Description string      `json:"description,omitempty"`
+	Steps       []SkillStep `json:"steps"`
+	ToolsetID   string      `json:"toolset_id,omitempty"`
+}
+
+// SkillSummary represents a minimal skill summary.
+type SkillSummary struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+	StepCount   int    `json:"stepCount"`
+	ToolsetID   string `json:"toolset_id,omitempty"`
+}
+
+// ListSkillsInput is the input for list_skills.
+type ListSkillsInput struct{}
+
+// Validate checks that the input is valid.
+func (l *ListSkillsInput) Validate() error { return nil }
+
+// ListSkillsOutput is the output for list_skills.
+type ListSkillsOutput struct {
+	Skills []SkillSummary `json:"skills"`
+}
+
+// DescribeSkillInput is the input for describe_skill.
+type DescribeSkillInput struct {
+	SkillID string `json:"skill_id"`
+}
+
+// Validate checks that the input is valid.
+func (d *DescribeSkillInput) Validate() error {
+	if d.SkillID == "" {
+		return errors.New("skill_id is required")
+	}
+	return nil
+}
+
+// DescribeSkillOutput is the output for describe_skill.
+type DescribeSkillOutput struct {
+	Skill SkillDefinition `json:"skill"`
+}
+
+// PlanSkillInput is the input for plan_skill.
+type PlanSkillInput struct {
+	SkillID string           `json:"skill_id,omitempty"`
+	Skill   *SkillDefinition `json:"skill,omitempty"`
+}
+
+// Validate checks that the input is valid.
+func (p *PlanSkillInput) Validate() error {
+	if p.SkillID == "" && p.Skill == nil {
+		return errors.New("skill_id or skill is required")
+	}
+	if p.SkillID != "" && p.Skill != nil {
+		return errors.New("skill_id and skill cannot both be set")
+	}
+	if p.Skill != nil && p.Skill.Name == "" {
+		return errors.New("skill.name is required")
+	}
+	return nil
+}
+
+// SkillPlan is the deterministic plan returned by plan_skill.
+type SkillPlan struct {
+	Name  string      `json:"name"`
+	Steps []SkillStep `json:"steps"`
+}
+
+// PlanSkillOutput is the output for plan_skill.
+type PlanSkillOutput struct {
+	Plan SkillPlan `json:"plan"`
+}
+
+// RunSkillInput is the input for run_skill.
+type RunSkillInput struct {
+	SkillID      string           `json:"skill_id,omitempty"`
+	Skill        *SkillDefinition `json:"skill,omitempty"`
+	MaxSteps     *int             `json:"max_steps,omitempty"`
+	MaxToolCalls *int             `json:"max_tool_calls,omitempty"`
+	TimeoutMs    *int             `json:"timeout_ms,omitempty"`
+}
+
+// Validate checks that the input is valid.
+func (r *RunSkillInput) Validate() error {
+	if r.SkillID == "" && r.Skill == nil {
+		return errors.New("skill_id or skill is required")
+	}
+	if r.SkillID != "" && r.Skill != nil {
+		return errors.New("skill_id and skill cannot both be set")
+	}
+	if r.Skill != nil && r.Skill.Name == "" {
+		return errors.New("skill.name is required")
+	}
+	return nil
+}
+
+// SkillStepResult is the output for a skill step.
+type SkillStepResult struct {
+	StepID string       `json:"step_id"`
+	Value  any          `json:"value,omitempty"`
+	Error  *ErrorObject `json:"error,omitempty"`
+}
+
+// RunSkillOutput is the output for run_skill.
+type RunSkillOutput struct {
+	Results    []SkillStepResult `json:"results,omitempty"`
+	Error      *ErrorObject      `json:"error,omitempty"`
+	DurationMs *int              `json:"durationMs,omitempty"`
 }
 
 // ChainStep represents a single step in a chain

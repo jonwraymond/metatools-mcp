@@ -9,6 +9,7 @@ import (
 	"github.com/jonwraymond/metatools-mcp/internal/adapters"
 	"github.com/jonwraymond/metatools-mcp/internal/bootstrap"
 	"github.com/jonwraymond/metatools-mcp/internal/config"
+	"github.com/jonwraymond/metatools-mcp/internal/mcpbackend"
 	"github.com/jonwraymond/metatools-mcp/internal/server"
 	"github.com/jonwraymond/tooldiscovery/tooldoc"
 	"github.com/jonwraymond/toolexec/run"
@@ -43,7 +44,33 @@ func createServer() (*server.Server, error) {
 		return nil, fmt.Errorf("creating index: %w", err)
 	}
 	docs := tooldoc.NewInMemoryStore(tooldoc.StoreOptions{Index: idx})
+
+	mcpBackendCfgs := make([]mcpbackend.Config, len(appCfg.Backends.MCP))
+	for i, backend := range appCfg.Backends.MCP {
+		mcpBackendCfgs[i] = mcpbackend.Config{
+			Name:       backend.Name,
+			URL:        backend.URL,
+			Headers:    backend.Headers,
+			MaxRetries: backend.MaxRetries,
+		}
+	}
+	mcpManager, err := mcpbackend.NewManager(mcpBackendCfgs)
+	if err != nil {
+		return nil, fmt.Errorf("mcp backends: %w", err)
+	}
+	if mcpManager.HasBackends() {
+		if err := mcpManager.ConnectAll(context.Background()); err != nil {
+			return nil, fmt.Errorf("connect mcp backends: %w", err)
+		}
+		if err := mcpManager.RegisterTools(idx); err != nil {
+			return nil, fmt.Errorf("register mcp tools: %w", err)
+		}
+	}
+
 	runner := run.NewRunner(run.WithIndex(idx))
+	if mcpManager.HasBackends() {
+		runner = run.NewRunner(run.WithIndex(idx), run.WithMCPExecutor(mcpManager))
+	}
 
 	exec, err := maybeCreateExecutor(appCfg.Execution, idx, docs, runner)
 	if err != nil {

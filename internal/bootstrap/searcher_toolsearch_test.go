@@ -42,6 +42,17 @@ func TestSearcherFromConfig_LexicalStrategy(t *testing.T) {
 	assert.Nil(t, searcher, "lexical strategy should return nil")
 }
 
+func TestSearcherFromConfig_SemanticRequiresBuildTag(t *testing.T) {
+	cfg := config.SearchConfig{
+		Strategy:         "semantic",
+		SemanticEmbedder: "stub",
+	}
+
+	searcher, err := SearcherFromConfig(cfg)
+	require.Error(t, err)
+	assert.Nil(t, searcher)
+}
+
 func TestSearcherFromConfig_CustomBM25Values(t *testing.T) {
 	cfg := config.SearchConfig{
 		Strategy:           "bm25",

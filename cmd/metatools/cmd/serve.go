@@ -11,10 +11,16 @@ import (
 	"github.com/jonwraymond/metatools-mcp/internal/adapters"
 	"github.com/jonwraymond/metatools-mcp/internal/bootstrap"
 	"github.com/jonwraymond/metatools-mcp/internal/config"
+	"github.com/jonwraymond/metatools-mcp/internal/handlers"
+	"github.com/jonwraymond/metatools-mcp/internal/mcpbackend"
+	"github.com/jonwraymond/metatools-mcp/internal/middleware"
 	"github.com/jonwraymond/metatools-mcp/internal/server"
+	"github.com/jonwraymond/metatools-mcp/internal/skills"
+	"github.com/jonwraymond/metatools-mcp/internal/toolset"
 	transportpkg "github.com/jonwraymond/metatools-mcp/internal/transport"
 	"github.com/jonwraymond/tooldiscovery/tooldoc"
 	"github.com/jonwraymond/toolexec/run"
+	bwssecret "github.com/jonwraymond/toolops-integrations/secret/bws"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/spf13/cobra"
 )
@@ -133,16 +139,117 @@ func buildServerConfigFromConfig(appCfg config.AppConfig) (config.Config, error)
 		return config.Config{}, fmt.Errorf("creating index: %w", err)
 	}
 	docs := tooldoc.NewInMemoryStore(tooldoc.StoreOptions{Index: idx})
+
+	mcpBackendCfgs := make([]mcpbackend.Config, len(appCfg.Backends.MCP))
+	for i, backend := range appCfg.Backends.MCP {
+		mcpBackendCfgs[i] = mcpbackend.Config{
+			Name:       backend.Name,
+			URL:        backend.URL,
+			Headers:    backend.Headers,
+			MaxRetries: backend.MaxRetries,
+		}
+	}
+	mcpManager, err := mcpbackend.NewManager(mcpBackendCfgs)
+	if err != nil {
+		return config.Config{}, fmt.Errorf("mcp backends: %w", err)
+	}
+	if mcpManager.HasBackends() {
+		if err := mcpManager.ConnectAll(context.Background()); err != nil {
+			return config.Config{}, fmt.Errorf("connect mcp backends: %w", err)
+		}
+		if err := mcpManager.RegisterTools(idx); err != nil {
+			return config.Config{}, fmt.Errorf("register mcp tools: %w", err)
+		}
+	}
+
 	runner := run.NewRunner(run.WithIndex(idx))
+	if mcpManager.HasBackends() {
+		runner = run.NewRunner(run.WithIndex(idx), run.WithMCPExecutor(mcpManager))
+	}
 
 	exec, err := maybeCreateExecutor(appCfg.Execution, idx, docs, runner)
 	if err != nil {
 		return config.Config{}, fmt.Errorf("create executor: %w", err)
 	}
 
+	toolsetSpecs := make([]toolset.Spec, len(appCfg.Toolsets))
+	for i, spec := range appCfg.Toolsets {
+		toolsetSpecs[i] = toolset.Spec{
+			Name:             spec.Name,
+			Description:      spec.Description,
+			NamespaceFilters: spec.NamespaceFilters,
+			TagFilters:       spec.TagFilters,
+			AllowIDs:         spec.AllowIDs,
+			DenyIDs:          spec.DenyIDs,
+			Policy:           spec.Policy,
+		}
+	}
+	toolsetsRegistry, err := toolset.BuildRegistry(idx, toolsetSpecs)
+	if err != nil {
+		return config.Config{}, fmt.Errorf("build toolsets: %w", err)
+	}
+	skillSpecs := make([]skills.Spec, len(appCfg.Skills))
+	for i, spec := range appCfg.Skills {
+		steps := make([]skills.StepSpec, len(spec.Steps))
+		for j, step := range spec.Steps {
+			steps[j] = skills.StepSpec{
+				ID:     step.ID,
+				ToolID: step.ToolID,
+				Inputs: step.Inputs,
+			}
+		}
+		skillSpecs[i] = skills.Spec{
+			Name:        spec.Name,
+			Description: spec.Description,
+			ToolsetID:   spec.ToolsetID,
+			Steps:       steps,
+			Guards: skills.GuardSpec{
+				MaxSteps: spec.Guards.MaxSteps,
+				AllowIDs: spec.Guards.AllowIDs,
+			},
+		}
+	}
+	skillsRegistry, err := skills.BuildRegistry(toolsetsRegistry, skillSpecs)
+	if err != nil {
+		return config.Config{}, fmt.Errorf("build skills: %w", err)
+	}
+
 	cfg := adapters.NewConfig(idx, docs, runner, exec)
 	cfg.Providers = appCfg.Providers
 	cfg.Middleware = appCfg.Middleware
+	cfg.Toolsets = toolsetsRegistry
+	cfg.Skills = skillsRegistry
+	if mcpManager.HasBackends() {
+		refreshPolicy := mcpbackend.RefreshPolicy{
+			Interval:   appCfg.Backends.MCPRefresh.Interval,
+			Jitter:     appCfg.Backends.MCPRefresh.Jitter,
+			StaleAfter: appCfg.Backends.MCPRefresh.StaleAfter,
+			OnDemand:   appCfg.Backends.MCPRefresh.OnDemand,
+		}
+		cfg.Refresher = mcpbackend.NewRefresher(mcpManager, idx, refreshPolicy)
+	}
+	cfg.SkillDefaults = handlers.SkillDefaults{
+		MaxSteps:     appCfg.SkillDefaults.MaxSteps,
+		MaxToolCalls: appCfg.SkillDefaults.MaxToolCalls,
+		Timeout:      appCfg.SkillDefaults.Timeout,
+	}
+
+	wrappedRunner, err := middleware.WrapRunner(cfg.Runner, idx, appCfg.Middleware)
+	if err != nil {
+		return config.Config{}, fmt.Errorf("wrap runner: %w", err)
+	}
+	if wrappedRunner != nil {
+		cfg.Runner = wrappedRunner
+	}
+	if cfg.Executor != nil {
+		wrappedExec, err := middleware.WrapExecutor(cfg.Executor, appCfg.Middleware)
+		if err != nil {
+			return config.Config{}, fmt.Errorf("wrap executor: %w", err)
+		}
+		if wrappedExec != nil {
+			cfg.Executor = wrappedExec
+		}
+	}
 
 	// Preserve notify settings from env config for now.
 	envCfg, err := config.LoadEnv()
@@ -170,6 +277,21 @@ func runServe(ctx context.Context, cfg *ServeConfig) error {
 		return fmt.Errorf("apply runtime limits: %w", err)
 	}
 
+	secretResolver, closeSecrets, err := bootstrap.NewSecretResolver(appCfg.Secrets, bwssecret.Register)
+	if err != nil {
+		return fmt.Errorf("secrets: %w", err)
+	}
+	if closeSecrets != nil {
+		defer func() { _ = closeSecrets() }()
+	}
+	if secretResolver != nil {
+		resolved, err := bootstrap.ResolveMCPBackendConfigs(ctx, secretResolver, appCfg.Backends.MCP)
+		if err != nil {
+			return fmt.Errorf("resolve mcp backend secrets: %w", err)
+		}
+		appCfg.Backends.MCP = resolved
+	}
+
 	serverCfg, err := buildServerConfigFromConfig(appCfg)
 	if err != nil {
 		return fmt.Errorf("build server config: %w", err)
@@ -180,15 +302,21 @@ func runServe(ctx context.Context, cfg *ServeConfig) error {
 		return fmt.Errorf("create server: %w", err)
 	}
 
+	if refresher, ok := serverCfg.Refresher.(*mcpbackend.Refresher); ok && refresher != nil {
+		refresher.StartLoop(ctx)
+	}
+
 	var transport transportpkg.Transport
 	switch appCfg.Transport.Type {
 	case "stdio":
 		transport = &transportpkg.StdioTransport{}
 	case "sse":
 		transport = &transportpkg.SSETransport{Config: transportpkg.SSEConfig{
-			Host: appCfg.Transport.HTTP.Host,
-			Port: appCfg.Transport.HTTP.Port,
-			Path: "/mcp",
+			Host:          appCfg.Transport.HTTP.Host,
+			Port:          appCfg.Transport.HTTP.Port,
+			Path:          "/mcp",
+			HealthEnabled: appCfg.Health.Enabled,
+			HealthPath:    appCfg.Health.Path,
 		}}
 	case "streamable":
 		transport = &transportpkg.StreamableHTTPTransport{Config: transportpkg.StreamableHTTPConfig{
@@ -198,6 +326,8 @@ func runServe(ctx context.Context, cfg *ServeConfig) error {
 			Stateless:      appCfg.Transport.Streamable.Stateless,
 			JSONResponse:   appCfg.Transport.Streamable.JSONResponse,
 			SessionTimeout: appCfg.Transport.Streamable.SessionTimeout,
+			HealthEnabled:  appCfg.Health.Enabled,
+			HealthPath:     appCfg.Health.Path,
 			TLS: transportpkg.TLSConfig{
 				Enabled:  appCfg.Transport.HTTP.TLS.Enabled,
 				CertFile: appCfg.Transport.HTTP.TLS.CertFile,

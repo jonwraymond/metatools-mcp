@@ -88,6 +88,26 @@ flowchart LR
 
 ![Diagram](assets/diagrams/progressive-disclosure.svg)
 
+## Toolops execution wrappers
+
+Execution endpoints (`run_tool`, `run_chain`, `execute_code`, `run_skill`) can be
+wrapped with toolops observe/cache/resilience. These are configured via
+`middleware.observe`, `middleware.cache`, and `middleware.resilience` and applied
+outside the request middleware chain.
+
+## Toolsets and skills
+
+Toolsets are deterministic tool collections composed from discovery results.
+Skills are pre-registered, guarded workflows executed through the runner.
+
+![Diagram](assets/diagrams/toolset-skill-flow.svg)
+
+## Search strategy selection
+
+Semantic and hybrid search are optional and require a BYO embedder adapter.
+When configuration or build tags are missing, the server falls back safely.
+
+![Diagram](assets/diagrams/semantic-search-flow.svg)
 
 ## MCP tool mapping
 

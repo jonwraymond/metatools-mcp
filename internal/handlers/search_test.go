@@ -7,6 +7,7 @@ import (
 
 	"github.com/jonwraymond/metatools-mcp/pkg/metatools"
 	"github.com/jonwraymond/tooldiscovery/index"
+	"github.com/jonwraymond/toolfoundation/model"
 	"github.com/modelcontextprotocol/go-sdk/jsonrpc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,6 +16,7 @@ import (
 type mockIndex struct {
 	searchFunc         func(_ context.Context, query string, limit int, cursor string) ([]metatools.ToolSummary, string, error)
 	listNamespacesFunc func(_ context.Context, limit int, cursor string) ([]string, string, error)
+	getBackendsFunc    func(_ context.Context, id string) ([]model.ToolBackend, error)
 }
 
 func (m *mockIndex) SearchPage(ctx context.Context, query string, limit int, cursor string) ([]metatools.ToolSummary, string, error) {
@@ -29,6 +31,13 @@ func (m *mockIndex) ListNamespacesPage(ctx context.Context, limit int, cursor st
 		return m.listNamespacesFunc(ctx, limit, cursor)
 	}
 	return []string{}, "", nil
+}
+
+func (m *mockIndex) GetAllBackends(ctx context.Context, id string) ([]model.ToolBackend, error) {
+	if m.getBackendsFunc != nil {
+		return m.getBackendsFunc(ctx, id)
+	}
+	return []model.ToolBackend{}, nil
 }
 
 func TestSearchTools_EmptyQuery(t *testing.T) {

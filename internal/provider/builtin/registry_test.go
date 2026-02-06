@@ -6,7 +6,10 @@ import (
 
 	"github.com/jonwraymond/metatools-mcp/internal/config"
 	"github.com/jonwraymond/metatools-mcp/internal/handlers"
+	"github.com/jonwraymond/metatools-mcp/internal/skills"
+	"github.com/jonwraymond/metatools-mcp/internal/toolset"
 	"github.com/jonwraymond/metatools-mcp/pkg/metatools"
+	"github.com/jonwraymond/toolfoundation/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -18,6 +21,9 @@ func (m *mockIndex) SearchPage(_ context.Context, _ string, _ int, _ string) ([]
 }
 func (m *mockIndex) ListNamespacesPage(_ context.Context, _ int, _ string) ([]string, string, error) {
 	return nil, "", nil
+}
+func (m *mockIndex) GetAllBackends(_ context.Context, _ string) ([]model.ToolBackend, error) {
+	return nil, nil
 }
 
 type mockStore struct{}
@@ -39,14 +45,30 @@ func (m *mockRunner) RunChain(_ context.Context, _ []handlers.ChainStep) (handle
 }
 
 func TestNewRegistry_Defaults(t *testing.T) {
+	runner := &mockRunner{}
+	toolsets := toolset.NewRegistry(nil)
+	skillsRegistry := skills.NewRegistry(nil)
+	defaults := config.DefaultAppConfig().SkillDefaults
 	deps := Deps{
 		Search:     handlers.NewSearchHandler(&mockIndex{}),
+		ListTools:  handlers.NewListToolsHandler(&mockIndex{}),
 		Namespaces: handlers.NewNamespacesHandler(&mockIndex{}),
 		Describe:   handlers.NewDescribeHandler(&mockStore{}),
 		Examples:   handlers.NewExamplesHandler(&mockStore{}),
-		Run:        handlers.NewRunHandler(&mockRunner{}),
-		Chain:      handlers.NewChainHandler(&mockRunner{}),
+		Run:        handlers.NewRunHandler(runner),
+		Chain:      handlers.NewChainHandler(runner),
 		Code:       nil,
+		Toolsets:   handlers.NewToolsetsHandler(toolsets),
+		Skills: handlers.NewSkillsHandler(
+			skillsRegistry,
+			toolsets,
+			runner,
+			handlers.SkillDefaults{
+				MaxSteps:     defaults.MaxSteps,
+				MaxToolCalls: defaults.MaxToolCalls,
+				Timeout:      defaults.Timeout,
+			},
+		),
 	}
 
 	cfg := config.DefaultAppConfig().Providers
@@ -57,23 +79,46 @@ func TestNewRegistry_Defaults(t *testing.T) {
 	names := registry.Names()
 	assert.ElementsMatch(t, []string{
 		"search_tools",
+		"list_tools",
 		"list_namespaces",
 		"describe_tool",
 		"list_tool_examples",
 		"run_tool",
 		"run_chain",
+		"list_toolsets",
+		"describe_toolset",
+		"list_skills",
+		"describe_skill",
+		"plan_skill",
+		"run_skill",
 	}, names)
 }
 
 func TestNewRegistry_ExecuteCodeEnabledMissingHandler(t *testing.T) {
+	runner := &mockRunner{}
+	toolsets := toolset.NewRegistry(nil)
+	skillsRegistry := skills.NewRegistry(nil)
+	defaults := config.DefaultAppConfig().SkillDefaults
 	deps := Deps{
 		Search:     handlers.NewSearchHandler(&mockIndex{}),
+		ListTools:  handlers.NewListToolsHandler(&mockIndex{}),
 		Namespaces: handlers.NewNamespacesHandler(&mockIndex{}),
 		Describe:   handlers.NewDescribeHandler(&mockStore{}),
 		Examples:   handlers.NewExamplesHandler(&mockStore{}),
-		Run:        handlers.NewRunHandler(&mockRunner{}),
-		Chain:      handlers.NewChainHandler(&mockRunner{}),
+		Run:        handlers.NewRunHandler(runner),
+		Chain:      handlers.NewChainHandler(runner),
 		Code:       nil,
+		Toolsets:   handlers.NewToolsetsHandler(toolsets),
+		Skills: handlers.NewSkillsHandler(
+			skillsRegistry,
+			toolsets,
+			runner,
+			handlers.SkillDefaults{
+				MaxSteps:     defaults.MaxSteps,
+				MaxToolCalls: defaults.MaxToolCalls,
+				Timeout:      defaults.Timeout,
+			},
+		),
 	}
 
 	cfg := config.DefaultAppConfig().Providers
@@ -84,14 +129,30 @@ func TestNewRegistry_ExecuteCodeEnabledMissingHandler(t *testing.T) {
 }
 
 func TestNewRegistry_DisabledProviders(t *testing.T) {
+	runner := &mockRunner{}
+	toolsets := toolset.NewRegistry(nil)
+	skillsRegistry := skills.NewRegistry(nil)
+	defaults := config.DefaultAppConfig().SkillDefaults
 	deps := Deps{
 		Search:     handlers.NewSearchHandler(&mockIndex{}),
+		ListTools:  handlers.NewListToolsHandler(&mockIndex{}),
 		Namespaces: handlers.NewNamespacesHandler(&mockIndex{}),
 		Describe:   handlers.NewDescribeHandler(&mockStore{}),
 		Examples:   handlers.NewExamplesHandler(&mockStore{}),
-		Run:        handlers.NewRunHandler(&mockRunner{}),
-		Chain:      handlers.NewChainHandler(&mockRunner{}),
+		Run:        handlers.NewRunHandler(runner),
+		Chain:      handlers.NewChainHandler(runner),
 		Code:       nil,
+		Toolsets:   handlers.NewToolsetsHandler(toolsets),
+		Skills: handlers.NewSkillsHandler(
+			skillsRegistry,
+			toolsets,
+			runner,
+			handlers.SkillDefaults{
+				MaxSteps:     defaults.MaxSteps,
+				MaxToolCalls: defaults.MaxToolCalls,
+				Timeout:      defaults.Timeout,
+			},
+		),
 	}
 
 	cfg := config.DefaultAppConfig().Providers

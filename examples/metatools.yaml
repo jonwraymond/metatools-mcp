@@ -24,6 +24,10 @@ search:
     tags_boost: 2
     max_docs: 0
     max_doctext_len: 0
+  semantic:
+    embedder: ""   # BYO embedder key for semantic/hybrid search
+    config: {}
+    weight: 0.5
 
 execution:
   timeout: 30s
@@ -32,6 +36,8 @@ execution:
 
 providers:
   search_tools:
+    enabled: true
+  list_tools:
     enabled: true
   list_namespaces:
     enabled: true
@@ -46,12 +52,64 @@ providers:
   execute_code:
     enabled: false
     sandbox: dev
+  list_toolsets:
+    enabled: true
+  describe_toolset:
+    enabled: true
+  list_skills:
+    enabled: true
+  describe_skill:
+    enabled: true
+  plan_skill:
+    enabled: true
+  run_skill:
+    enabled: true
+
+toolsets:
+  - name: "core"
+    description: "Core safe tools"
+    namespace_filters: ["local", "core"]
+    tag_filters: ["safe"]
+    allow_ids: []
+    deny_ids: []
+    policy: "allow_all"
+
+skills:
+  - name: "ping_check"
+    description: "Run a simple ping tool"
+    toolset_id: "toolset:core"
+    steps:
+      - id: "ping"
+        tool_id: "local.ping"
+        inputs: {}
+    guards:
+      max_steps: 4
+      allow_ids: []
+
+skill_defaults:
+  max_steps: 8
+  max_tool_calls: 32
+  timeout: 30s
 
 backends:
   local:
     enabled: true
     paths: []
     watch: false
+  mcp:
+    - name: "deepwiki"
+      url: "https://mcp.deepwiki.com/mcp"
+      headers: {}
+      max_retries: 5
+  mcp_refresh:
+    interval: 10m
+    jitter: 30s
+    stale_after: 15m
+    on_demand: true
+
+health:
+  enabled: true
+  http_path: /healthz
 
 middleware:
   chain: []
@@ -68,3 +126,19 @@ middleware:
     #     authorizer:
     #       name: "allow_all"
     #     allow_anonymous: false
+  observe:
+    enabled: false
+    config: {}
+  cache:
+    enabled: false
+    policy:
+      ttl: 5m
+  resilience:
+    enabled: false
+    retry:
+      enabled: false
+      config: {}
+    circuit:
+      enabled: false
+      config: {}
+    timeout: 30s

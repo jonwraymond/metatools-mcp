@@ -15,6 +15,12 @@ type Config struct {
 	Runner   handlers.Runner
 	Executor handlers.Executor // optional
 
+	Toolsets      handlers.ToolsetRegistry // optional
+	Skills        handlers.SkillRegistry   // optional
+	SkillDefaults handlers.SkillDefaults
+
+	Refresher handlers.Refresher // optional backend refresher
+
 	Providers        ProvidersConfig
 	ProviderRegistry *provider.Registry // optional override
 	Middleware       middleware.Config

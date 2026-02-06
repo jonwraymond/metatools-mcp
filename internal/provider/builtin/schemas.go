@@ -64,6 +64,49 @@ func searchToolsTool() mcp.Tool {
 	}
 }
 
+func listToolsTool() mcp.Tool {
+	return mcp.Tool{
+		Name:        "list_tools",
+		Description: "List tools with optional backend filtering",
+		InputSchema: map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"limit":        map[string]any{"type": "integer", "minimum": 1, "maximum": 100},
+				"cursor":       map[string]any{"type": "string"},
+				"backend_kind": map[string]any{"type": "string", "enum": []string{"local", "provider", "mcp"}},
+				"backend_name": map[string]any{"type": "string"},
+			},
+			"additionalProperties": false,
+		},
+		OutputSchema: map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"tools": map[string]any{
+					"type": "array",
+					"items": map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"id":               map[string]any{"type": "string"},
+							"name":             map[string]any{"type": "string"},
+							"namespace":        map[string]any{"type": "string"},
+							"shortDescription": map[string]any{"type": "string"},
+							"tags": map[string]any{
+								"type":  "array",
+								"items": map[string]any{"type": "string"},
+							},
+						},
+						"required":             []string{"id", "name"},
+						"additionalProperties": false,
+					},
+				},
+				"nextCursor": map[string]any{"type": "string"},
+			},
+			"required":             []string{"tools"},
+			"additionalProperties": false,
+		},
+	}
+}
+
 func listNamespacesTool() mcp.Tool {
 	return mcp.Tool{
 		Name:        "list_namespaces",
@@ -255,6 +298,163 @@ func executeCodeTool() mcp.Tool {
 	}
 }
 
+func listToolsetsTool() mcp.Tool {
+	return mcp.Tool{
+		Name:        "list_toolsets",
+		Description: "List configured toolsets",
+		InputSchema: map[string]any{
+			"type":                 "object",
+			"additionalProperties": false,
+		},
+		OutputSchema: map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"toolsets": map[string]any{
+					"type": "array",
+					"items": map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"id":          map[string]any{"type": "string"},
+							"name":        map[string]any{"type": "string"},
+							"description": map[string]any{"type": "string"},
+							"toolCount":   map[string]any{"type": "integer"},
+						},
+						"required":             []string{"id", "name", "toolCount"},
+						"additionalProperties": false,
+					},
+				},
+			},
+			"required":             []string{"toolsets"},
+			"additionalProperties": false,
+		},
+	}
+}
+
+func describeToolsetTool() mcp.Tool {
+	return mcp.Tool{
+		Name:        "describe_toolset",
+		Description: "Describe a toolset and its tools",
+		InputSchema: map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"toolset_id": map[string]any{"type": "string"},
+			},
+			"required":             []string{"toolset_id"},
+			"additionalProperties": false,
+		},
+		OutputSchema: map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"toolset": map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"id":          map[string]any{"type": "string"},
+						"name":        map[string]any{"type": "string"},
+						"description": map[string]any{"type": "string"},
+						"tools": map[string]any{
+							"type":  "array",
+							"items": toolSummarySchema(),
+						},
+					},
+					"required":             []string{"id", "name"},
+					"additionalProperties": false,
+				},
+			},
+			"required":             []string{"toolset"},
+			"additionalProperties": false,
+		},
+	}
+}
+
+func listSkillsTool() mcp.Tool {
+	return mcp.Tool{
+		Name:        "list_skills",
+		Description: "List configured skills",
+		InputSchema: map[string]any{
+			"type":                 "object",
+			"additionalProperties": false,
+		},
+		OutputSchema: map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"skills": map[string]any{
+					"type": "array",
+					"items": map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"id":          map[string]any{"type": "string"},
+							"name":        map[string]any{"type": "string"},
+							"description": map[string]any{"type": "string"},
+							"stepCount":   map[string]any{"type": "integer"},
+							"toolset_id":  map[string]any{"type": "string"},
+						},
+						"required":             []string{"id", "name", "stepCount"},
+						"additionalProperties": false,
+					},
+				},
+			},
+			"required":             []string{"skills"},
+			"additionalProperties": false,
+		},
+	}
+}
+
+func describeSkillTool() mcp.Tool {
+	return mcp.Tool{
+		Name:        "describe_skill",
+		Description: "Describe a configured skill",
+		InputSchema: map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"skill_id": map[string]any{"type": "string"},
+			},
+			"required":             []string{"skill_id"},
+			"additionalProperties": false,
+		},
+		OutputSchema: map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"skill": skillSchema(),
+			},
+			"required":             []string{"skill"},
+			"additionalProperties": false,
+		},
+	}
+}
+
+func planSkillTool() mcp.Tool {
+	return mcp.Tool{
+		Name:        "plan_skill",
+		Description: "Generate a deterministic skill plan",
+		InputSchema: planSkillInputSchema(),
+		OutputSchema: map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"plan": map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"name":  map[string]any{"type": "string"},
+						"steps": skillStepArraySchema(),
+					},
+					"required":             []string{"name", "steps"},
+					"additionalProperties": false,
+				},
+			},
+			"required":             []string{"plan"},
+			"additionalProperties": false,
+		},
+	}
+}
+
+func runSkillTool() mcp.Tool {
+	return mcp.Tool{
+		Name:         "run_skill",
+		Description:  "Execute a skill plan",
+		InputSchema:  runSkillInputSchema(),
+		OutputSchema: runSkillOutputSchema(),
+	}
+}
+
 func errorSchema() map[string]any {
 	return map[string]any{
 		"type": "object",
@@ -318,6 +518,109 @@ func runChainOutputSchema() map[string]any {
 			},
 			"final": map[string]any{},
 			"error": errorSchema(),
+		},
+		"required":             []string{"results"},
+		"additionalProperties": false,
+	}
+}
+
+func toolSummarySchema() map[string]any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"id":               map[string]any{"type": "string"},
+			"name":             map[string]any{"type": "string"},
+			"namespace":        map[string]any{"type": "string"},
+			"shortDescription": map[string]any{"type": "string"},
+			"tags": map[string]any{
+				"type":  "array",
+				"items": map[string]any{"type": "string"},
+			},
+		},
+		"required":             []string{"id", "name"},
+		"additionalProperties": false,
+	}
+}
+
+func skillStepSchema() map[string]any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"id":      map[string]any{"type": "string"},
+			"tool_id": map[string]any{"type": "string"},
+			"inputs":  map[string]any{"type": "object"},
+		},
+		"required":             []string{"id", "tool_id"},
+		"additionalProperties": false,
+	}
+}
+
+func skillStepArraySchema() map[string]any {
+	return map[string]any{
+		"type":  "array",
+		"items": skillStepSchema(),
+	}
+}
+
+func skillSchema() map[string]any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"name":        map[string]any{"type": "string"},
+			"description": map[string]any{"type": "string"},
+			"toolset_id":  map[string]any{"type": "string"},
+			"steps":       skillStepArraySchema(),
+		},
+		"required":             []string{"name", "steps"},
+		"additionalProperties": false,
+	}
+}
+
+func planSkillInputSchema() map[string]any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"skill_id": map[string]any{"type": "string"},
+			"skill":    skillSchema(),
+		},
+		"anyOf": []map[string]any{
+			{"required": []string{"skill_id"}},
+			{"required": []string{"skill"}},
+		},
+		"additionalProperties": false,
+	}
+}
+
+func runSkillInputSchema() map[string]any {
+	schema := planSkillInputSchema()
+	props := schema["properties"].(map[string]any)
+	props["max_steps"] = map[string]any{"type": "integer", "minimum": 1}
+	props["max_tool_calls"] = map[string]any{"type": "integer", "minimum": 1}
+	props["timeout_ms"] = map[string]any{"type": "integer", "minimum": 1}
+	return schema
+}
+
+func runSkillOutputSchema() map[string]any {
+	stepResultSchema := map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"step_id": map[string]any{"type": "string"},
+			"value":   map[string]any{},
+			"error":   errorSchema(),
+		},
+		"required":             []string{"step_id"},
+		"additionalProperties": false,
+	}
+
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"results": map[string]any{
+				"type":  "array",
+				"items": stepResultSchema,
+			},
+			"error":      errorSchema(),
+			"durationMs": map[string]any{"type": "integer"},
 		},
 		"required":             []string{"results"},
 		"additionalProperties": false,

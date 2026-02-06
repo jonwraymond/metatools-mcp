@@ -6,6 +6,7 @@ import (
 
 	"github.com/jonwraymond/metatools-mcp/internal/handlers"
 	"github.com/jonwraymond/metatools-mcp/pkg/metatools"
+	"github.com/jonwraymond/toolfoundation/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,6 +18,9 @@ func (m *mockIndex) SearchPage(_ context.Context, _ string, _ int, _ string) ([]
 }
 func (m *mockIndex) ListNamespacesPage(_ context.Context, _ int, _ string) ([]string, string, error) {
 	return nil, "", nil
+}
+func (m *mockIndex) GetAllBackends(_ context.Context, _ string) ([]model.ToolBackend, error) {
+	return nil, nil
 }
 
 type mockStore struct{}
