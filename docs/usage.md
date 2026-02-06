@@ -78,6 +78,8 @@ Environment variables in config files:
 - `${VAR}` and `$VAR` are expanded from the process environment.
 - Missing `${VAR}` values fail fast at startup (recommended for secrets).
 - Use `$$` to write a literal `$` without triggering expansion.
+- `secretref:<provider>:<ref>` values are resolved via the `secrets` config block
+  before backend clients are constructed (fail fast in strict mode).
 
 ## MCP backends (remote MCP servers)
 
@@ -108,6 +110,37 @@ backends:
       headers:
         Authorization: "Bearer ${MCP_BACKEND_TOKEN}"
 ```
+
+### Secret refs (optional)
+
+If you don't want secrets in the environment, metatools-mcp can resolve
+`secretref:<provider>:<ref>` at startup using `toolops/secret` providers.
+
+Example: Bitwarden Secrets Manager provider (`bws`) via `toolops-integrations`:
+
+```yaml
+secrets:
+  strict: true
+  providers:
+    bws:
+      enabled: true
+      config:
+        access_token: ${BWS_ACCESS_TOKEN}
+        organization_id: ${BWS_ORG_ID}
+        cache_ttl: 10m
+
+backends:
+  mcp:
+    - name: "supabase"
+      url: "https://mcp.supabase.com/mcp"
+      headers:
+        Authorization: "Bearer secretref:bws:project/dotenv/key/SUPABASE_ACCESS_TOKEN"
+```
+
+Notes:
+- Resolution is strict by default: missing `${ENV}` or unresolved `secretref:*`
+  fails the server startup.
+- Errors identify the backend and config field, but never include secret values.
 
 This registers tools from the remote server into the index and enables the
 runner to dispatch to them via MCP backend calls.

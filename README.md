@@ -82,6 +82,18 @@ Notes:
   `METATOOLS_SEARCH_STRATEGY=bm25` without it, the server now fails fast.
 - `METATOOLS_SEARCH_STRATEGY` is case-insensitive (for example, `BM25` works).
 
+## Secrets
+
+metatools-mcp can resolve `secretref:<provider>:<ref>` values at startup via the
+`toolops/secret` resolver (fail fast in strict mode). This is intended for
+backend URLs and HTTP header values.
+
+Bitwarden Secrets Manager is available as a provider named `bws` via
+`toolops-integrations` (configured using env vars like `${BWS_ACCESS_TOKEN}` and
+`${BWS_ORG_ID}`).
+
+See `docs/usage.md` for configuration examples.
+
 ### Environment Variables
 
 | Variable | Default | Description |
