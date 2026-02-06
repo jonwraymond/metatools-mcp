@@ -72,6 +72,10 @@ func main() {
 	if err := os.WriteFile(*out, rendered, 0o600); err != nil {
 		fatalf("write output: %v", err)
 	}
+	// WriteFile's perm only applies when creating a file; enforce 0600 on overwrite too.
+	if err := os.Chmod(*out, 0o600); err != nil {
+		fatalf("chmod output: %v", err)
+	}
 }
 
 func fatalf(format string, args ...any) {
