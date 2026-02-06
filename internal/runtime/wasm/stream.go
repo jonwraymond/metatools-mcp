@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/tetratelabs/wazero"
@@ -42,8 +43,6 @@ func (c *StreamClient) RunStream(ctx context.Context, spec wasmbackend.Spec) (<-
 }
 
 func (c *StreamClient) runStreamInternal(ctx context.Context, spec wasmbackend.Spec, events chan<- wasmbackend.StreamEvent) {
-	defer close(events)
-
 	start := time.Now()
 
 	// Validate spec
@@ -52,6 +51,7 @@ func (c *StreamClient) runStreamInternal(ctx context.Context, spec wasmbackend.S
 			Type:  wasmbackend.StreamEventError,
 			Error: wasmbackend.ErrInvalidModule,
 		}
+		close(events)
 		return
 	}
 
@@ -70,6 +70,7 @@ func (c *StreamClient) runStreamInternal(ctx context.Context, spec wasmbackend.S
 					Type:  wasmbackend.StreamEventError,
 					Error: err,
 				}
+				close(events)
 				return
 			}
 		}
@@ -82,6 +83,7 @@ func (c *StreamClient) runStreamInternal(ctx context.Context, spec wasmbackend.S
 			Type:  wasmbackend.StreamEventError,
 			Error: err,
 		}
+		close(events)
 		return
 	}
 	defer func() { _ = compiled.Close(ctx) }()
@@ -108,8 +110,12 @@ func (c *StreamClient) runStreamInternal(ctx context.Context, spec wasmbackend.S
 		}
 	}
 
+	var wg sync.WaitGroup
+	wg.Add(2)
+
 	// Stream stdout in a goroutine
 	go func() {
+		defer wg.Done()
 		buf := make([]byte, 1024)
 		for {
 			n, readErr := stdoutReader.Read(buf)
@@ -129,6 +135,7 @@ func (c *StreamClient) runStreamInternal(ctx context.Context, spec wasmbackend.S
 
 	// Stream stderr in a goroutine
 	go func() {
+		defer wg.Done()
 		buf := make([]byte, 1024)
 		for {
 			n, readErr := stderrReader.Read(buf)
@@ -153,16 +160,21 @@ func (c *StreamClient) runStreamInternal(ctx context.Context, spec wasmbackend.S
 	_ = stdoutWriter.Close()
 	_ = stderrWriter.Close()
 
-	// Small delay to allow readers to drain
-	time.Sleep(10 * time.Millisecond)
+	// Ensure stdout/stderr stream goroutines finish before we emit the terminal event and close channel.
+	wg.Wait()
 
 	if err != nil {
+		if mod != nil {
+			_ = mod.Close(ctx)
+		}
+
 		// Check if it's a context error
 		if ctx.Err() != nil {
 			events <- wasmbackend.StreamEvent{
 				Type:  wasmbackend.StreamEventError,
 				Error: ctx.Err(),
 			}
+			close(events)
 			return
 		}
 
@@ -173,6 +185,7 @@ func (c *StreamClient) runStreamInternal(ctx context.Context, spec wasmbackend.S
 				Type:     wasmbackend.StreamEventExit,
 				ExitCode: exitCode,
 			}
+			close(events)
 			return
 		}
 
@@ -180,6 +193,7 @@ func (c *StreamClient) runStreamInternal(ctx context.Context, spec wasmbackend.S
 			Type:  wasmbackend.StreamEventError,
 			Error: err,
 		}
+		close(events)
 		return
 	}
 
@@ -194,6 +208,7 @@ func (c *StreamClient) runStreamInternal(ctx context.Context, spec wasmbackend.S
 		Type:     wasmbackend.StreamEventExit,
 		ExitCode: 0,
 	}
+	close(events)
 }
 
 // Ensure interface compliance at compile time.

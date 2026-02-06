@@ -29,7 +29,7 @@ type SSEConfig struct {
 type SSETransport struct {
 	Config SSEConfig
 
-	mu       sync.Mutex
+	mu       sync.RWMutex
 	listener net.Listener
 	server   *http.Server
 }
@@ -46,9 +46,14 @@ func (t *SSETransport) Info() Info {
 		path = "/mcp"
 	}
 	addr := ""
+
+	t.mu.RLock()
 	if t.listener != nil {
 		addr = t.listener.Addr().String()
-	} else if t.Config.Port != 0 {
+	}
+	t.mu.RUnlock()
+
+	if addr == "" && t.Config.Port != 0 {
 		host := t.Config.Host
 		if host == "" {
 			host = "0.0.0.0"
