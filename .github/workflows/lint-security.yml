@@ -12,6 +12,9 @@ permissions:
 jobs:
   lint-security:
     runs-on: ubuntu-latest
+    env:
+      # Bitwarden's vendored static library references libm symbols; ensure tooling can load packages.
+      CGO_LDFLAGS: "-lm"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
