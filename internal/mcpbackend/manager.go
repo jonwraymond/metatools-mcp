@@ -4,10 +4,11 @@ package mcpbackend
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"log/slog"
-	"math/rand"
+	"math/big"
 	"net/http"
 	"net/url"
 	"strings"
@@ -37,9 +38,6 @@ type Manager struct {
 	backends   map[string]*backend
 	refreshMu  sync.Mutex
 	refreshing bool
-
-	rngMu sync.Mutex
-	rng   *rand.Rand
 }
 
 type backend struct {
@@ -95,7 +93,6 @@ func (r *Refresher) StartLoop(ctx context.Context) {
 func NewManager(cfgs []Config) (*Manager, error) {
 	manager := &Manager{
 		backends: make(map[string]*backend, len(cfgs)),
-		rng:      rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 	for _, cfg := range cfgs {
 		name := strings.TrimSpace(cfg.Name)
@@ -290,15 +287,27 @@ func (m *Manager) jittered(base, jitter time.Duration) time.Duration {
 	if maxJitter <= 0 {
 		return base
 	}
-	jitterSpan := maxJitter * 2
 
-	var n int64
-	m.rngMu.Lock()
-	if m.rng == nil {
-		m.rng = rand.New(rand.NewSource(time.Now().UnixNano()))
+	// Saturate rather than overflow for extreme durations.
+	const maxInt64 = int64(^uint64(0) >> 1)
+	jitterSpan := maxJitter * 2
+	if maxJitter > maxInt64/2 {
+		jitterSpan = maxInt64
 	}
-	n = m.rng.Int63n(jitterSpan + 1)
-	m.rngMu.Unlock()
+
+	// Jitter doesn't require determinism, but it must not use a weak RNG that
+	// triggers security scanners.
+	var maxExclusive *big.Int
+	if jitterSpan == maxInt64 {
+		maxExclusive = new(big.Int).Lsh(big.NewInt(1), 63) // 2^63
+	} else {
+		maxExclusive = big.NewInt(jitterSpan + 1)
+	}
+	nBig, err := rand.Int(rand.Reader, maxExclusive)
+	if err != nil {
+		return base
+	}
+	n := nBig.Int64()
 
 	delta := n - maxJitter
 	next := base + time.Duration(delta)

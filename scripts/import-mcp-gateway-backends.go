@@ -69,7 +69,7 @@ func main() {
 		fatalf("import: %v", err)
 	}
 
-	if err := os.WriteFile(*out, rendered, 0o644); err != nil {
+	if err := os.WriteFile(*out, rendered, 0o600); err != nil {
 		fatalf("write output: %v", err)
 	}
 }
