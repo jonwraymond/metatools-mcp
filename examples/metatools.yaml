@@ -80,7 +80,7 @@ skills:
     toolset_id: "toolset:core"
     steps:
       - id: "ping"
-        tool_id: "local.ping"
+        tool_id: "local:ping"
         inputs: {}
     guards:
       max_steps: 4

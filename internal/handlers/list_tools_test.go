@@ -63,14 +63,14 @@ func TestListTools_FilterByBackend(t *testing.T) {
 		searchFunc: func(_ context.Context, _ string, _ int, _ string) ([]metatools.ToolSummary, string, error) {
 			return []metatools.ToolSummary{
 				{ID: "mcp.deepwiki:search", Name: "search"},
-				{ID: "local.ping", Name: "ping"},
+				{ID: "local:ping", Name: "ping"},
 			}, "", nil
 		},
 		getBackendsFunc: func(_ context.Context, id string) ([]model.ToolBackend, error) {
 			switch id {
 			case "mcp.deepwiki:search":
 				return []model.ToolBackend{{Kind: model.BackendKindMCP, MCP: &model.MCPBackend{ServerName: "deepwiki"}}}, nil
-			case "local.ping":
+			case "local:ping":
 				return []model.ToolBackend{{Kind: model.BackendKindLocal, Local: &model.LocalBackend{Name: "ping"}}}, nil
 			default:
 				return nil, index.ErrNotFound

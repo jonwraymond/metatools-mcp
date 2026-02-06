@@ -47,6 +47,10 @@ metatools serve --transport=streamable --port=8080 --stateless
 4. Client may GET `/mcp` for server notification stream
 5. Client DELETEs `/mcp` to terminate session
 
+**Required headers (HTTP clients):**
+- `Content-Type: application/json`
+- `Accept: */*` (or `Accept: application/json, text/event-stream`)
+
 **YAML configuration:**
 ```yaml
 transport:
@@ -178,7 +182,7 @@ skills:
     toolset_id: "toolset:core"
     steps:
       - id: "ping"
-        tool_id: "local.ping"
+        tool_id: "local:ping"
         inputs: {}
     guards:
       max_steps: 4

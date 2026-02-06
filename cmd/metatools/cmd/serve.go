@@ -162,10 +162,22 @@ func buildServerConfigFromConfig(appCfg config.AppConfig) (config.Config, error)
 		}
 	}
 
-	runner := run.NewRunner(run.WithIndex(idx))
-	if mcpManager.HasBackends() {
-		runner = run.NewRunner(run.WithIndex(idx), run.WithMCPExecutor(mcpManager))
+	var localReg run.LocalRegistry
+	if appCfg.Backends.Local.Enabled {
+		localReg, err = bootstrap.RegisterDefaultLocalTools(idx)
+		if err != nil {
+			return config.Config{}, fmt.Errorf("register local tools: %w", err)
+		}
 	}
+
+	runnerOpts := []run.ConfigOption{run.WithIndex(idx)}
+	if localReg != nil {
+		runnerOpts = append(runnerOpts, run.WithLocalRegistry(localReg))
+	}
+	if mcpManager.HasBackends() {
+		runnerOpts = append(runnerOpts, run.WithMCPExecutor(mcpManager))
+	}
+	runner := run.NewRunner(runnerOpts...)
 
 	exec, err := maybeCreateExecutor(appCfg.Execution, idx, docs, runner)
 	if err != nil {
