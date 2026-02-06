@@ -13,7 +13,7 @@ transport:
       key: ""
   streamable:
     stateless: false        # Disable session management
-    json_response: false    # Prefer JSON over SSE streaming
+    json_response: true     # Prefer JSON over SSE streaming
     session_timeout: 30m    # Idle session cleanup
 
 search:
