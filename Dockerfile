@@ -8,6 +8,13 @@ WORKDIR /src
 ARG TARGETOS
 ARG TARGETARCH
 
+# Bitwarden's `sdk-go` uses cgo to link a vendored static library (`libbitwarden_c.a`).
+# We need a C toolchain in the build image.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libc6-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # This Dockerfile is intended to be built from the ApertureStack root as context,
 # so local `replace ../toolops` and `replace ../toolops-integrations` directives work.
 COPY metatools-mcp/go.mod metatools-mcp/go.sum ./metatools-mcp/
@@ -18,16 +25,17 @@ WORKDIR /src/metatools-mcp
 RUN --mount=type=cache,target=/go/pkg/mod \
     go mod download
 
-COPY metatools-mcp ./metatools-mcp
-COPY toolops ./toolops
-COPY toolops-integrations ./toolops-integrations
+COPY metatools-mcp /src/metatools-mcp
+COPY toolops /src/toolops
+COPY toolops-integrations /src/toolops-integrations
 
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} \
+    CGO_ENABLED=1 CGO_LDFLAGS="-lm" GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} \
     go build -mod=mod -o /out/metatools ./cmd/metatools
 
-FROM gcr.io/distroless/base-debian12
+# We link a cgo-based Bitwarden SDK; runtime needs libgcc_s and other C runtime libs.
+FROM gcr.io/distroless/cc-debian12
 WORKDIR /app
 COPY --from=build /out/metatools /app/metatools
 COPY --from=build /src/metatools-mcp/examples /app/examples
