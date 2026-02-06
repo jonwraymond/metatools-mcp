@@ -16,14 +16,14 @@ type stubSkillRunner struct {
 	errTool string
 }
 
-func (s stubSkillRunner) Run(ctx context.Context, toolID string, args map[string]any) (RunResult, error) {
+func (s stubSkillRunner) Run(_ context.Context, toolID string, _ map[string]any) (RunResult, error) {
 	if toolID == s.errTool {
 		return RunResult{}, errors.New("boom")
 	}
 	return RunResult{Structured: toolID}, nil
 }
 
-func (s stubSkillRunner) RunChain(ctx context.Context, steps []ChainStep) (RunResult, []StepResult, error) {
+func (s stubSkillRunner) RunChain(_ context.Context, _ []ChainStep) (RunResult, []StepResult, error) {
 	return RunResult{}, nil, nil
 }
 
