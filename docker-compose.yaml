@@ -1,8 +1,8 @@
 services:
   metatools-mcp:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: metatools-mcp/Dockerfile
       args:
         GO_VERSION: "1.25"
     image: metatools-mcp:local
