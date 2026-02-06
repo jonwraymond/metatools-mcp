@@ -24,13 +24,22 @@ progressive disclosure:
 
 ## MCP tools exposed
 
-- `search_tools`
-- `list_namespaces`
-- `describe_tool`
+Discovery:
+- `search_tools` (cheap, BM25/lexical over the aggregated index)
+- `list_tools` (paged inventory; can filter by backend)
+- `list_namespaces` (paged namespaces)
+
+Inspection:
+- `describe_tool` (progressive detail levels)
 - `list_tool_examples`
-- `run_tool`
-- `run_chain`
-- `execute_code` (only when an executor is injected)
+- `list_toolsets`, `describe_toolset`
+- `list_skills`, `describe_skill`, `plan_skill`
+
+Execution:
+- `run_tool` (dispatches to local/provider/MCP backends)
+- `run_chain` (sequential tool execution with optional data passthrough)
+- `run_skill` (guarded pre-registered workflows)
+- `execute_code` (only when enabled and an executor is injected)
 
 ## Changelog
 
