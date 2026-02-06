@@ -1,3 +1,4 @@
+// Package toolset loads and exposes composed toolsets for metatools-mcp.
 package toolset
 
 import (

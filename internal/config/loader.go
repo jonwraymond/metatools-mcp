@@ -36,6 +36,7 @@ func loadConfig(path string, overrides map[string]any) (AppConfig, error) {
 	}
 
 	if path != "" {
+		// #nosec G304 -- config path is explicitly user-controlled (CLI/env) and is intended to be read.
 		b, err := os.ReadFile(path)
 		if err != nil {
 			return AppConfig{}, fmt.Errorf("read file %q: %w", path, err)

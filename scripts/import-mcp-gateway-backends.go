@@ -1,3 +1,5 @@
+// Package main imports an mcp-gateway multi-proxy config and emits a
+// metatools-mcp backend config (local-only) suitable for aggregation tests.
 package main
 
 import (
@@ -67,7 +69,7 @@ func main() {
 		fatalf("import: %v", err)
 	}
 
-	if err := os.WriteFile(*out, rendered, 0o644); err != nil {
+	if err := os.WriteFile(*out, rendered, 0o600); err != nil {
 		fatalf("write output: %v", err)
 	}
 }

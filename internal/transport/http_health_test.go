@@ -52,7 +52,7 @@ func TestHealthEndpoint_SSE(t *testing.T) {
 
 	resp, err := http.Get("http://" + addr + "/healthz")
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	body, _ := io.ReadAll(resp.Body)
 	require.Equal(t, http.StatusOK, resp.StatusCode)
 	require.Equal(t, "OK", string(body))
@@ -84,7 +84,7 @@ func TestHealthEndpoint_Streamable(t *testing.T) {
 
 	resp, err := http.Get("http://" + addr + "/healthz")
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	body, _ := io.ReadAll(resp.Body)
 	require.Equal(t, http.StatusOK, resp.StatusCode)
 	require.Equal(t, "OK", string(body))
