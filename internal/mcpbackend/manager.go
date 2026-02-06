@@ -1,3 +1,5 @@
+// Package mcpbackend manages connections to remote MCP servers, including tool
+// catalog refresh and tool execution.
 package mcpbackend
 
 import (
@@ -288,14 +290,14 @@ func (m *Manager) jittered(base, jitter time.Duration) time.Duration {
 	if maxJitter <= 0 {
 		return base
 	}
-	max := maxJitter * 2
+	jitterSpan := maxJitter * 2
 
 	var n int64
 	m.rngMu.Lock()
 	if m.rng == nil {
 		m.rng = rand.New(rand.NewSource(time.Now().UnixNano()))
 	}
-	n = m.rng.Int63n(max + 1)
+	n = m.rng.Int63n(jitterSpan + 1)
 	m.rngMu.Unlock()
 
 	delta := n - maxJitter

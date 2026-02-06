@@ -1,3 +1,5 @@
+// Package skills provides metatools-mcp wrappers for planning and running
+// toolcompose skills with deterministic behavior and guard validation.
 package skills
 
 import "github.com/jonwraymond/toolcompose/skill"

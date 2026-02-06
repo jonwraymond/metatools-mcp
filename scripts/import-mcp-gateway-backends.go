@@ -1,3 +1,5 @@
+// Package main imports an mcp-gateway multi-proxy config and emits a
+// metatools-mcp backend config (local-only) suitable for aggregation tests.
 package main
 
 import (
