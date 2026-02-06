@@ -79,6 +79,28 @@ func TestDescribeTool_Schema(t *testing.T) {
 	assert.NotNil(t, result.SchemaInfo)
 }
 
+func TestDescribeTool_TypedNilSchemaInfoOmitted(t *testing.T) {
+	store := &mockStore{
+		describeToolFunc: func(_ context.Context, _ string, _ string) (ToolDoc, error) {
+			var schema map[string]any
+			return ToolDoc{
+				Summary:    "A test tool",
+				SchemaInfo: schema, // typed-nil map: would JSON-marshal to null unless normalized
+			}, nil
+		},
+	}
+
+	handler := NewDescribeHandler(store)
+	input := metatools.DescribeToolInput{
+		ToolID:      "test.tool",
+		DetailLevel: "summary",
+	}
+
+	result, err := handler.Handle(context.Background(), input)
+	require.NoError(t, err)
+	assert.Nil(t, result.SchemaInfo)
+}
+
 func TestDescribeTool_Full(t *testing.T) {
 	notes := "These are usage notes"
 	store := &mockStore{

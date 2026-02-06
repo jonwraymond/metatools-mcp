@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"reflect"
 
 	"github.com/jonwraymond/metatools-mcp/pkg/metatools"
 )
@@ -9,6 +10,20 @@ import (
 // DescribeHandler handles the describe_tool metatool
 type DescribeHandler struct {
 	store Store
+}
+
+func nilIfTypedNil(v any) any {
+	if v == nil {
+		return nil
+	}
+	rv := reflect.ValueOf(v)
+	switch rv.Kind() {
+	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Pointer, reflect.Slice:
+		if rv.IsNil() {
+			return nil
+		}
+	}
+	return v
 }
 
 // NewDescribeHandler creates a new describe handler
@@ -36,8 +51,8 @@ func (h *DescribeHandler) Handle(ctx context.Context, input metatools.DescribeTo
 	// Build output
 	output := &metatools.DescribeToolOutput{
 		Summary:      doc.Summary,
-		Tool:         doc.Tool,
-		SchemaInfo:   doc.SchemaInfo,
+		Tool:         nilIfTypedNil(doc.Tool),
+		SchemaInfo:   nilIfTypedNil(doc.SchemaInfo),
 		Notes:        doc.Notes,
 		Examples:     doc.Examples,
 		ExternalRefs: doc.ExternalRefs,
