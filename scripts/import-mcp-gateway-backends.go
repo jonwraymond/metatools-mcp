@@ -54,7 +54,7 @@ type outputMCPBackend struct {
 
 func main() {
 	in := flag.String("in", "/Users/jraymond/Documents/Projects/mcp-gateway/config.multi-proxy.yaml", "Path to mcp-gateway multi-proxy config")
-	out := flag.String("out", "examples/backends.mcp-gateway.yaml", "Output path for metatools-mcp backend config example")
+	out := flag.String("out", "examples/backends.mcp-gateway.local.yaml", "Output path for metatools-mcp backend config example (local-only)")
 	flag.Parse()
 
 	b, err := os.ReadFile(*in)

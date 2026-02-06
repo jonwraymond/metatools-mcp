@@ -39,3 +39,7 @@ secrets/
 .claude/
 
 CLAUDE.md
+
+# Generated local configs (do not commit)
+examples/backends.mcp-gateway*.yaml
+docker-compose.*.local.yaml
