@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/jonwraymond/metatools-mcp/compare/metatools-mcp-v0.7.0...metatools-mcp-v0.7.1) (2026-02-06)
+
+
+### Bug Fixes
+
+* **metatools-mcp:** wire local ping tool ([07151a1](https://github.com/jonwraymond/metatools-mcp/commit/07151a1dfdbf403251a226bedf3311e9d1a5c906))
+
 ## [0.7.0](https://github.com/jonwraymond/metatools-mcp/compare/metatools-mcp-v0.6.0...metatools-mcp-v0.7.0) (2026-02-06)
 
 
