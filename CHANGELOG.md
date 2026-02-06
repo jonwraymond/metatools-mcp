@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.7.0](https://github.com/jonwraymond/metatools-mcp/compare/metatools-mcp-v0.6.0...metatools-mcp-v0.7.0) (2026-02-06)
+
+
+### Features
+
+* backend aggregation and secretref support ([c151c25](https://github.com/jonwraymond/metatools-mcp/commit/c151c25e9e6df09de2af73845bdcd4222aedcefa))
+
+
+### Bug Fixes
+
+* **describe_tool:** omit typed-nil fields ([a6abd3d](https://github.com/jonwraymond/metatools-mcp/commit/a6abd3de740758d988c846fa541942d727d65b22))
+* **docker:** build with workspace context ([0f271a5](https://github.com/jonwraymond/metatools-mcp/commit/0f271a53378ee08d8339bb6795fb5263de337c54))
+* **docker:** support bitwarden sdk-go ([e2d196a](https://github.com/jonwraymond/metatools-mcp/commit/e2d196a369fa77534238cc590205368771155e45))
+* eliminate races in wasm stream + SSE transport ([78a4f78](https://github.com/jonwraymond/metatools-mcp/commit/78a4f78022ea0115d7e24c63778a2eb4280930ec))
+
 ## [0.6.0](https://github.com/jonwraymond/metatools-mcp/compare/metatools-mcp-v0.5.3...metatools-mcp-v0.6.0) (2026-02-03)
 
 
